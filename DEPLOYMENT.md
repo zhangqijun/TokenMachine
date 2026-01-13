@@ -7,22 +7,24 @@ InferX 使用 Docker Compose 进行部署，包含以下服务：
 - **postgres**: PostgreSQL 15 数据库
 - **redis**: Redis 7 缓存
 - **api**: FastAPI 后端服务 (端口 8000)
-- **web**: React 前端服务 (端口 80/443)
+- **web**: React 前端服务 (端口 8080/8443)
 - **prometheus**: 监控指标收集 (端口 9091)
 - **grafana**: 监控可视化面板 (端口 3001)
 
 ## 服务端口
 
-| 服务 | 端口 | 说明 |
-|------|------|------|
-| Web | 80 | HTTP (自动重定向到 HTTPS) |
-| Web | 443 | HTTPS |
-| API | 8000 | 后端 API |
-| API | 9090 | Prometheus Metrics |
-| Prometheus | 9091 | 监控数据 |
-| Grafana | 3001 | 监控面板 |
-| PostgreSQL | 5432 | 数据库 |
-| Redis | 6379 | 缓存 |
+| 服务 | 内部端口 | 外部端口 | 说明 |
+|------|----------|----------|------|
+| Web | 80 | 8080 | HTTP (自动重定向到 HTTPS) |
+| Web | 443 | 8443 | HTTPS |
+| API | 8000 | 8000 | 后端 API |
+| API | 9090 | 9090 | Prometheus Metrics |
+| Prometheus | 9090 | 9091 | 监控数据 |
+| Grafana | 3000 | 3001 | 监控面板 |
+| PostgreSQL | 5432 | 5432 | 数据库 |
+| Redis | 6379 | 6379 | 缓存 |
+
+> 注意：由于公网限制，Web 服务使用非标准端口 (8080/8443)
 
 ## 前置要求
 
@@ -115,11 +117,60 @@ curl http://localhost:9090/metrics
 
 ## 访问地址
 
-- **前端**: https://zhangqijun.cn
-- **API 文档**: https://zhangqijun.cn/docs
-- **API 指标**: http://zhangqijun.cn:9090/metrics
-- **Grafana**: http://zhangqijun.cn:3001 (默认用户名 admin，密码见 .env)
-- **Prometheus**: http://zhangqijun.cn:9091
+### 局域网访问
+- **前端**: https://10.0.0.147:8443
+- **API 文档**: https://10.0.0.147:8443/docs
+- **API 指标**: http://10.0.0.147:9090/metrics
+- **Grafana**: http://10.0.0.147:3001 (默认用户名 admin，密码见 .env)
+- **Prometheus**: http://10.0.0.147:9091
+
+### 公网访问 (需配置路由器端口转发)
+- **前端**: https://zhangqijun.cn:8443
+- **API 文档**: https://zhangqijun.cn:8443/docs
+- **Grafana**: https://zhangqijun.cn:3001
+
+#### 路由器端口转发配置
+需要在路由器上添加以下转发规则：
+```bash
+# SSH 到路由器
+ssh root@10.0.0.1
+
+# 添加 HTTPS 转发 (8443 -> 10.0.0.147:8443)
+uci add firewall redirect
+uci set firewall.@redirect[-1].name='inferx-https'
+uci set firewall.@redirect[-1].src='wan'
+uci set firewall.@redirect[-1].dest='lan'
+uci set firewall.@redirect[-1].src_dport='8443'
+uci set firewall.@redirect[-1].dest_ip='10.0.0.147'
+uci set firewall.@redirect[-1].dest_port='8443'
+uci set firewall.@redirect[-1].target='DNAT'
+uci commit firewall
+/etc/init.d/firewall restart
+
+# 添加 HTTP 转发 (8080 -> 10.0.0.147:8080，自动重定向到 HTTPS)
+uci add firewall redirect
+uci set firewall.@redirect[-1].name='inferx-http'
+uci set firewall.@redirect[-1].src='wan'
+uci set firewall.@redirect[-1].dest='lan'
+uci set firewall.@redirect[-1].src_dport='8080'
+uci set firewall.@redirect[-1].dest_ip='10.0.0.147'
+uci set firewall.@redirect[-1].dest_port='8080'
+uci set firewall.@redirect[-1].target='DNAT'
+uci commit firewall
+/etc/init.d/firewall restart
+
+# 添加 Grafana 转发 (3001 -> 10.0.0.147:3001)
+uci add firewall redirect
+uci set firewall.@redirect[-1].name='inferx-grafana'
+uci set firewall.@redirect[-1].src='wan'
+uci set firewall.@redirect[-1].dest='lan'
+uci set firewall.@redirect[-1].src_dport='3001'
+uci set firewall.@redirect[-1].dest_ip='10.0.0.147'
+uci set firewall.@redirect[-1].dest_port='3001'
+uci set firewall.@redirect[-1].target='DNAT'
+uci commit firewall
+/etc/init.d/firewall restart
+```
 
 ## 常用命令
 

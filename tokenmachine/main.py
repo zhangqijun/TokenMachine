@@ -1,5 +1,5 @@
 """
-InferX - AI Model Deployment and Management Platform
+TokenMachine - AI Model Deployment and Management Platform
 
 Main application entry point.
 """
@@ -20,12 +20,12 @@ import psutil
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from inferx.core.config import get_settings, ensure_directories
-from inferx.core.database import init_db, get_db
-from inferx.core.gpu import get_gpu_manager
-from inferx.api.middleware import setup_middleware
-from inferx.monitoring import metrics as prom_metrics
-from inferx.monitoring.metrics import (
+from tokenmachine.core.config import get_settings, ensure_directories
+from tokenmachine.core.database import init_db, get_db
+from tokenmachine.core.gpu import get_gpu_manager
+from tokenmachine.api.middleware import setup_middleware
+from tokenmachine.monitoring import metrics as prom_metrics
+from tokenmachine.monitoring.metrics import (
     system_cpu_percent,
     system_memory_used_mb,
     system_memory_total_mb,
@@ -44,7 +44,7 @@ logger.add(
     level=settings.log_level,
 )
 logger.add(
-    os.path.join(settings.log_path, "inferx.log"),
+    os.path.join(settings.log_path, "tokenmachine.log"),
     rotation=settings.log_rotation,
     retention=settings.log_retention,
     level=settings.log_level,
@@ -75,7 +75,7 @@ async def lifespan(app: FastAPI):
     logger.info("Shutting down...")
 
     # Cleanup worker pool
-    from inferx.workers.worker_pool import get_worker_pool
+    from tokenmachine.workers.worker_pool import get_worker_pool
     worker_pool = get_worker_pool()
     await worker_pool.cleanup()
 
@@ -144,7 +144,7 @@ async def metrics():
 # Include Routers
 # ============================================================================
 
-from inferx.api.v1 import chat, models, admin
+from tokenmachine.api.v1 import chat, models, admin
 
 app.include_router(chat.router)
 app.include_router(models.router)
@@ -192,7 +192,7 @@ def custom_openapi():
             "type": "apiKey",
             "in": "header",
             "name": "Authorization",
-            "description": "API key authentication using Bearer token format. Example: `Bearer inferx_sk_...`"
+            "description": "API key authentication using Bearer token format. Example: `Bearer tmachine_sk_...`"
         }
     }
 
@@ -230,7 +230,7 @@ if __name__ == "__main__":
     import uvicorn
 
     uvicorn.run(
-        "inferx.main:app",
+        "tokenmachine.main:app",
         host=settings.api_host,
         port=settings.api_port,
         reload=settings.api_reload,

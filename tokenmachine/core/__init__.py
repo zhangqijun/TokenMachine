@@ -1,6 +1,6 @@
 """Core package."""
-from inferx.core.config import Settings, get_settings, ensure_directories
-from inferx.core.security import (
+from tokenmachine.core.config import Settings, get_settings, ensure_directories
+from tokenmachine.core.security import (
     hash_password,
     verify_password,
     generate_api_key,
@@ -10,8 +10,8 @@ from inferx.core.security import (
     decode_access_token,
     generate_request_id,
 )
-from inferx.core.gpu import GPUManager, get_gpu_manager
-from inferx.core.database import init_db, drop_db, get_db
+from tokenmachine.core.gpu import GPUManager, get_gpu_manager
+from tokenmachine.core.database import init_db, drop_db, get_db
 
 __all__ = [
     "Settings",

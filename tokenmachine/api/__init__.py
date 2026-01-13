@@ -1,11 +1,11 @@
 """API package."""
-from inferx.api.deps import (
+from tokenmachine.api.deps import (
     get_current_db,
     verify_api_key_auth,
     verify_admin_access,
     get_deployment_by_name,
 )
-from inferx.api.middleware import setup_middleware
+from tokenmachine.api.middleware import setup_middleware
 
 __all__ = [
     "get_current_db",

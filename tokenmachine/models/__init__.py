@@ -1,5 +1,5 @@
 """Models package."""
-from inferx.models.database import (
+from tokenmachine.models.database import (
     Base,
     User,
     Model,

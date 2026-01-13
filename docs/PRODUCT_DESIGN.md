@@ -418,12 +418,12 @@ USE_KT=1 llamafactory-cli train \
 
 ```
 Prometheus 指标:
-├── inferx_api_requests_total
-├── inferx_api_latency_seconds
-├── inferx_model_tokens_total
-├── inferx_gpu_utilization_percent
-├── inferx_queue_depth
-└── inferx_worker_health_status
+├── tokenmachine_api_requests_total
+├── tokenmachine_api_latency_seconds
+├── tokenmachine_model_tokens_total
+├── tokenmachine_gpu_utilization_percent
+├── tokenmachine_queue_depth
+└── tokenmachine_worker_health_status
 
 Grafana 面板:
 ├── API 性能仪表盘
@@ -1621,7 +1621,7 @@ curl http://localhost:80/v1/monitoring/queue
 nvidia-smi dmon -s u
 
 # 3. 检查数据库连接
-psql -h localhost -U inferx -c "SELECT COUNT(*) FROM usage_logs;"
+psql -h localhost -U tokenmachine -c "SELECT COUNT(*) FROM usage_logs;"
 ```
 
 ### 16.3 备份与恢复

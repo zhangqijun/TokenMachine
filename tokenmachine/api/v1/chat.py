@@ -10,15 +10,15 @@ from sqlalchemy.orm import Session
 from loguru import logger
 import httpx
 
-from inferx.api.deps import get_current_db, verify_api_key_auth, get_deployment_by_name
-from inferx.models.database import ApiKey, UsageLog, UsageLogStatus
-from inferx.models.schemas import (
+from tokenmachine.api.deps import get_current_db, verify_api_key_auth, get_deployment_by_name
+from tokenmachine.models.database import ApiKey, UsageLog, UsageLogStatus
+from tokenmachine.models.schemas import (
     ChatCompletionRequest,
     ChatCompletionResponse,
     ChatCompletionStreamResponse,
 )
-from inferx.workers.worker_pool import get_worker_pool
-from inferx.monitoring.metrics import (
+from tokenmachine.workers.worker_pool import get_worker_pool
+from tokenmachine.monitoring.metrics import (
     model_tokens_total,
     model_requests_total,
     api_key_requests_total,

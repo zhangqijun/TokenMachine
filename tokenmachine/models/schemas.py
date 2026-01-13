@@ -311,7 +311,7 @@ class ModelInfo(BaseModel):
     id: str
     object: str = "model"
     created: int
-    owned_by: str = "inferx"
+    owned_by: str = "tokenmachine"
 
 
 class ModelsListResponse(BaseModel):

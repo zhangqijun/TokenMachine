@@ -8,9 +8,9 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from loguru import logger
 
-from inferx.core.database import get_db
-from inferx.core.security import hash_api_key
-from inferx.models.database import ApiKey, User, Deployment
+from tokenmachine.core.database import get_db
+from tokenmachine.core.security import hash_api_key
+from tokenmachine.models.database import ApiKey, User, Deployment
 
 security = HTTPBearer(auto_error=False)
 

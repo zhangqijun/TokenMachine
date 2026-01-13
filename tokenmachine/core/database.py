@@ -5,7 +5,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from typing import Generator
 
-from inferx.core.config import get_settings
+from tokenmachine.core.config import get_settings
 
 settings = get_settings()
 
@@ -38,16 +38,16 @@ def get_db() -> Generator[Session, None, None]:
 
 def init_db():
     """Initialize database tables."""
-    from inferx.models.database import Base
+    from tokenmachine.models.database import Base
 
     # Import all models to ensure they're registered
-    from inferx.models import database  # noqa
+    from tokenmachine.models import database  # noqa
 
     Base.metadata.create_all(bind=engine)
 
 
 def drop_db():
     """Drop all database tables (use with caution!)."""
-    from inferx.models.database import Base
+    from tokenmachine.models.database import Base
 
     Base.metadata.drop_all(bind=engine)

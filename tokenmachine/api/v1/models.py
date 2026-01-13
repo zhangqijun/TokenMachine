@@ -6,9 +6,9 @@ from typing import List
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from inferx.api.deps import get_current_db, verify_api_key_auth
-from inferx.models.database import ApiKey, Deployment, DeploymentStatus, Model
-from inferx.models.schemas import ModelInfo, ModelsListResponse
+from tokenmachine.api.deps import get_current_db, verify_api_key_auth
+from tokenmachine.models.database import ApiKey, Deployment, DeploymentStatus, Model
+from tokenmachine.models.schemas import ModelInfo, ModelsListResponse
 
 router = APIRouter(tags=["Models"])
 
@@ -36,7 +36,7 @@ async def list_models(
                 id=deployment.name,
                 object="model",
                 created=int(model.created_at.timestamp()),
-                owned_by="inferx"
+                owned_by="tokenmachine"
             ))
 
     return ModelsListResponse(object="list", data=data)

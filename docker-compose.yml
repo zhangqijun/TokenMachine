@@ -4,27 +4,27 @@ services:
   # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
-    container_name: inferx-postgres
+    container_name: tokenmachine-postgres
     environment:
-      POSTGRES_DB: inferx
-      POSTGRES_USER: inferx
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-inferx_password}
+      POSTGRES_DB: tokenmachine
+      POSTGRES_USER: tokenmachine
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-tokenmachine_password}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U inferx"]
+      test: ["CMD-SHELL", "pg_isready -U tokenmachine"]
       interval: 10s
       timeout: 5s
       retries: 5
     networks:
-      - inferx-network
+      - tokenmachine-network
 
   # Redis Cache
   redis:
     image: redis:7-alpine
-    container_name: inferx-redis
+    container_name: tokenmachine-redis
     ports:
       - "6379:6379"
     volumes:
@@ -35,25 +35,25 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - inferx-network
+      - tokenmachine-network
 
   # FastAPI Application
   api:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: inferx-api
+    container_name: tokenmachine-api
     environment:
-      DATABASE_URL: postgresql://inferx:${POSTGRES_PASSWORD:-inferx_password}@postgres:5432/inferx
+      DATABASE_URL: postgresql://tokenmachine:${POSTGRES_PASSWORD:-tokenmachine_password}@postgres:5432/tokenmachine
       REDIS_URL: redis://redis:6379/0
       SECRET_KEY: ${SECRET_KEY:-your-secret-key-change-this-in-production}
-      MODEL_STORAGE_PATH: /var/lib/inferx/models
-      LOG_PATH: /var/log/inferx
+      MODEL_STORAGE_PATH: /var/lib/tokenmachine/models
+      LOG_PATH: /var/log/tokenmachine
       ENVIRONMENT: production
       DEBUG: "false"
     volumes:
-      - model_data:/var/lib/inferx/models
-      - log_data:/var/log/inferx
+      - model_data:/var/lib/tokenmachine/models
+      - log_data:/var/log/tokenmachine
     ports:
       - "8000:8000"
       - "9090:9090"
@@ -63,13 +63,13 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - inferx-network
+      - tokenmachine-network
     restart: unless-stopped
 
   # Prometheus
   prometheus:
     image: prom/prometheus:latest
-    container_name: inferx-prometheus
+    container_name: tokenmachine-prometheus
     ports:
       - "9091:9090"
     volumes:
@@ -79,13 +79,13 @@ services:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
     networks:
-      - inferx-network
+      - tokenmachine-network
     restart: unless-stopped
 
   # Grafana
   grafana:
     image: grafana/grafana:latest
-    container_name: inferx-grafana
+    container_name: tokenmachine-grafana
     ports:
       - "3001:3000"
     environment:
@@ -97,7 +97,7 @@ services:
     depends_on:
       - prometheus
     networks:
-      - inferx-network
+      - tokenmachine-network
     restart: unless-stopped
 
   # Frontend Web Application
@@ -105,7 +105,7 @@ services:
     build:
       context: ./web
       dockerfile: Dockerfile
-    container_name: inferx-web
+    container_name: tokenmachine-web
     ports:
       - "8080:80"
       - "8543:443"
@@ -114,7 +114,7 @@ services:
     depends_on:
       - api
     networks:
-      - inferx-network
+      - tokenmachine-network
     restart: unless-stopped
 
 volumes:
@@ -126,5 +126,5 @@ volumes:
   grafana_data:
 
 networks:
-  inferx-network:
+  tokenmachine-network:
     driver: bridge

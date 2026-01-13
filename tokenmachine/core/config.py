@@ -1,5 +1,5 @@
 """
-Configuration management for InferX.
+Configuration management for TokenMachine.
 """
 import os
 from typing import Optional
@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     )
 
     # Application
-    app_name: str = "InferX"
+    app_name: str = "TokenMachine"
     app_version: str = "0.1.0"
     environment: str = "development"
     debug: bool = True
@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     api_reload: bool = False
 
     # Database
-    database_url: str = "postgresql://inferx:inferx_password@localhost:5432/inferx"
+    database_url: str = "postgresql://tokenmachine:tokenmachine_password@localhost:5432/tokenmachine"
     database_pool_size: int = 10
     database_max_overflow: int = 20
 
@@ -39,13 +39,13 @@ class Settings(BaseSettings):
 
     # Security
     secret_key: str = "your-secret-key-change-this-in-production"
-    api_key_prefix: str = "inferx_sk_"
+    api_key_prefix: str = "tmachine_sk_"
     api_key_length: int = 32
     access_token_expire_minutes: int = 60 * 24 * 7  # 7 days
 
     # Storage
-    model_storage_path: str = "/var/lib/inferx/models"
-    log_path: str = "/var/log/inferx"
+    model_storage_path: str = "/var/lib/tokenmachine/models"
+    log_path: str = "/var/log/tokenmachine"
 
     # GPU
     gpu_memory_utilization: float = 0.9

@@ -9,8 +9,8 @@ from fastapi.middleware.gzip import GZipMiddleware
 from loguru import logger
 from prometheus_client import Counter, Histogram
 
-from inferx.monitoring.metrics import api_requests_total, api_latency_seconds
-from inferx.core.security import generate_request_id
+from tokenmachine.monitoring.metrics import api_requests_total, api_latency_seconds
+from tokenmachine.core.security import generate_request_id
 
 
 # Request ID middleware

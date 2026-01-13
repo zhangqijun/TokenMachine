@@ -1,5 +1,5 @@
 """
-Database models for InferX.
+Database models for TokenMachine.
 """
 from datetime import datetime
 from typing import Optional, List

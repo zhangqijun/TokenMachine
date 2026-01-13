@@ -6,9 +6,9 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from loguru import logger
 
-from inferx.api.deps import get_current_db, verify_admin_access
-from inferx.models.database import User, ApiKey, Deployment, Model
-from inferx.models.schemas import (
+from tokenmachine.api.deps import get_current_db, verify_admin_access
+from tokenmachine.models.database import User, ApiKey, Deployment, Model
+from tokenmachine.models.schemas import (
     ModelCreate,
     ModelResponse,
     DeploymentCreate,
@@ -20,9 +20,9 @@ from inferx.models.schemas import (
     GPUsResponse,
     SystemStats,
 )
-from inferx.services.model_service import ModelService
-from inferx.services.deployment_service import DeploymentService
-from inferx.services.gpu_service import GPUService
+from tokenmachine.services.model_service import ModelService
+from tokenmachine.services.deployment_service import DeploymentService
+from tokenmachine.services.gpu_service import GPUService
 
 router = APIRouter(prefix="/api/v1/admin", tags=["Admin"])
 
@@ -38,7 +38,7 @@ async def create_model(
     db: Session = Depends(get_current_db),
 ):
     """Create a new model and start downloading."""
-    from inferx.models.database import ModelSource, ModelCategory
+    from tokenmachine.models.database import ModelSource, ModelCategory
 
     service = ModelService(db)
 
@@ -119,7 +119,7 @@ async def list_deployments(
     db: Session = Depends(get_current_db),
 ):
     """List all deployments."""
-    from inferx.models.database import DeploymentStatus
+    from tokenmachine.models.database import DeploymentStatus
 
     service = DeploymentService(db)
     deployments = service.list_deployments(
@@ -204,7 +204,7 @@ async def create_api_key(
     db: Session = Depends(get_current_db),
 ):
     """Create a new API key."""
-    from inferx.core.security import generate_api_key, hash_api_key
+    from tokenmachine.core.security import generate_api_key, hash_api_key
 
     # Generate API key
     raw_key = generate_api_key(data.user_id)
@@ -270,7 +270,7 @@ async def get_system_stats(
     db: Session = Depends(get_current_db),
 ):
     """Get system statistics."""
-    from inferx.models.database import DeploymentStatus, ModelStatus
+    from tokenmachine.models.database import DeploymentStatus, ModelStatus
 
     gpu_service = GPUService(db)
     gpu_stats = gpu_service.get_gpu_stats()

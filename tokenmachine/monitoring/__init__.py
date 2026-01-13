@@ -1,5 +1,5 @@
 """Monitoring package."""
-from inferx.monitoring.metrics import (
+from tokenmachine.monitoring.metrics import (
     api_requests_total,
     api_latency_seconds,
     api_requests_active,

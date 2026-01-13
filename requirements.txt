@@ -14,7 +14,7 @@ redis==5.0.1
 hiredis==2.2.3
 
 # GPU Monitoring
-pynvml==12.535.133
+pynvml==11.5.0
 
 # HTTP Client
 httpx==0.26.0

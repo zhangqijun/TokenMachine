@@ -62,13 +62,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
     networks:
       - inferx-network
     restart: unless-stopped
@@ -94,7 +87,7 @@ services:
     image: grafana/grafana:latest
     container_name: inferx-grafana
     ports:
-      - "3000:3000"
+      - "3001:3000"
     environment:
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
       GF_INSTALL_PLUGINS: ""
@@ -103,6 +96,23 @@ services:
       - ./config/grafana:/etc/grafana/provisioning
     depends_on:
       - prometheus
+    networks:
+      - inferx-network
+    restart: unless-stopped
+
+  # Frontend Web Application
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: inferx-web
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ~/zhangqijun.cn_apache:/etc/nginx/ssl:ro
+    depends_on:
+      - api
     networks:
       - inferx-network
     restart: unless-stopped

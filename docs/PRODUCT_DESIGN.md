@@ -30,7 +30,7 @@
 
 | 项目 | 内容 |
 |------|------|
-| **产品名称** | AIHub / ModelStack / InferX |
+| **产品名称** | TokenMachine |
 | **产品定位** | 一站式 AI 模型部署、调度、计费和管理平台 |
 | **目标用户** | 企业 IT 部门、AI 创业公司、研究机构、需要私有化部署的中大型企业 |
 | **核心价值** | 降本（私有化部署）、灵活（多硬件多模型）、可控（数据自主）、易用（一键部署） |
@@ -542,11 +542,11 @@ CI/CD:
 ```bash
 # All-in-One 快速开始
 docker run -d \
-  --name inferx \
+  --name tokenmachine \
   -p 80:80 \
   -p 10161:10161 \
-  -v inferx-data:/var/lib/inferx \
-  inferx/inferx:latest
+  -v tokenmachine-data:/var/lib/tokenmachine \
+  tokenmachine/tokenmachine:latest
 
 # 访问
 open http://localhost
@@ -556,7 +556,7 @@ open http://localhost
 
 ```yaml
 # Helm Chart 部署
-helm install inferx ./charts/inferx \
+helm install tokenmachine ./charts/tokenmachine \
   --set gpuPool.nvidia=8 \
   --set gpuPool.ascend=4 \
   --set replicas.server=3 \
@@ -1083,7 +1083,7 @@ CREATE FULLTEXT INDEX ft_model_search ON models(name, version);
 #### 基础规范
 
 ```
-Base URL: https://api.inferx.com/v1
+Base URL: https://api.tokenmachine.com/v1
 认证方式: Bearer Token (API Key)
 响应格式: JSON
 字符编码: UTF-8
@@ -1277,7 +1277,7 @@ Authorization: Bearer {api_key}
 
 ```javascript
 // 实时日志流
-const ws = new WebSocket('wss://api.inferx.com/v1/logs/stream');
+const ws = new WebSocket('wss://api.tokenmachine.com/v1/logs/stream');
 
 ws.onopen = () => {
   ws.send(JSON.stringify({
@@ -1399,7 +1399,7 @@ ws.onmessage = (event) => {
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                    📊 InferX 监控中心                               │
+│                    📊 TokenMachine 监控中心                         │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                      │
 │  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐  │
@@ -1465,7 +1465,7 @@ def generate_api_key(user_id: int) -> str:
     hash_part = hashlib.sha256(key_material.encode()).hexdigest()[:8]
 
     # 组合成最终 Key
-    api_key = f"inf_{random_part[:16]}{hash_part}"
+    api_key = f"tm_{random_part[:16]}{hash_part}"
 
     return api_key
 
@@ -1602,16 +1602,16 @@ class DynamicBatchScheduler:
 
 ```bash
 # 服务无法启动
-docker logs inferx-server
-docker inspect inferx-server
+docker logs tokenmachine-server
+docker inspect tokenmachine-server
 
 # GPU 不可用
 nvidia-smi
 lspci | grep -i nvidia
 
 # 模型加载失败
-ls -lh /var/lib/inferx/models/
-docker exec inferx-worker df -h
+ls -lh /var/lib/tokenmachine/models/
+docker exec tokenmachine-worker df -h
 
 # API 响应慢
 # 1. 检查队列深度
@@ -1628,23 +1628,23 @@ psql -h localhost -U inferx -c "SELECT COUNT(*) FROM usage_logs;"
 
 ```bash
 # 数据库备份
-pg_dump -U inferx inferx_db > backup_$(date +%Y%m%d).sql
+pg_dump -U tokenmachine tokenmachine_db > backup_$(date +%Y%m%d).sql
 
 # 模型文件备份
-rsync -avz /var/lib/inferx/models/ /backup/models/
+rsync -avz /var/lib/tokenmachine/models/ /backup/models/
 
 # 配置文件备份
-tar -czf config_backup_$(date +%Y%m%d).tar.gz /etc/inferx/
+tar -czf config_backup_$(date +%Y%m%d).tar.gz /etc/tokenmachine/
 
 # 恢复流程
 # 1. 停止服务
 docker-compose down
 
 # 2. 恢复数据库
-psql -U inferx inferx_db < backup_20250112.sql
+psql -U tokenmachine tokenmachine_db < backup_20250112.sql
 
 # 3. 恢复模型文件
-rsync -avz /backup/models/ /var/lib/inferx/models/
+rsync -avz /backup/models/ /var/lib/tokenmachine/models/
 
 # 4. 恢复配置
 tar -xzf config_backup_20250112.tar.gz -C /

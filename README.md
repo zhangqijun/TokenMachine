@@ -103,9 +103,9 @@ curl -X POST http://localhost:8000/v1/chat/completions \
 
 | 文档 | 说明 |
 |------|------|
-| [产品设计](PRODUCT_DESIGN.md) | 完整的产品功能设计和商业模式 |
-| [MVP 设计](PHASE1_MVP_DESIGN.md) | Phase 1 详细技术设计文档 |
-| [框架对比](INFERENCE_FRAMEWORKS_COMPARISON.md) | 推理引擎技术对比分析 |
+| [产品设计](docs/PRODUCT_DESIGN.md) | 完整的产品功能设计和商业模式 |
+| [MVP 设计](docs/PHASE1_MVP_DESIGN.md) | Phase 1 详细技术设计文档 |
+| [框架对比](docs/INFERENCE_FRAMEWORKS_COMPARISON.md) | 推理引擎技术对比分析 |
 
 ---
 
@@ -181,4 +181,4 @@ curl -X POST http://localhost:8000/v1/chat/completions \
 
 ---
 
-**Links**: [文档](PRODUCT_DESIGN.md) | [演示](https://demo.tokenmachine.com) | [社区](https://github.com/your-org/tokenmachine/discussions)
+**Links**: [文档](docs/) | [演示](https://demo.tokenmachine.com) | [社区](https://github.com/your-org/tokenmachine/discussions)

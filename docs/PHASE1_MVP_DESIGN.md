@@ -101,7 +101,7 @@
 
 **目录结构**:
 ```
-inferx/
+tokenmachine/
 ├── api/
 │   ├── v1/
 │   │   ├── chat.py          # OpenAI Chat API
@@ -341,7 +341,7 @@ Response:
       "id": "llama-3-8b-instruct",
       "object": "model",
       "created": 1699012345,
-      "owned_by": "inferx"
+      "owned_by": "tokenmachine"
     }
   ]
 }
@@ -508,8 +508,8 @@ Content-Type: application/json
 Response:
 {
   "id": 1,
-  "key": "inferx_sk_abc123...",  # 仅返回一次
-  "key_prefix": "inferx_sk_abc1",
+  "key": "tm_sk_abc123...",  # 仅返回一次
+  "key_prefix": "tm_sk_abc1",
   "name": "Production API Key",
   "quota_tokens": 100000000,
   "tokens_used": 0
@@ -661,7 +661,7 @@ class ModelService:
         from utils import logger
         
         try:
-            storage_path = f"/var/lib/inferx/models/{name.replace('/', '--')}"
+            storage_path = f"/var/lib/tokenmachine/models/{name.replace('/', '--')}"
             
             if source == "huggingface":
                 cmd = ["huggingface-cli", "download", name, "--local-dir", storage_path]
@@ -971,66 +971,66 @@ from prometheus_client import Counter, Gauge, Histogram, Summary
 
 # API 指标
 api_requests_total = Counter(
-    'inferx_api_requests_total',
+    'tokenmachine_api_requests_total',
     'Total API requests',
     ['method', 'endpoint', 'status']
 )
 
 api_latency_seconds = Histogram(
-    'inferx_api_latency_seconds',
+    'tokenmachine_api_latency_seconds',
     'API latency in seconds',
     ['endpoint']
 )
 
 # 模型指标
 model_tokens_total = Counter(
-    'inferx_model_tokens_total',
+    'tokenmachine_model_tokens_total',
     'Total tokens generated',
     ['model_name', 'token_type']  # input, output
 )
 
 model_requests_active = Gauge(
-    'inferx_model_requests_active',
+    'tokenmachine_model_requests_active',
     'Active model requests',
     ['model_name']
 )
 
 # GPU 指标
 gpu_utilization_percent = Gauge(
-    'inferx_gpu_utilization_percent',
+    'tokenmachine_gpu_utilization_percent',
     'GPU utilization percentage',
     ['gpu_id']
 )
 
 gpu_memory_used_mb = Gauge(
-    'inferx_gpu_memory_used_mb',
+    'tokenmachine_gpu_memory_used_mb',
     'GPU memory used in MB',
     ['gpu_id']
 )
 
 gpu_temperature_celsius = Gauge(
-    'inferx_gpu_temperature_celsius',
+    'tokenmachine_gpu_temperature_celsius',
     'GPU temperature in Celsius',
     ['gpu_id']
 )
 
 # Worker 指标
 worker_status = Gauge(
-    'inferx_worker_status',
+    'tokenmachine_worker_status',
     'Worker status (1=running, 0=stopped)',
     ['deployment_id', 'worker_id']
 )
 
 worker_requests_total = Counter(
-    'inferx_worker_requests_total',
+    'tokenmachine_worker_requests_total',
     'Total worker requests',
     ['deployment_id', 'worker_id', 'status']
 )
 
 # 系统指标
-system_cpu_percent = Gauge('inferx_system_cpu_percent', 'System CPU percentage')
-system_memory_used_mb = Gauge('inferx_system_memory_used_mb', 'System memory used in MB')
-system_disk_usage_percent = Gauge('inferx_system_disk_usage_percent', 'System disk usage percentage')
+system_cpu_percent = Gauge('tokenmachine_system_cpu_percent', 'System CPU percentage')
+system_memory_used_mb = Gauge('tokenmachine_system_memory_used_mb', 'System memory used in MB')
+system_disk_usage_percent = Gauge('tokenmachine_system_disk_usage_percent', 'System disk usage percentage')
 ```
 
 ```python
@@ -1084,17 +1084,17 @@ services:
   # PostgreSQL 数据库
   postgres:
     image: postgres:15-alpine
-    container_name: inferx-postgres
+    container_name: tokenmachine-postgres
     environment:
-      POSTGRES_DB: inferx
-      POSTGRES_USER: inferx
+      POSTGRES_DB: tokenmachine
+      POSTGRES_USER: tokenmachine
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U inferx"]
+      test: ["CMD-SHELL", "pg_isready -U tokenmachine"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -1102,7 +1102,7 @@ services:
   # Redis 缓存
   redis:
     image: redis:7-alpine
-    container_name: inferx-redis
+    container_name: tokenmachine-redis
     ports:
       - "6379:6379"
     volumes:
@@ -1118,15 +1118,15 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: inferx-api
+    container_name: tokenmachine-api
     environment:
-      DATABASE_URL: postgresql://inferx:${POSTGRES_PASSWORD}@postgres:5432/inferx
+      DATABASE_URL: postgresql://tokenmachine:${POSTGRES_PASSWORD}@postgres:5432/tokenmachine
       REDIS_URL: redis://redis:6379/0
       INFERENCE_API_KEY: ${INFERENCE_API_KEY}
-      MODEL_STORAGE_PATH: /var/lib/inferx/models
+      MODEL_STORAGE_PATH: /var/lib/tokenmachine/models
     volumes:
-      - model_data:/var/lib/inferx/models
-      - ./logs:/var/log/inferx
+      - model_data:/var/lib/tokenmachine/models
+      - ./logs:/var/log/tokenmachine
     ports:
       - "8000:8000"
       - "9090:9090"  # Prometheus metrics
@@ -1147,7 +1147,7 @@ services:
   # Prometheus
   prometheus:
     image: prom/prometheus:latest
-    container_name: inferx-prometheus
+    container_name: tokenmachine-prometheus
     ports:
       - "9091:9090"
     volumes:
@@ -1160,7 +1160,7 @@ services:
   # Grafana
   grafana:
     image: grafana/grafana:latest
-    container_name: inferx-grafana
+    container_name: tokenmachine-grafana
     ports:
       - "3000:3000"
     environment:
@@ -1188,12 +1188,12 @@ global:
   evaluation_interval: 15s
 
 scrape_configs:
-  - job_name: 'inferx-api'
+  - job_name: 'tokenmachine-api'
     static_configs:
       - targets: ['api:9090']
     metrics_path: '/metrics'
 
-  - job_name: 'inferx-workers'
+  - job_name: 'tokenmachine-workers'
     static_configs:
       - targets: ['localhost:8001', 'localhost:8002']  # vLLM workers
     metrics_path: '/metrics'
@@ -1229,7 +1229,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # 创建模型存储目录
-RUN mkdir -p /var/lib/inferx/models /var/log/inferx
+RUN mkdir -p /var/lib/tokenmachine/models /var/log/tokenmachine
 
 # 暴露端口
 EXPOSE 8000 9090
@@ -1466,11 +1466,11 @@ curl -X POST http://localhost:8000/api/v1/admin/api-keys \
     "user_id": 1,
     "quota_tokens": 100000000
   }'
-# 返回: { "key": "inferx_sk_abc123...", "key_prefix": "inferx_sk_abc1" }
+# 返回: { "key": "tm_sk_abc123...", "key_prefix": "tm_sk_abc1" }
 
 # 8. 使用 OpenAI API 调用
 curl -X POST http://localhost:8000/v1/chat/completions \
-  -H "Authorization: Bearer inferx_sk_abc123..." \
+  -H "Authorization: Bearer tm_sk_abc123..." \
   -H "Content-Type: application/json" \
   -d '{
     "model": "llama-3-8b-prod",
@@ -1527,7 +1527,7 @@ open http://localhost:3000
 
 set -e
 
-echo "🚀 InferX MVP Quick Start"
+echo "🚀 TokenMachine MVP Quick Start"
 
 # 1. 检查 Docker
 if ! command -v docker &> /dev/null; then
@@ -1566,7 +1566,7 @@ curl -X POST http://localhost:8000/api/v1/admin/users \
   -H "Content-Type: application/json" \
   -d '{
     "username": "admin",
-    "email": "admin@inferx.local",
+    "email": "admin@tokenmachine.local",
     "password": "admin123"
   }'
 
@@ -1588,6 +1588,6 @@ echo ""
 
 ---
 
-**文档版本**: v1.0  
-**最后更新**: 2025-01-13  
-**作者**: InferX Team
+**文档版本**: v1.0
+**最后更新**: 2025-01-13
+**作者**: TokenMachine Team

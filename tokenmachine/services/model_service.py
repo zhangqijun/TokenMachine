@@ -10,9 +10,9 @@ from pathlib import Path
 from loguru import logger
 from sqlalchemy.orm import Session
 
-from inferx.models.database import Model, ModelStatus, ModelSource, ModelCategory
-from inferx.core.config import get_settings
-from inferx.core.gpu import get_gpu_manager
+from tokenmachine.models.database import Model, ModelStatus, ModelSource, ModelCategory
+from tokenmachine.core.config import get_settings
+from tokenmachine.core.gpu import get_gpu_manager
 
 settings = get_settings()
 

@@ -9,7 +9,7 @@ from typing import Optional, Dict, Any
 from loguru import logger
 import httpx
 
-from inferx.core.config import get_settings
+from tokenmachine.core.config import get_settings
 
 settings = get_settings()
 

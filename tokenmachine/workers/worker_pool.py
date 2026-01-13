@@ -5,8 +5,8 @@ import asyncio
 from typing import Dict, List, Optional, Any
 from loguru import logger
 
-from inferx.workers.vllm_worker import VLLMWorker, VLLMWorkerError
-from inferx.core.config import get_settings
+from tokenmachine.workers.vllm_worker import VLLMWorker, VLLMWorkerError
+from tokenmachine.core.config import get_settings
 
 settings = get_settings()
 

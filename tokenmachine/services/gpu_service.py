@@ -6,9 +6,9 @@ from datetime import datetime
 from loguru import logger
 from sqlalchemy.orm import Session
 
-from inferx.models.database import GPU, GPUStatus, Deployment
-from inferx.core.gpu import get_gpu_manager
-from inferx.models.schemas import GPUInfo, GPUsResponse
+from tokenmachine.models.database import GPU, GPUStatus, Deployment
+from tokenmachine.core.gpu import get_gpu_manager
+from tokenmachine.models.schemas import GPUInfo, GPUsResponse
 
 
 class GPUService:

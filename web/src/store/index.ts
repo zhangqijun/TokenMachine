@@ -112,7 +112,7 @@ export const useStore = create<AppState>((set) => ({
     const newKey: ApiKey = {
       ...keyData,
       id: `key_${Date.now()}`,
-      key_prefix: `inferx_sk_${randomPart}...`,
+      key_prefix: `tmachine_sk_${randomPart}...`,
       created_at: new Date().toISOString(),
       last_used_at: new Date().toISOString(),
     };

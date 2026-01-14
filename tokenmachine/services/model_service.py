@@ -259,7 +259,7 @@ class ModelService:
             return False
 
         # Check if model is in use
-        from inferx.models.database import Deployment, DeploymentStatus
+        from tokenmachine.models.database import Deployment, DeploymentStatus
         active_deployments = self.db.query(Deployment).filter(
             Deployment.model_id == model_id,
             Deployment.status.in_([DeploymentStatus.RUNNING, DeploymentStatus.STARTING])

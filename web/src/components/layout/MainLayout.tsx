@@ -99,7 +99,7 @@ const MainLayout = () => {
             borderBottom: '1px solid rgba(255,255,255,0.1)',
           }}
         >
-          InferX
+          TokenMachine
         </div>
         <Menu
           theme="dark"

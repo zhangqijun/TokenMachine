@@ -6,14 +6,14 @@ from typing import List, Optional, Dict, Any
 from loguru import logger
 from sqlalchemy.orm import Session
 
-from inferx.models.database import (
+from tokenmachine.models.database import (
     Deployment, DeploymentStatus, Model, ModelStatus, GPU, GPUStatus
 )
-from inferx.models.schemas import DeploymentCreate, DeploymentConfig
-from inferx.workers.worker_pool import VLLMWorkerPool
-from inferx.services.model_service import ModelService
-from inferx.core.config import get_settings
-from inferx.core.gpu import get_gpu_manager
+from tokenmachine.models.schemas import DeploymentCreate, DeploymentConfig
+from tokenmachine.workers.worker_pool import VLLMWorkerPool
+from tokenmachine.services.model_service import ModelService
+from tokenmachine.core.config import get_settings
+from tokenmachine.core.gpu import get_gpu_manager
 
 settings = get_settings()
 

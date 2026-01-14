@@ -78,7 +78,7 @@ pytest tests/unit/test_security.py
 Run with coverage:
 
 ```bash
-pytest --cov=inferx --cov-report=html
+pytest --cov=tokenmachine --cov-report=html
 ```
 
 ### Test Configuration
@@ -167,7 +167,7 @@ Available in `web/src/test/test-utils.tsx`:
 ```python
 # tests/unit/test_my_service.py
 import pytest
-from inferx.services.my_service import MyService
+from backend.services.my_service import MyService
 
 class TestMyService:
     def test_my_function(self, db_session, patch_gpu_manager):
@@ -219,7 +219,7 @@ Tests are designed to run in CI/CD pipelines:
 - name: Run backend tests
   run: |
     pip install -r tests/requirements.txt
-    pytest --cov=inferx --cov-report=xml
+    pytest --cov=tokenmachine --cov-report=xml
 
 - name: Run frontend tests
   run: |

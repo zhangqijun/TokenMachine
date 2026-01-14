@@ -39,7 +39,7 @@ git clone https://github.com/your-org/tokenmachine.git
 cd tokenmachine
 
 # 启动服务
-docker-compose up -d
+cd infra/docker && docker-compose up -d
 
 # 等待服务就绪
 docker-compose logs -f api

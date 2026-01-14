@@ -546,7 +546,7 @@ docker run -d \
   -p 80:80 \
   -p 10161:10161 \
   -v tokenmachine-data:/var/lib/tokenmachine \
-  tokenmachine/tokenmachine:latest
+  backend/tokenmachine:latest
 
 # 访问
 open http://localhost
@@ -590,170 +590,81 @@ helm install tokenmachine ./charts/tokenmachine \
 
 ## 6. 实施路线
 
-### Phase 1: MVP（最小可行产品）- 3 天（AI Agent 辅助开发）
+### 6.1 核心功能（P0）
 
-**核心功能**（功能不减，AI 加速）:
+**必须实现**:
 - ✅ GPU 资源管理（NVIDIA）
 - ✅ 模型部署（vLLM 后端）
 - ✅ OpenAI 兼容 API
 - ✅ 基础监控（Prometheus）
 - ✅ API Key 认证
 
-**AI Agent 辅助开发计划**:
+**开发计划**:
 
-#### 📅 第 1 天：基础架构与核心服务
+#### Week 1-2: 基础架构
+- 项目初始化（代码结构、依赖配置）
+- 数据库设计和迁移
+- 配置管理系统
+- 日志系统
+- API 认证中间件
 
-**上午（4小时）**
-- 🤖 AI Agent: 生成 FastAPI 项目脚手架
-  - 项目结构、配置文件、依赖管理
-  - Docker Compose 配置
-  - 数据库连接池设置
-- 🤖 AI Agent: 创建数据库模型（SQLModel）
-  - users, models, deployments, api_keys, usage_logs
-  - Alembic 数据库迁移脚本
-- 🤖 AI Agent: 实现配置管理系统
-  - YAML/环境变量配置
-  - 配置验证和热重载
+#### Week 3-4: GPU 管理
+- GPU 信息采集
+- GPU 资源分配
+- GPU 健康检查
+- GPU 监控指标
 
-**下午（4小时）**
-- 🤖 AI Agent: 实现 GPU 检测与资源管理
-  - NVIDIA GPU 检测（nvidia-smi 包装）
-  - GPU 分配算法（Spread/Binpack 策略）
-  - 资源池管理器
-- 🤖 AI Agent: 构建 RESTful API 框架
-  - 路由注册、中间件、错误处理
-  - 请求验证（Pydantic）
-  - API 文档（OpenAPI 3.0）
-- 🤖 AI Agent: 实现基础认证系统
-  - API Key 生成与验证
-  - JWT Token 支持
-  - 权限中间件
+#### Week 5-6: 模型管理
+- 模型下载功能
+- 模型存储管理
+- 模型版本管理
+- 模型状态管理
 
-**第 1 天交付物**:
-- ✅ 可运行的项目框架
-- ✅ 数据库表结构完整
-- ✅ GPU 资源检测和分配
-- ✅ 基础 API 和认证系统
+#### Week 7-8: 部署管理
+- vLLM Worker 封装
+- 部署创建/停止
+- Worker 健康检查
+- 部署状态监控
 
----
+#### Week 9-10: API 网关
+- OpenAI Chat API 实现
+- OpenAI Models API 实现
+- 流式输出支持
+- 请求路由和负载均衡
 
-#### 📅 第 2 天：模型部署与推理引擎
+#### Week 11: 监控和日志
+- Prometheus 指标收集
+- Grafana 面板配置
+- 结构化日志
+- 告警规则
 
-**上午（4小时）**
-- 🤖 AI Agent: 集成 vLLM 后端
-  - vLLM Python SDK 封装
-  - 模型加载器（HuggingFace/ModelScope）
-  - 模型进度跟踪和下载管理
-- 🤖 AI Agent: 实现模型生命周期管理
-  - 模型启动/停止/重启
-  - 健康检查和自动恢复
-  - 容器化部署（Docker SDK）
-- 🤖 AI Agent: 创建 Worker 服务
-  - 分布式任务调度
-  - GPU 绑定和资源隔离
-  - 日志收集和流式输出
+#### Week 12: 测试和优化
+- 单元测试
+- 集成测试
+- 性能测试
+- 文档完善
 
-**下午（4小时）**
-- 🤖 AI Agent: 实现推理服务
-  - vLLM 推理接口封装
-  - 批处理优化
-  - 流式响应支持（SSE）
-- 🤖 AI Agent: 构建模型部署 API
-  - POST /v1/models/deploy
-  - PATCH /v1/models/deployments/{id}
-  - DELETE /v1/models/deployments/{id}
-  - 部署状态查询
-- 🤖 AI Agent: 实现模型版本管理
-  - 版本存储和索引
-  - 模型指纹校验
-  - 快速切换和回滚
+**里程碑**:
 
-**第 2 天交付物**:
-- ✅ 完整的模型部署系统
-- ✅ vLLM 推理引擎集成
-- ✅ 模型生命周期管理
-- ✅ 部署 API 和版本控制
+| 周次 | 里程碑 | 交付物 |
+|------|--------|--------|
+| Week 2 | 基础架构完成 | 数据库、配置、日志系统 |
+| Week 4 | GPU 管理完成 | GPU 信息采集、资源分配 |
+| Week 6 | 模型管理完成 | 模型下载、存储、版本管理 |
+| Week 8 | 部署管理完成 | vLLM 集成、部署生命周期 |
+| Week 10 | API 网关完成 | OpenAI API 兼容 |
+| Week 11 | 监控完成 | Prometheus + Grafana |
+| Week 12 | 核心版发布 | 可用的核心产品 |
 
 ---
 
-#### 📅 第 3 天：API 网关、监控与部署
-
-**上午（4小时）**
-- 🤖 AI Agent: 实现 OpenAI 兼容 API
-  - POST /v1/chat/completions
-  - POST /v1/completions
-  - GET /v1/models
-  - 流式和非流式响应
-- 🤖 AI Agent: 构建请求路由系统
-  - 模型匹配和转发
-  - 负载均衡（Round Robin）
-  - 失败重试和熔断
-- 🤖 AI Agent: 实现监控指标导出
-  - Prometheus metrics endpoint
-  - 核心指标（QPS、延迟、GPU 利用率）
-  - 自定义业务指标
-
-**下午（4小时）**
-- 🤖 AI Agent: 编写测试用例
-  - 单元测试（pytest）
-  - API 集成测试
-  - 端到端测试（E2E）
-- 🤖 AI Agent: 配置生产部署
-  - Docker 镜像构建优化
-  - Docker Compose 编排
-  - 健康检查和启动脚本
-- 🤖 AI Agent: 编写文档和脚本
-  - README（快速开始指南）
-  - API 使用示例
-  - 部署脚本（deploy.sh）
-
-**第 3 天交付物**:
-- ✅ OpenAI 兼容 API
-- ✅ Prometheus 监控集成
-- ✅ 完整的测试覆盖
-- ✅ 生产级 Docker 部署
-
----
-
-**开发效率提升策略**:
-
-| 传统开发方式 | AI Agent 辅助 | 效率提升 |
-|------------|-------------|---------|
-| 手写脚手架代码 | AI 生成标准模板 | **10x** |
-| 查阅文档和示例 | AI 直接生成实现 | **5x** |
-| 调试和测试 | AI 生成测试用例 | **3x** |
-| 编写配置和脚本 | AI 自动化生成 | **8x** |
-| 代码审查和优化 | AI 实时建议 | **4x** |
-
-**AI Agent 技术栈**:
-- **Claude Code** (claude.ai/code) - 代码生成和重构
-- **GitHub Copilot** - 代码补全和建议
-- **Cursor AI** - 智能代码编辑
-- **v0.dev** - UI 组件快速生成（如需前端）
-
-**关键成功因素**:
-1. ✅ **明确的代码规范** - AI 生成代码风格一致
-2. ✅ **模块化设计** - 每个 Agent 负责独立模块
-3. ✅ **持续验证** - 每小时运行测试确保质量
-4. ✅ **人类监督** - 开发者审核 AI 生成的关键代码
-5. ✅ **增量开发** - 小步快跑，频繁集成
-
-**目标**: 3天内交付可商用的 MVP，验证产品方向，获取早期用户
-
-**风险缓解**:
-- 🔄 代码质量：AI 生成代码后立即 Code Review
-- 🔄 集成问题：使用标准化接口和契约测试
-- 🔄 性能优化：基于 GPUStack 等成熟项目的最佳实践
-
----
-
-### Phase 2: 增强版 - 3 个月
+### 6.2 增强功能（P1）
 
 **新增功能**:
 - ➕ 计费系统（Token 计费）
 - ➕ 多租户支持
 - ➕ SGLang 后端
-- ➕ 模型版本管理
+- ➕ 模型版本管理增强
 - ➕ 灰度发布
 - ➕ SSO 登录（OIDC / SAML）
 
@@ -766,7 +677,7 @@ helm install tokenmachine ./charts/tokenmachine \
 
 ---
 
-### Phase 3: 企业版 - 6 个月
+### 6.3 企业功能（P2）
 
 **新增功能**:
 - ➕ 国产芯片支持（Chitu 集成）
@@ -786,7 +697,7 @@ helm install tokenmachine ./charts/tokenmachine \
 
 ---
 
-### Phase 4: 生态版 - 持续迭代
+### 6.4 生态功能（P3）
 
 **新增功能**:
 - ➕ 插件市场
@@ -1610,7 +1521,7 @@ nvidia-smi
 lspci | grep -i nvidia
 
 # 模型加载失败
-ls -lh /var/lib/tokenmachine/models/
+ls -lh /var/lib/backend/models/
 docker exec tokenmachine-worker df -h
 
 # API 响应慢
@@ -1631,10 +1542,10 @@ psql -h localhost -U tokenmachine -c "SELECT COUNT(*) FROM usage_logs;"
 pg_dump -U tokenmachine tokenmachine_db > backup_$(date +%Y%m%d).sql
 
 # 模型文件备份
-rsync -avz /var/lib/tokenmachine/models/ /backup/models/
+rsync -avz /var/lib/backend/models/ /backup/models/
 
 # 配置文件备份
-tar -czf config_backup_$(date +%Y%m%d).tar.gz /etc/tokenmachine/
+tar -czf config_backup_$(date +%Y%m%d).tar.gz /etc/backend/
 
 # 恢复流程
 # 1. 停止服务
@@ -1644,7 +1555,7 @@ docker-compose down
 psql -U tokenmachine tokenmachine_db < backup_20250112.sql
 
 # 3. 恢复模型文件
-rsync -avz /backup/models/ /var/lib/tokenmachine/models/
+rsync -avz /backup/models/ /var/lib/backend/models/
 
 # 4. 恢复配置
 tar -xzf config_backup_20250112.tar.gz -C /

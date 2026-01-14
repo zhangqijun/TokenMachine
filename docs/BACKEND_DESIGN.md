@@ -1,7 +1,7 @@
-# Phase 1 MVP - 详细设计方案
+# Backend Design - 详细设计方案
 
 ## 目录
-- [1. MVP 功能范围](#1-mvp-功能范围)
+- [1. 核心功能范围](#1-核心功能范围)
 - [2. 系统架构设计](#2-系统架构设计)
 - [3. 数据库设计](#3-数据库设计)
 - [4. API 设计](#4-api-设计)
@@ -12,7 +12,7 @@
 
 ---
 
-## 1. MVP 功能范围
+## 1. 核心功能范围
 
 ### 1.1 核心功能清单
 
@@ -42,14 +42,23 @@
 
 ### 1.2 功能边界（不包含）
 
-- ❌ 计费系统（Phase 2）
-- ❌ 多租户（Phase 2）
-- ❌ SGLang 后端（Phase 2）
-- ❌ 国产芯片支持（Phase 3）
-- ❌ 模型微调（Phase 3）
-- ❌ 智能路由（Phase 2）
-- ❌ 格式转换（Phase 3）
-- ❌ SSO 登录（Phase 2）
+- ❌ 计费系统 (P2)
+- ❌ 多租户 (P2)
+- ❌ SGLang 后端 (P2)
+- ❌ 国产芯片支持 (P2)
+- ❌ 模型微调 (P2)
+- ❌ 智能路由 (P2)
+- ❌ 格式转换 (P2)
+- ❌ SSO 登录 (P2)
+
+### 1.3 未来增强功能 (P2)
+
+- ➕ 计费系统（Token 计费）
+- ➕ 多租户支持
+- ➕ SGLang 后端
+- ➕ 模型版本管理增强
+- ➕ 灰度发布
+- ➕ SSO 登录（OIDC / SAML）
 
 ---
 
@@ -101,7 +110,7 @@
 
 **目录结构**:
 ```
-tokenmachine/
+backend/
 ├── api/
 │   ├── v1/
 │   │   ├── chat.py          # OpenAI Chat API
@@ -661,7 +670,7 @@ class ModelService:
         from utils import logger
         
         try:
-            storage_path = f"/var/lib/tokenmachine/models/{name.replace('/', '--')}"
+            storage_path = f"/var/lib/backend/models/{name.replace('/', '--')}"
             
             if source == "huggingface":
                 cmd = ["huggingface-cli", "download", name, "--local-dir", storage_path]
@@ -1123,9 +1132,9 @@ services:
       DATABASE_URL: postgresql://tokenmachine:${POSTGRES_PASSWORD}@postgres:5432/tokenmachine
       REDIS_URL: redis://redis:6379/0
       INFERENCE_API_KEY: ${INFERENCE_API_KEY}
-      MODEL_STORAGE_PATH: /var/lib/tokenmachine/models
+      MODEL_STORAGE_PATH: /var/lib/backend/models
     volumes:
-      - model_data:/var/lib/tokenmachine/models
+      - model_data:/var/lib/backend/models
       - ./logs:/var/log/tokenmachine
     ports:
       - "8000:8000"
@@ -1229,7 +1238,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # 创建模型存储目录
-RUN mkdir -p /var/lib/tokenmachine/models /var/log/tokenmachine
+RUN mkdir -p /var/lib/backend/models /var/log/tokenmachine
 
 # 暴露端口
 EXPOSE 8000 9090
@@ -1307,10 +1316,10 @@ psutil==5.9.8
 | 引擎 | 版本 | 用途 | 备注 |
 |------|------|------|------|
 | **vLLM** | 0.3.0 | 默认推理引擎 | PagedAttention、OpenAI API 兼容 |
-| **(预留)** | - | SGLang | Phase 2 支持 |
-| **(预留)** | - | TensorRT-LLM | Phase 2 支持 |
+| **(预留)** | - | SGLang | P2 支持 |
+| **(预留)** | - | TensorRT-LLM | P2 支持 |
 
-### 7.3 前端技术栈（MVP 阶段可选）
+### 7.3 前端技术栈（可选）
 
 | 组件 | 技术选型 | 版本 | 说明 |
 |------|---------|------|------|

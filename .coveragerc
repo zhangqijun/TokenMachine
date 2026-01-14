@@ -1,14 +1,14 @@
-# Coverage configuration for InferX
+# Coverage configuration for TokenMachine
 
 [run]
-source = inferx
+source = backend
 omit =
     */tests/*
     */test_*.py
     */__pycache__/*
     */site-packages/*
     */dist-packages/*
-    inferx/main.py  # Application entry point
+    backend/main.py  # Application entry point
     */migrations/*
 
 branch = True

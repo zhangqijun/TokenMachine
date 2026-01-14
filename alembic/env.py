@@ -10,11 +10,11 @@ from alembic import context
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-from inferx.core.config import get_settings
-from inferx.models.database import Base
+from tokenmachine.core.config import get_settings
+from tokenmachine.models.database import Base
 
 # Import all models to ensure they're registered
-from inferx.models import database  # noqa
+from tokenmachine.models import database  # noqa
 
 # this is the Alembic Config object
 config = context.config

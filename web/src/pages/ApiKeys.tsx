@@ -55,7 +55,7 @@ const ApiKeys = () => {
       key: 'key_prefix',
       render: (prefix: string, record: ApiKey) => {
         const isRevealed = revealKeys[record.id];
-        const fullKey = `inferx_sk_${record.id.substring(4)}_${Math.random().toString(36).substring(2, 10)}`;
+        const fullKey = `tmachine_sk_${record.id.substring(4)}_${Math.random().toString(36).substring(2, 10)}`;
         return (
           <Space>
             <code style={{ background: '#f5f5f5', padding: '4px 8px', borderRadius: 4 }}>

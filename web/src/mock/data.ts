@@ -1,4 +1,4 @@
-// Mock data for InferX platform
+// Mock data for TokenMachine platform
 
 export interface Model {
   id: string;
@@ -294,7 +294,7 @@ export const mockGPUs: GPU[] = [
 export const mockApiKeys: ApiKey[] = [
   {
     id: 'key_1',
-    key_prefix: 'inferx_sk_a7b3...',
+    key_prefix: 'tmachine_sk_a7b3...',
     name: 'Production API Key',
     quota_tokens: 100000000,
     tokens_used: 12543000,
@@ -305,7 +305,7 @@ export const mockApiKeys: ApiKey[] = [
   },
   {
     id: 'key_2',
-    key_prefix: 'inferx_sk_c9d4...',
+    key_prefix: 'tmachine_sk_c9d4...',
     name: 'Development Key',
     quota_tokens: 10000000,
     tokens_used: 2340000,
@@ -316,7 +316,7 @@ export const mockApiKeys: ApiKey[] = [
   },
   {
     id: 'key_3',
-    key_prefix: 'inferx_sk_e1f5...',
+    key_prefix: 'tmachine_sk_e1f5...',
     name: 'Testing Key',
     quota_tokens: 5000000,
     tokens_used: 4875000,

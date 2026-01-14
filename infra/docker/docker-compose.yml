@@ -106,7 +106,7 @@ services:
     container_name: tokenmachine-web
     ports:
       - "8080:80"
-      - "8543:443"
+      - "8443:443"
     volumes:
       - ~/zhangqijun.cn_apache:/etc/nginx/ssl:ro
     depends_on:

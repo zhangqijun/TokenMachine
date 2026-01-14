@@ -1,10 +1,11 @@
 /**
  * Test utility functions and components.
  */
-import { ReactElement } from 'react'
-import { render, RenderOptions } from '@testing-library/react'
+import type { ReactElement } from 'react'
+import { render, type RenderOptions } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import { ConfigProvider, theme } from 'antd'
+import { vi } from 'vitest'
 
 // Mock store
 const mockStore = {

@@ -50,7 +50,8 @@ const mockDeployments = [
 
 function mockDeploymentsApi() {
   global.fetch = vi.fn((url) => {
-    if (url.includes('/deployments')) {
+    const urlStr = typeof url === 'string' ? url : String(url)
+    if (urlStr.includes('/deployments')) {
       return Promise.resolve({
         ok: true,
         json: () => Promise.resolve({ items: mockDeployments }),

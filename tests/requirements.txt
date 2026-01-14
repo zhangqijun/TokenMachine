@@ -1,0 +1,31 @@
+# Backend test requirements for InferX
+# Install with: pip install -r tests/requirements.txt
+
+# Testing framework
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
+pytest-timeout==2.1.0
+pytest-mock==3.12.0
+
+# Coverage
+coverage==7.3.2
+
+# HTTP testing
+httpx==0.26.0
+
+# Async testing
+asyncio==3.4.3
+
+# Database testing
+pytest-postgresql==5.0.0
+pytest-redis==3.0.2
+
+# Fixtures
+factory-boy==3.3.0
+
+# Response testing
+responses==0.24.1
+
+# Freezegun for mocking time
+freezegun==1.2.2

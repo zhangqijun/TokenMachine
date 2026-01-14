@@ -48,7 +48,7 @@ docker-compose logs -f api
 ### 部署第一个模型
 
 ```bash
-# 1. 下载模型 (通过 Web UI: http://localhost:3000)
+# 1. 下载模型 (通过 Web UI: http://localhost:8080)
 # 或使用 API:
 
 # 2. 创建 API Key
@@ -64,6 +64,37 @@ curl -X POST http://localhost:8000/v1/chat/completions \
     "model": "qwen2.5-7b-instruct",
     "messages": [{"role": "user", "content": "Hello!"}]
   }'
+```
+
+---
+
+## 项目结构
+
+```
+TokenMachine/
+├── backend/              # Python 后端 (FastAPI)
+│   ├── api/             # API 端点
+│   ├── core/            # 核心模块 (config, database, gpu, security)
+│   ├── models/          # 数据库模型
+│   ├── services/        # 业务逻辑
+│   ├── workers/         # 推理工作进程
+│   └── monitoring/      # 监控指标
+│
+├── ui/                   # React 前端
+│   └── src/
+│       ├── components/   # UI 组件
+│       ├── pages/        # 页面
+│       └── store/        # 状态管理
+│
+├── infra/                # 基础设施
+│   ├── docker/          # Docker 配置
+│   ├── prometheus/      # Prometheus 配置
+│   └── nginx/           # nginx 配置
+│
+├── migrations/           # 数据库迁移
+├── scripts/              # 部署脚本
+├── tests/                # 测试套件
+└── docs/                 # 文档
 ```
 
 ---
@@ -103,9 +134,12 @@ curl -X POST http://localhost:8000/v1/chat/completions \
 
 | 文档 | 说明 |
 |------|------|
+| [开发路线图](TODO.md) | 按模块和优先级组织的任务清单 |
 | [产品设计](docs/PRODUCT_DESIGN.md) | 完整的产品功能设计和商业模式 |
-| [MVP 设计](docs/PHASE1_MVP_DESIGN.md) | Phase 1 详细技术设计文档 |
-| [框架对比](docs/INFERENCE_FRAMEWORKS_COMPARISON.md) | 推理引擎技术对比分析 |
+| [后端设计](docs/BACKEND_DESIGN.md) | 后端架构详细设计 |
+| [前端设计](docs/FRONTEND_DESIGN.md) | 前端设计规范 |
+| [部署指南](docs/DEPLOYMENT.md) | 生产环境部署说明 |
+| [测试指南](docs/TESTING.md) | 测试基础设施和使用 |
 
 ---
 
@@ -123,34 +157,89 @@ curl -X POST http://localhost:8000/v1/chat/completions \
 - **Chitu** - 国产芯片支持
 - **kt-kernel** - CPU+GPU 异构计算
 
+### 前端
+- **框架**: React 19 + TypeScript
+- **UI**: Ant Design 6
+- **构建**: Vite
+- **状态**: Zustand
+
 ### 部署
 - Docker / Docker Compose
 - Kubernetes (Helm Charts)
 
 ---
 
+## 开发
+
+### 后端开发
+
+```bash
+# 运行开发服务器
+uvicorn backend.main:app --reload
+
+# 运行测试
+pytest
+
+# 运行特定测试
+pytest tests/unit/test_security.py
+
+# 数据库迁移
+alembic revision --autogenerate -m "message"
+alembic upgrade head
+```
+
+### 前端开发
+
+```bash
+cd ui
+
+# 安装依赖
+npm install
+
+# 开发服务器
+npm run dev
+
+# 构建
+npm run build
+
+# 测试
+npm test
+```
+
+---
+
 ## 功能路线图
 
-### Phase 1: MVP (当前)
-- [x] GPU 资源管理
-- [x] vLLM 模型部署
-- [x] OpenAI 兼容 API
-- [x] 基础监控
+### P0 - 核心功能（当前开发中）
+- [x] 数据库设计
 - [x] API Key 认证
+- [x] 基础测试框架
+- [ ] GPU 资源管理
+- [ ] 模型部署（vLLM）
+- [ ] OpenAI 兼容 API
+- [ ] 基础监控
 
-### Phase 2: 增强版
+### P1 - 增强功能
+- [ ] Admin API
+- [ ] Web UI
+- [ ] 完整测试覆盖
+- [ ] 部署自动化
+
+### P2 - 企业功能
 - [ ] 计费系统
 - [ ] 多租户支持
 - [ ] SGLang 后端
-- [ ] 模型版本管理
+- [ ] 模型版本管理增强
 - [ ] SSO 登录
 
-### Phase 3: 企业版
+### P3 - 高级功能
 - [ ] 国产芯片支持
 - [ ] CPU+GPU 异构推理
 - [ ] 模型微调
 - [ ] 高级 RBAC
 - [ ] 审计日志
+
+**详细任务列表请查看 [TODO.md](TODO.md)**
 
 ---
 
@@ -163,6 +252,8 @@ curl -X POST http://localhost:8000/v1/chat/completions \
 3. 提交更改 (`git commit -m 'Add amazing feature'`)
 4. 推送到分支 (`git push origin feature/amazing-feature`)
 5. 提交 Pull Request
+
+---
 
 ## 许可证
 
@@ -181,4 +272,4 @@ curl -X POST http://localhost:8000/v1/chat/completions \
 
 ---
 
-**Links**: [文档](docs/) | [演示](https://demo.tokenmachine.com) | [社区](https://github.com/your-org/tokenmachine/discussions)
+**Links**: [文档](docs/) | [任务列表](TODO.md) | [演示](https://demo.tokenmachine.com) | [社区](https://github.com/your-org/tokenmachine/discussions)

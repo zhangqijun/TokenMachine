@@ -1,5 +1,5 @@
 """
-Pytest configuration and shared fixtures for InferX tests.
+Pytest configuration and shared fixtures for TokenMachine tests.
 """
 import os
 import sys
@@ -17,20 +17,26 @@ from sqlalchemy.orm import sessionmaker, Session
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from inferx.core.config import Settings, get_settings
-from inferx.models.database import Base, User, Model, Deployment, GPU, ApiKey, UsageLog
-from inferx.models.database import (
-    ModelCategory, ModelSource, ModelStatus,
-    DeploymentStatus, GPUStatus, UsageLogStatus
-)
+# Try to load old inferx module, skip if not available
+try:
+    from inferx.core.config import Settings, get_settings
+    from inferx.models.database import Base, User, Model, Deployment, GPU, ApiKey, UsageLog
+    from inferx.models.database import (
+        ModelCategory, ModelSource, ModelStatus,
+        DeploymentStatus, GPUStatus, UsageLogStatus
+    )
+    INFERX_AVAILABLE = True
+except ImportError:
+    INFERX_AVAILABLE = False
 
+# Only define fixtures if inferx is available
+if INFERX_AVAILABLE:
+    # ============================================================================
+    # Test Settings Override
+    # ============================================================================
 
-# ============================================================================
-# Test Settings Override
-# ============================================================================
-
-@pytest.fixture
-def test_settings() -> Settings:
+    @pytest.fixture
+    def test_settings() -> Settings:
     """Get test settings with safe defaults."""
     return Settings(
         app_name="InferX-Test",

@@ -60,7 +60,7 @@ class Model(Base):
     """Model model."""
     __tablename__ = "models"
 
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable=False, index=True)
     version = Column(String(50), nullable=False)
     source = Column(SQLEnum(ModelSource), nullable=False)
@@ -184,3 +184,101 @@ class UsageLog(Base):
     # Relationships
     api_key = relationship("ApiKey", back_populates="usage_logs")
     deployment = relationship("Deployment", back_populates="usage_logs")
+
+
+# ============================================================================
+# Server-Worker Architecture Models
+# ============================================================================
+
+class ClusterType(str, Enum):
+    """Cluster type enumeration."""
+    DOCKER = "docker"
+    KUBERNETES = "kubernetes"
+    STANDALONE = "standalone"
+
+
+class Cluster(Base):
+    """Cluster model - represents a logical cluster of workers."""
+    __tablename__ = "clusters"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(255), unique=True, nullable=False, index=True)
+    description = Column(Text)
+    type = Column(SQLEnum(ClusterType), nullable=False, default=ClusterType.STANDALONE)
+    config = Column(JSON)  # Cluster-specific configuration
+    created_at = Column(TIMESTAMP, default=func.now(), nullable=False)
+    updated_at = Column(TIMESTAMP, default=func.now(), onupdate=func.now(), nullable=False)
+
+    # Relationships
+    workers = relationship("Worker", back_populates="cluster", cascade="all, delete-orphan")
+
+
+class WorkerStatus(str, Enum):
+    """Worker status enumeration."""
+    NEW = "new"
+    REGISTERING = "registering"
+    READY = "ready"
+    ALLOCATING = "allocating"
+    BUSY = "busy"
+    RELEASING = "releasing"
+    UNHEALTHY = "unhealthy"
+    DRAINING = "draining"
+    TERMINATED = "terminated"
+
+
+class Worker(Base):
+    """Worker model - represents a worker node in the cluster."""
+    __tablename__ = "workers"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    cluster_id = Column(Integer, ForeignKey("clusters.id", ondelete="SET NULL"), nullable=True, index=True)
+    name = Column(String(255), nullable=False, index=True)
+    ip = Column(String(45), nullable=False)  # IPv4 or IPv6
+    ifname = Column(String(50))  # Network interface name
+    hostname = Column(String(255))
+    status = Column(SQLEnum(WorkerStatus), default=WorkerStatus.REGISTERING, nullable=False, index=True)
+    token_hash = Column(String(255), unique=True, nullable=True, index=True)
+    gpu_count = Column(Integer, default=0, nullable=False)
+    last_heartbeat_at = Column(TIMESTAMP, nullable=True)
+    created_at = Column(TIMESTAMP, default=func.now(), nullable=False)
+    updated_at = Column(TIMESTAMP, default=func.now(), onupdate=func.now(), nullable=False)
+
+    # Unique constraint on cluster_id + name
+    __table_args__ = (
+        Index('ix_worker_cluster_name', 'cluster_id', 'name', unique=True),
+    )
+
+    # Relationships
+    cluster = relationship("Cluster", back_populates="workers")
+    model_instances = relationship("ModelInstance", back_populates="worker", cascade="all, delete-orphan")
+
+
+class ModelInstanceStatus(str, Enum):
+    """Model instance status enumeration."""
+    STARTING = "starting"
+    RUNNING = "running"
+    STOPPING = "stopping"
+    STOPPED = "stopped"
+    ERROR = "error"
+
+
+class ModelInstance(Base):
+    """Model instance model - represents a running instance of a model on a worker."""
+    __tablename__ = "model_instances"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    model_id = Column(BigInteger, ForeignKey("models.id", ondelete="CASCADE"), nullable=False, index=True)
+    worker_id = Column(Integer, ForeignKey("workers.id", ondelete="CASCADE"), nullable=False, index=True)
+    name = Column(String(255), nullable=False, unique=True, index=True)
+    status = Column(SQLEnum(ModelInstanceStatus), default=ModelInstanceStatus.STARTING, nullable=False, index=True)
+    backend = Column(String(50), nullable=False, default="vllm")  # vllm, sglang, tensorrt, etc.
+    config = Column(JSON)  # Backend-specific configuration
+    gpu_ids = Column(JSON)  # List of GPU IDs assigned to this instance
+    port = Column(Integer)  # Port number for the instance
+    health_status = Column(JSON)  # Health check result
+    created_at = Column(TIMESTAMP, default=func.now(), nullable=False)
+    updated_at = Column(TIMESTAMP, default=func.now(), onupdate=func.now(), nullable=False)
+
+    # Relationships
+    model = relationship("Model")
+    worker = relationship("Worker", back_populates="model_instances")

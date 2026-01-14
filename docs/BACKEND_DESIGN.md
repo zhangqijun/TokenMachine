@@ -3,12 +3,13 @@
 ## 目录
 - [1. 核心功能范围](#1-核心功能范围)
 - [2. 系统架构设计](#2-系统架构设计)
-- [3. 数据库设计](#3-数据库设计)
-- [4. API 设计](#4-api-设计)
-- [5. 核心功能模块](#5-核心功能模块)
-- [6. 部署架构](#6-部署架构)
-- [7. 技术选型](#7-技术选型)
-- [8. 开发计划](#8-开发计划)
+- [3. Server-Worker 分离架构](#3-server-worker-分离架构)
+- [4. 数据库设计](#4-数据库设计)
+- [5. API 设计](#5-api-设计)
+- [6. 核心功能模块](#6-核心功能模块)
+- [7. 部署架构](#7-部署架构)
+- [8. 技术选型](#8-技术选型)
+- [9. 开发计划](#9-开发计划)
 
 ---
 
@@ -153,9 +154,249 @@ backend/
 
 ---
 
-## 3. 数据库设计
+## 3. Server-Worker 分离架构
 
-### 3.1 ER 图
+### 3.1 架构概述
+
+TokenMachine 采用 Server-Worker 分离架构，将控制平面和数据平面解耦，实现更好的可扩展性和容错性。
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         客户端层                                  │
+│  Web UI │ CLI │ OpenAI API │ SDK                                │
+└────────────────────────────┬────────────────────────────────────┘
+                             │ HTTPS
+                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                      Server (控制平面)                           │
+├─────────────────────────────────────────────────────────────────┤
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐          │
+│  │ API Gateway  │  │  Scheduler   │  │ Controllers  │          │
+│  │              │  │              │  │              │          │
+│  │ • 路由       │  │ • 调度策略   │  │ • Model      │          │
+│  │ • 认证       │  │ • 资源分配   │  │ • Instance   │          │
+│  │ • 限流       │  │ • 负载均衡   │  │ • Worker     │          │
+│  └──────────────┘  └──────────────┘  └──────────────┘          │
+│                                                                   │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐          │
+│  │   Database   │  │    Cache     │  │   Monitor    │          │
+│  │   (PG)       │  │   (Redis)    │  │ (Prometheus) │          │
+│  └──────────────┘  └──────────────┘  └──────────────┘          │
+└────────────────────────────┬────────────────────────────────────┘
+                             │ gRPC/HTTP
+                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                      Worker (数据平面)                           │
+├─────────────────────────────────────────────────────────────────┤
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐          │
+│  │ Worker API   │  │Serve Manager │  │  Backends    │          │
+│  │              │  │              │  │              │          │
+│  │ • 健康检查   │  │ • 模型加载   │  │ • vLLM       │          │
+│  │ • 日志流     │  │ • 实例管理   │  │ • SGLang     │          │
+│  │ • 指标上报   │  │ • 资源监控   │  │ • TensorRT   │          │
+│  └──────────────┘  └──────────────┘  └──────────────┘          │
+│                                                                   │
+│  ┌─────────────────────────────────────────────────────────┐    │
+│  │                  GPU Resources                           │    │
+│  │  GPU 0 │ GPU 1 │ GPU 2 │ GPU 3 │ ...                    │    │
+│  └─────────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 3.2 核心概念
+
+| 概念 | 说明 | 示例 |
+|------|------|------|
+| **Server** | 控制平面，负责任务调度、资源管理、状态维护 | API Server、Scheduler |
+| **Worker** | 数据平面，负责模型加载、推理执行、资源上报 | 推理节点 |
+| **Cluster** | 逻辑集群，一组 Worker 的集合 | 生产集群、测试集群 |
+| **Model** | 模型定义，包含模型元数据 | Qwen2.5-7B-Instruct |
+| **ModelInstance** | 模型实例，模型在 Worker 上的运行实例 | worker-1 上的 Qwen 实例 |
+| **WorkerPool** | Worker 池，用于调度的一组 Worker | GPU 池、NPU 池 |
+
+### 3.3 Server 组件
+
+#### 3.3.1 目录结构
+
+```
+backend/server/
+├── __init__.py
+├── server.py              # Server 主类
+├── api/                   # Server API
+│   ├── __init__.py
+│   ├── workers.py         # Worker 管理 API
+│   └── instances.py       # Instance 管理 API
+├── controllers/           # 控制器
+│   ├── __init__.py
+│   ├── worker_controller.py
+│   ├── instance_controller.py
+│   ├── cluster_controller.py
+│   └── model_controller.py
+└── client/                # Worker 客户端
+    ├── __init__.py
+    └── client.py          # HTTP 客户端
+```
+
+#### 3.3.2 Server 主类
+
+`backend/server/server.py` - Server 控制平面
+
+**主要功能**:
+- 初始化并管理控制器 (WorkerController, ModelInstanceController, ClusterController)
+- 启动后台任务（健康检查、状态同步）
+- 提供 API 服务
+
+**关键方法**:
+```python
+async def start()                          # 启动 Server
+async def stop()                           # 停止 Server
+async def serve(host, port)                # 启动 API 服务
+```
+
+#### 3.3.3 控制器
+
+| 控制器 | 文件 | 职责 |
+|--------|------|------|
+| **WorkerController** | `worker_controller.py` | Worker 节点的 CRUD、状态管理、健康检查 |
+| **ModelInstanceController** | `instance_controller.py` | 模型实例管理、健康检查 |
+| **ClusterController** | `cluster_controller.py` | 集群管理 |
+| **ModelController** | `model_controller.py` | 模型定义管理 |
+
+### 3.4 Worker 组件
+
+#### 3.4.1 目录结构
+
+```
+backend/worker/
+├── __init__.py
+├── worker.py              # Worker 主类
+├── config.py              # Worker 配置
+├── api/                   # Worker API
+│   ├── __init__.py
+│   ├── health.py          # 健康检查
+│   ├── logs.py            # 日志流
+│   └── proxy.py           # 推理代理
+├── serve_manager.py       # 模型服务管理
+├── backends/              # 推理后端
+│   ├── __init__.py
+│   ├── base.py            # 后端抽象
+│   ├── vllm_backend.py    # vLLM
+│   └── sglang_backend.py  # SGLang
+├── collector.py           # 指标采集
+└── exporter.py            # 指标导出
+```
+
+#### 3.4.2 Worker 主类
+
+`backend/worker/worker.py` - Worker 数据平面
+
+**主要功能**:
+- 向 Server 注册
+- 启动模型实例管理
+- 定时发送心跳
+- 指标采集和上报
+
+**关键方法**:
+```python
+async def register()                        # 向 Server 注册
+async def start()                          # 启动 Worker
+async def stop()                           # 停止 Worker
+async def _heartbeat_loop()                # 心跳循环
+```
+
+#### 3.4.3 ServeManager
+
+`backend/worker/serve_manager.py` - 模型服务管理器
+
+**主要功能**:
+- 监听分配给 Worker 的模型实例
+- 启动/停止推理后端
+- 健康检查和状态同步
+
+#### 3.4.4 推理后端
+
+`backend/worker/backends/` - 推理引擎实现
+
+| 后端 | 文件 | 状态 |
+|------|------|------|
+| **vLLM** | `vllm_backend.py` | ✅ 已实现 |
+| **SGLang** | `sglang_backend.py` | 🔧 占位符 |
+| **TensorRT** | - | 📋 计划中 |
+
+### 3.5 通信协议
+
+| 协议 | 用途 | 说明 |
+|------|------|------|
+| **HTTP/REST** | 管理 API | Server-Worker 之间的管理通信 |
+| **WebSocket** | 日志流 | Worker 日志实时推送到 Server |
+| **HTTP** | 推理请求 | 兼容 OpenAI API |
+
+### 3.6 Worker 生命周期
+
+```
+┌─────────┐    注册    ┌──────────┐    就绪    ┌─────────┐
+│  NEW    │ ────────> │REGISTERING│ ────────> │  READY  │
+└─────────┘            └──────────┘            └────┬────┘
+                                                    │
+                     ┌──────────────────────────────┘
+                     │
+                     ▼
+            ┌─────────────────┐
+            │    RUNNING      │ ◄────┐
+            └────────┬────────┘      │
+                     │               │ 资源分配
+                     ▼               │
+            ┌─────────────────┐      │
+            │  ALLOCATING      │ ─────┘
+            └────────┬─────────┘
+                     │
+                     ▼
+            ┌─────────────────┐
+            │  BUSY           │ ◄────┐
+            └────────┬────────┘      │
+                     │               │ 资源释放
+                     ▼               │
+            ┌─────────────────┐      │
+            │ RELEASING       │ ─────┘
+            └────────┬─────────┘
+                     │
+                     ▼
+            ┌─────────────────┐
+            │    READY        │ ─────┐
+            └─────────────────┘      │
+                     ▲                │ 错误/超时
+                     │                └────────────────┘
+```
+
+### 3.7 API 端点
+
+#### 3.7.1 Worker 管理 API
+
+| 方法 | 路径 | 描述 |
+|------|------|------|
+| POST | `/api/v1/workers/register` | Worker 注册 |
+| POST | `/api/v1/workers/{id}/heartbeat` | 心跳上报 |
+| POST | `/api/v1/workers/{id}/status` | 状态上报 |
+| GET | `/api/v1/workers` | 列出 Workers |
+| GET | `/api/v1/workers/{id}` | 获取 Worker 详情 |
+| POST | `/api/v1/workers/{id}/drain` | 排空 Worker |
+| DELETE | `/api/v1/workers/{id}` | 删除 Worker |
+
+#### 3.7.2 ModelInstance 管理 API
+
+| 方法 | 路径 | 描述 |
+|------|------|------|
+| POST | `/api/v1/instances` | 创建实例 |
+| GET | `/api/v1/instances` | 列出实例 |
+| GET | `/api/v1/instances/{id}` | 获取实例详情 |
+| PATCH | `/api/v1/instances/{id}/status` | 更新实例状态 |
+| DELETE | `/api/v1/instances/{id}` | 删除实例 |
+
+---
+
+## 4. 数据库设计
+
+### 4.1 ER 图
 
 ```
 ┌─────────────┐       ┌─────────────┐       ┌─────────────┐
@@ -288,7 +529,7 @@ CREATE INDEX idx_usage_logs_deployment ON usage_logs(deployment_id);
 
 ---
 
-## 4. API 设计
+## 5. API 设计
 
 ### 4.1 OpenAI 兼容 API
 
@@ -535,7 +776,7 @@ Authorization: Bearer {admin_token}
 
 ---
 
-## 5. 核心功能模块
+## 6. 核心功能模块
 
 ### 5.1 GPU 管理模块
 
@@ -1082,7 +1323,7 @@ async def health():
 
 ---
 
-## 6. 部署架构
+## 7. 部署架构
 
 ### 6.1 Docker Compose 部署
 
@@ -1294,7 +1535,7 @@ psutil==5.9.8
 
 ---
 
-## 7. 技术选型
+## 8. 技术选型
 
 ### 7.1 后端技术栈
 
@@ -1333,7 +1574,7 @@ psutil==5.9.8
 
 ---
 
-## 8. 开发计划
+## 9. 开发计划
 
 ### 8.1 迭代计划（12 周）
 

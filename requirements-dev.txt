@@ -1,5 +1,5 @@
 # TokenMachine Development Dependencies
-# This file contains dependencies for local development with GPU support
+# Updated: 2025-01-16
 
 # ============================================================================
 # PyTorch & CUDA (CUDA 12.8)
@@ -11,8 +11,8 @@ torchaudio==2.8.0
 # ============================================================================
 # Inference Engines
 # ============================================================================
-# vLLM - High-throughput LLM inference engine
-vllm==0.10.2
+# vLLM - High-throughput LLM inference engine (Latest Stable)
+vllm==0.13.0
 
 # SGLang - Structured generation optimization (optional)
 # sglang>=0.3.0
@@ -21,19 +21,19 @@ vllm==0.10.2
 # Backend Framework
 # ============================================================================
 # Web Framework
-fastapi==0.109.0
-uvicorn[standard]==0.27.0
-pydantic==2.5.3
-pydantic-settings==2.1.0
+fastapi==0.127.0
+uvicorn[standard]==0.40.0
+pydantic==2.12.5
+pydantic-settings==2.12.0
 
 # Database
-sqlalchemy==2.0.25
+sqlalchemy==2.0.45
 psycopg2-binary==2.9.9
-alembic==1.13.1
+alembic==1.18.0
 
 # Cache
-redis==5.0.1
-hiredis==2.2.3
+redis==5.2.1
+hiredis==3.3.0
 
 # GPU Monitoring
 pynvml==11.5.0
@@ -57,10 +57,11 @@ prometheus-client==0.21.1
 # Testing & Development Tools
 # ============================================================================
 # Testing
-pytest==8.3.4
+pytest==8.4.2
 pytest-asyncio==0.24.0
 pytest-cov==6.0.0
 pytest-mock==3.14.0
+pytest-timeout==2.1.0
 
 # Code Quality
 black==24.10.0
@@ -75,8 +76,8 @@ ipython==8.31.0
 # ============================================================================
 # ML & NLP
 # ============================================================================
-# Transformers
-transformers==4.47.1
+# Transformers (Stable v4.x - v5 is still RC)
+transformers==4.57.5
 tokenizers==0.21.0
 huggingface-hub==0.35.0
 

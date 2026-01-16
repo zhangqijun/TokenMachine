@@ -1,23 +1,22 @@
-import { Layout, Menu, Avatar, Dropdown, Space, Badge } from 'antd';
+import { Layout, Menu, Avatar, Dropdown, Space, Badge, Input } from 'antd';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
   DashboardOutlined,
-  DatabaseOutlined,
-  RocketOutlined,
-  BarChartOutlined,
+  RobotOutlined,
+  ClusterOutlined,
   KeyOutlined,
-  SettingOutlined as SettingFilledOutlined,
+  ExperimentOutlined,
+  SettingOutlined,
   UserOutlined,
   LogoutOutlined,
   BellOutlined,
-  CloudServerOutlined,
-  ClusterOutlined,
-  MessageOutlined,
-  ControlOutlined,
+  SearchOutlined,
+  QuestionCircleOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 
 const { Header, Sider, Content } = Layout;
+const { Search } = Input;
 
 const MainLayout = () => {
   const navigate = useNavigate();
@@ -32,21 +31,9 @@ const MainLayout = () => {
     },
     {
       key: '/models',
-      icon: <DatabaseOutlined />,
+      icon: <RobotOutlined />,
       label: '模型管理',
       onClick: () => navigate('/models'),
-    },
-    {
-      key: '/deployments',
-      icon: <RocketOutlined />,
-      label: '部署管理',
-      onClick: () => navigate('/deployments'),
-    },
-    {
-      key: '/resources',
-      icon: <CloudServerOutlined />,
-      label: '资源管理',
-      onClick: () => navigate('/resources'),
     },
     {
       key: '/clusters',
@@ -55,29 +42,20 @@ const MainLayout = () => {
       onClick: () => navigate('/clusters'),
     },
     {
+      key: '/api-keys',
+      icon: <KeyOutlined />,
+      label: 'API 密钥',
+      onClick: () => navigate('/api-keys'),
+    },
+    {
       key: '/playground',
-      icon: <MessageOutlined />,
+      icon: <ExperimentOutlined />,
       label: '测试场',
       onClick: () => navigate('/playground'),
     },
     {
-      key: '/monitoring',
-      icon: <BarChartOutlined />,
-      label: '监控面板',
-      onClick: () => navigate('/monitoring'),
-    },
-    {
-      key: '/api-keys',
-      icon: <KeyOutlined />,
-      label: 'API Keys',
-      onClick: () => navigate('/api-keys'),
-    },
-    {
-      type: 'divider',
-    },
-    {
       key: '/settings',
-      icon: <ControlOutlined />,
+      icon: <SettingOutlined />,
       label: '系统设置',
       onClick: () => navigate('/settings'),
     },
@@ -144,14 +122,27 @@ const MainLayout = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
+            position: 'sticky',
+            top: 0,
+            zIndex: 999,
             borderBottom: '1px solid #f0f0f0',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
           }}
         >
           <div style={{ fontSize: 16, fontWeight: 500 }}>
             AI 模型部署与管理平台
           </div>
-          <Space size={16}>
-            <Badge count={3}>
+          <Space size="middle">
+            <Search
+              placeholder="搜索..."
+              allowClear
+              style={{ width: 200 }}
+              prefix={<SearchOutlined />}
+            />
+            <a href="#" style={{ color: '#666' }} title="帮助文档">
+              <QuestionCircleOutlined style={{ fontSize: 18 }} />
+            </a>
+            <Badge count={5} size="small">
               <BellOutlined style={{ fontSize: 18, color: '#666' }} />
             </Badge>
             <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">

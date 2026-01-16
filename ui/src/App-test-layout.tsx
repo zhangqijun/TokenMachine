@@ -3,11 +3,6 @@ import { ConfigProvider, theme } from 'antd';
 import zhCN from 'antd/locale/zh_CN';
 import MainLayout from './components/layout/MainLayout';
 import Dashboard from './pages/Dashboard';
-import Models from './pages/models';
-import Clusters from './pages/Clusters';
-import ApiKeys from './pages/ApiKeys';
-import Playground from './pages/Playground';
-import Settings from './pages/Settings';
 
 function App() {
   return (
@@ -32,11 +27,6 @@ function App() {
           <Route path="/" element={<MainLayout />}>
             <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
-            <Route path="models" element={<Models />} />
-            <Route path="clusters" element={<Clusters />} />
-            <Route path="api-keys" element={<ApiKeys />} />
-            <Route path="playground" element={<Playground />} />
-            <Route path="settings" element={<Settings />} />
           </Route>
         </Routes>
       </BrowserRouter>

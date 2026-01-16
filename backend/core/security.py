@@ -1,6 +1,8 @@
 """
 Security utilities for TokenMachine.
 """
+import os
+import re
 import secrets
 import hashlib
 from datetime import datetime, timedelta
@@ -73,7 +75,6 @@ def generate_request_id() -> str:
 
 def sanitize_filename(filename: str) -> str:
     """Sanitize a filename for safe storage."""
-    import re
     # Remove any path components
     filename = os.path.basename(filename)
     # Replace special characters with underscores

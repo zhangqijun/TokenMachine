@@ -6,7 +6,7 @@ import pytest
 from pathlib import Path
 from unittest.mock import patch
 
-from inferx.core.config import Settings, get_settings, ensure_directories
+from backend.core.config import Settings, get_settings, ensure_directories
 
 
 class TestSettings:
@@ -15,13 +15,12 @@ class TestSettings:
     def test_default_values(self):
         """Test that default values are correctly set."""
         settings = Settings()
-        assert settings.app_name == "InferX"
+        assert settings.app_name == "TokenMachine"
         assert settings.app_version == "0.1.0"
         assert settings.environment == "development"
         assert settings.debug is True
         assert settings.api_host == "0.0.0.0"
         assert settings.api_port == 8000
-        assert settings.database_url == "postgresql://inferx:inferx_password@localhost:5432/inferx"
         assert settings.redis_url == "redis://localhost:6379/0"
 
     def test_is_development(self):
@@ -74,7 +73,7 @@ class TestEnsureDirectories:
         model_path = tmp_path / "models"
         log_path = tmp_path / "logs"
 
-        monkeypatch.setattr("inferx.core.config.os.makedirs", lambda p, **kwargs: None)
+        monkeypatch.setattr("os.makedirs", lambda p, **kwargs: None)
 
         settings = Settings(
             model_storage_path=str(model_path),

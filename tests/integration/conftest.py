@@ -5,8 +5,8 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from inferx.main import app
-from inferx.api.deps import get_current_db
+from backend.main import app
+from backend.api.deps import get_current_db
 
 
 @pytest.fixture
@@ -18,7 +18,7 @@ def authenticated_client(client, test_api_key):
         return api_key
 
     # Import and override the auth dependency
-    from inferx.api.v1 import chat, models, admin
+    from backend.api.v1 import chat, models, admin
 
     original_verify = chat.verify_api_key_auth
     original_get_deployment = chat.get_deployment_by_name
@@ -37,8 +37,8 @@ def authenticated_client(client, test_api_key):
 @pytest.fixture
 def admin_client(client, test_admin_user):
     """Create a test client with admin authentication."""
-    from inferx.api.v1 import admin as admin_module
-    from inferx.core.security import create_access_token
+    from backend.api.v1 import admin as admin_module
+    from backend.core.security import create_access_token
 
     token = create_access_token({"sub": str(test_admin_user.id)})
 

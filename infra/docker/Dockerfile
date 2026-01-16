@@ -1,5 +1,11 @@
 FROM python:3.11-slim
 
+# Set proxy for build
+ENV http_proxy=http://10.157.59.75:7890
+ENV https_proxy=http://10.157.59.75:7890
+ENV HTTP_PROXY=http://10.157.59.75:7890
+ENV HTTPS_PROXY=http://10.157.59.75:7890
+
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     git \

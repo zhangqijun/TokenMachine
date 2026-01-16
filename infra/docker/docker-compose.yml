@@ -105,10 +105,7 @@ services:
       dockerfile: Dockerfile
     container_name: tokenmachine-web
     ports:
-      - "8080:80"
-      - "8443:443"
-    volumes:
-      - ~/zhangqijun.cn_apache:/etc/nginx/ssl:ro
+      - "8081:80"
     depends_on:
       - api
     networks:

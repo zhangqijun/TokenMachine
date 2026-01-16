@@ -1,6 +1,12 @@
 # Multi-stage build for React frontend
 FROM node:20-alpine AS builder
 
+# Set proxy for build
+ENV http_proxy=http://10.157.59.75:7890
+ENV https_proxy=http://10.157.59.75:7890
+ENV HTTP_PROXY=http://10.157.59.75:7890
+ENV HTTPS_PROXY=http://10.157.59.75:7890
+
 WORKDIR /app
 
 # Copy package files

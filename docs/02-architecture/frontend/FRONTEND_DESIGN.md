@@ -2368,6 +2368,498 @@ TokenMachine 帮助文档
 
 ---
 
-**文档版本**: v4.0
+## 11. GPUStack UI 参考设计
+
+> 本章节基于对 [GPUStack UI](https://github.com/gpustack/gpustack-ui) 的深入分析，提炼可参考的设计模式和架构方案。
+
+### 11.1 技术栈对比
+
+| 方面 | GPUStack UI | TokenMachine | 建议 |
+|------|-------------|--------------|------|
+| **构建工具** | UmiJS Max | Vite | 保持 Vite，更轻量灵活 |
+| **UI 框架** | Ant Design 6 + ProComponents | Ant Design 6 | 考虑引入 ProComponents |
+| **状态管理** | Jotai (原子化状态) | Zustand | 两者都适合 |
+| **样式方案** | styled-components | 待定 | 可参考 CSS-in-JS 方案 |
+| **路由模式** | Hash Router | 待定 | 建议 Hash Router（兼容性） |
+| **国际化** | react-intl (Umi 内置) | 待定 | 推荐 react-intl |
+
+### 11.2 核心组件设计参考
+
+#### 11.2.1 SealTable - 增强型表格组件
+
+**特性**：
+- 支持嵌套数据展开（父子关系）
+- 多列排序（单列/多列切换）
+- 虚拟滚动（大数据量）
+- 行选择（单选/多选）
+- 实时数据更新集成
+- 自定义单元格渲染
+
+**代码示例**：
+```typescript
+<SealTable
+  columns={columns}
+  dataSource={dataSource}
+  rowKey="id"
+  rowSelection={{
+    selectedRowKeys,
+    onChange: handleSelectionChange
+  }}
+  expandable={{
+    childrenDataSource: modelInstances,
+    childrenRowKey: "id"
+  }}
+  pagination={{
+    current: page,
+    pageSize: perPage,
+    total
+  }}
+  onTableSort={handleSortChange}
+/>
+```
+
+**适用场景**：
+- 模型列表（可展开查看实例）
+- Worker 列表（可展开查看 GPU）
+- API Key 列表（可展开查看使用记录）
+
+#### 11.2.2 SealForm - 浮动标签表单
+
+**特性**：
+- Material Design 风格的浮动标签
+- 自动状态管理（focus/blur/error）
+- 统一的验证样式
+- 支持多种输入类型
+
+**代码示例**：
+```typescript
+<SealInput
+  label="模型名称"
+  placeholder="请输入模型名称"
+  required
+  value={name}
+  onChange={(e) => setName(e.target.value)}
+  status={error ? 'error' : ''}
+  description="仅支持字母、数字和连字符"
+/>
+```
+
+#### 11.2.3 YAMLEditor - YAML 配置编辑器
+
+**特性**：
+- 基于 Monaco Editor
+- 语法高亮和自动补全
+- YAML Schema 验证
+- 导入/导出文件
+
+**代码示例**：
+```typescript
+<YAMLEditor
+  value={yamlContent}
+  height={400}
+  schema={backendSchema}
+  placeholder="配置后端参数..."
+  validateMessage={error}
+  onUpload={handleImportYaml}
+  ref={editorRef}
+/>
+```
+
+### 11.3 实时数据更新机制
+
+#### 11.3.1 Watch API + Web Worker
+
+**架构**：
+```
+┌─────────────┐     SSE      ┌─────────────┐     Worker     ┌─────────────┐
+│   前端组件   │ ←────────→  │  Hook 层    │ ←──────────→  │  JSON 解析   │
+│  (UI 渲染)  │   实时流     │ useChunkReq │   流式解析     │  (后台线程)  │
+└─────────────┘             └─────────────┘               └─────────────┘
+```
+
+**核心 Hook**：
+```typescript
+// useChunkRequest.ts
+const useChunkRequest = () => {
+  const [data, setData] = useState([]);
+  const workerRef = useRef<Worker>();
+
+  const setupChunkRequest = async (url: string) => {
+    // 1. 创建 Web Worker
+    workerRef.current = new Worker('./json-parser-worker.ts');
+
+    // 2. 监听 Worker 消息
+    workerRef.current.onmessage = (e) => {
+      const validJSON = e.data;
+      updateDataList(validJSON);  // 乐观更新
+    };
+
+    // 3. 发起 SSE 请求
+    await request(url, {
+      params: { watch: true },
+      onDownloadProgress: (e) => {
+        const newData = sliceResponseData(e.response);
+        workerRef.current.postMessage(newData);
+      }
+    });
+  };
+
+  return { setupChunkRequest };
+};
+```
+
+**适用场景**：
+- GPU 指标实时监控
+- 模型部署状态更新
+- Worker 心跳检测
+- 日志流式输出
+
+#### 11.3.2 数据更新策略
+
+| 策略 | 说明 | 使用场景 |
+|------|------|----------|
+| **乐观更新** | 先更新 UI，后确认 | 用户操作反馈 |
+| **轮询补偿** | SSE + 定时轮询 | 网络不稳定时 |
+| **增量更新** | 仅更新变化项 | 大列表优化 |
+| **去重合并** | 相同事件合并 | 防止闪烁 |
+
+### 11.4 路由与权限控制
+
+#### 11.4.1 路由配置
+
+```typescript
+// config/routes.ts
+export default [
+  {
+    path: '/models',
+    key: 'models',
+    access: 'canSeeAdmin',  // 权限标识
+    routes: [
+      {
+        path: '/models/catalog',
+        key: 'modelsCatalog',
+        component: './llmodels/catalog'
+      },
+      {
+        path: '/models/deployments',
+        key: 'modelDeployments',
+        component: './llmodels/index'
+      }
+    ]
+  }
+];
+```
+
+#### 11.4.2 权限控制
+
+```typescript
+// 权限检查 Hook
+const useAccess = () => {
+  const [userInfo] = useAtom(userAtom);
+
+  const canSeeAdmin = useMemo(() => {
+    return userInfo?.is_admin === true;
+  }, [userInfo]);
+
+  return {
+    canSeeAdmin,
+    canSeeUser: true  // 普通用户可见
+  };
+};
+
+// 路由守卫
+const onPageChange = (location: Location) => {
+  if (!initialState?.currentUser && location.pathname !== '/login') {
+    history.push('/login');
+  }
+};
+```
+
+### 11.5 Hooks 封装建议
+
+| Hook | 功能 | 优先级 |
+|------|------|--------|
+| **useTableFetch** | 表格数据获取 + 分页 + 排序 | 高 |
+| **useChunkRequest** | 实时数据流处理 | 高 |
+| **useTableSort** | 多列排序状态管理 | 中 |
+| **useUpdateChunkedList** | 列表增量更新 | 中 |
+| **useWorkerMaintenance** | Worker 维护模式 | 低 |
+| **useTerminalTabs** | 终端多标签页 | 低 |
+
+#### 11.5.1 useTableFetch 示例
+
+```typescript
+const useTableFetch = <T,>({
+  fetchAPI,
+  deleteAPI,
+  defaultQueryParams,
+  watch = false
+}: Options) => {
+  const [dataSource, setDataSource] = useState<{
+    dataList: T[];
+    loading: boolean;
+    total: number;
+  }>({
+    dataList: [],
+    loading: false,
+    total: 0
+  });
+
+  const [queryParams, setQueryParams] = useState(defaultQueryParams);
+
+  const fetchData = async (params?: Partial<QueryParams>) => {
+    const res = await fetchAPI({ ...queryParams, ...params });
+    setDataSource({
+      dataList: res.items,
+      loading: false,
+      total: res.pagination.total
+    });
+  };
+
+  // 如果启用 watch，建立 SSE 连接
+  useEffect(() => {
+    if (watch) {
+      const { setupChunkRequest } = useChunkRequest();
+      setupChunkRequest(`${API_URL}?watch=true`);
+    }
+  }, []);
+
+  return {
+    dataSource,
+    queryParams,
+    fetchData,
+    handlePageChange,
+    handleSearch,
+    handleDelete
+  };
+};
+```
+
+### 11.6 页面设计参考
+
+#### 11.6.1 Dashboard 改进建议
+
+**参考 GPUStack 设计**：
+- 多维度指标卡片（运行模型、GPU 总数、使用率、调用量）
+- GPU 监控图表（多线折线图，实时更新）
+- 活动日志（最新操作、告警信息）
+- 资源使用趋势（时间序列图）
+
+**优化点**：
+```typescript
+// 数据更新策略
+const useDashboardData = () => {
+  const [metrics, setMetrics] = useState();
+
+  // 1. 初始加载
+  useEffect(() => {
+    fetchMetrics();
+  }, []);
+
+  // 2. 实时更新（Watch API）
+  useEffect(() => {
+    const { setupChunkRequest } = useChunkRequest();
+    setupChunkRequest('/api/metrics?watch=true');
+
+    return () => {
+      // 清理连接
+    };
+  }, []);
+
+  // 3. 定时轮询补偿（5秒）
+  useEffect(() => {
+    const timer = setInterval(() => {
+      fetchMetrics();
+    }, 5000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  return metrics;
+};
+```
+
+#### 11.6.2 模型管理页面
+
+**布局建议**：
+```
+┌─────────────────────────────────────────────────────┐
+│  模型管理                    [上传模型] [批量操作▼]  │
+├─────────────────────────────────────────────────────┤
+│  🔍 [搜索]              [状态筛选▼] [类别筛选▼]      │
+│  ┌───────────────────────────────────────────────┐ │
+│  │ 模型名称    │ 版本 │ 大小  │ 状态 │ 操作      │ │
+│  ├───────────────────────────────────────────────┤ │
+│  │ llama-3-8b │ v1.0│ 16.5GB│ Ready│ [部署] [▼]│ │
+│  │            │      │       │      │           │ │
+│  │   └─ 实例1 │      │  GPU 0 │ Running│ [停止]│ │
+│  │   └─ 实例2 │      │  GPU 1 │ Running│ [停止]│ │
+│  └───────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────┘
+```
+
+**关键特性**：
+- 展开行显示模型实例
+- 实时状态更新（Running/Pending/Stopped）
+- 批量操作（部署/停止/删除）
+- GPU 资源可视化
+
+#### 11.6.3 Worker/集群管理
+
+**参考 GPUStack 的 Worker 页面**：
+```typescript
+// Worker 列表
+<Table
+  columns={[
+    { title: '节点名称', dataIndex: 'name' },
+    { title: '状态', dataIndex: 'state', render: StatusTag },
+    { title: 'GPU', dataIndex: 'gpu_count' },
+    {
+      title: '利用率',
+      dataIndex: 'mem_usage',
+      render: (value) => <ProgressBar percent={value} />
+    },
+    { title: '操作', render: Actions }
+  ]}
+  expandable={{
+    expandedRowRender: (record) => <WorkerGpuDetail worker={record} />
+  }}
+/>
+
+// 终端集成
+const { TerminalPanel, handleAddTerminal } = useTerminalTabs();
+
+<XTerminal
+  socketUrl={`ws://api/workers/${id}/terminal`}
+  onData={handleTerminalData}
+/>
+```
+
+### 11.7 组件库清单
+
+基于 GPUStack UI 分析，建议实现以下组件：
+
+| 组件 | 用途 | 复杂度 | 优先级 |
+|------|------|--------|--------|
+| **SealTable** | 数据列表 | 高 | P0 |
+| **SealForm** | 表单输入 | 中 | P0 |
+| **YAMLEditor** | 配置编辑 | 中 | P1 |
+| **LogsViewer** | 日志查看 | 中 | P1 |
+| **XTerminal** | SSH 终端 | 高 | P2 |
+| **FormDrawer** | 抽屉表单 | 低 | P1 |
+| **StatusTag** | 状态标签 | 低 | P0 |
+| **ProgressBar** | 进度条 | 低 | P0 |
+| **FilterBar** | 筛选工具栏 | 中 | P1 |
+| **EmptyState** | 空状态 | 低 | P1 |
+
+### 11.8 关键注意事项
+
+#### 11.8.1 性能优化
+
+```typescript
+// 1. 虚拟滚动
+import { List } from 'react-virtualized';
+
+<List
+  width={800}
+  height={600}
+  rowCount={dataList.length}
+  rowHeight={60}
+  rowRenderer={({ index, key, style }) => (
+    <div key={key} style={style}>
+      {renderRow(dataList[index])}
+    </div>
+  )}
+/>
+
+// 2. 防抖搜索
+const debouncedSearch = useDebounceFn(
+  (value) => {
+    handleSearch(value);
+  },
+  { wait: 300 }
+);
+
+// 3. 请求取消
+useEffect(() => {
+  const source = axios.CancelToken.source();
+
+  fetchData({ cancelToken: source.token });
+
+  return () => {
+    source.cancel('Component unmounted');
+  };
+}, []);
+```
+
+#### 11.8.2 错误处理
+
+```typescript
+// 统一错误处理
+const useApiCall = () => {
+  const [error, setError] = useState();
+
+  const call = async (apiFunc) => {
+    try {
+      return await apiFunc();
+    } catch (err) {
+      if (axios.isCancel(err)) {
+        console.log('Request canceled');
+        return;
+      }
+      setError(err);
+      message.error(err.message);
+      throw err;
+    }
+  };
+
+  return { call, error };
+};
+```
+
+#### 11.8.3 类型安全
+
+```typescript
+// API 响应类型
+export interface ListResponse<T> {
+  items: T[];
+  pagination: {
+    total: number;
+    totalPage: number;
+    page: number;
+    perPage: number;
+  };
+}
+
+// 使用示例
+const res = await queryModelsList<ModelsResponse>(params);
+```
+
+### 11.9 实施建议
+
+**阶段 1：基础组件（1-2 周）**
+- SealTable（表格组件）
+- SealForm（表单组件）
+- StatusTag（状态标签）
+- EmptyState（空状态）
+
+**阶段 2：核心页面（2-3 周）**
+- 模型管理页
+- Dashboard
+- Worker 列表页
+
+**阶段 3：高级功能（2-3 周）**
+- 实时数据更新
+- YAMLEditor
+- 日志查看器
+
+**阶段 4：优化与测试（1-2 周）**
+- 性能优化
+- E2E 测试
+- 文档完善
+
+---
+
+**文档版本**: v4.1
 **最后更新**: 2025-01-16
 **维护者**: TokenMachine Team

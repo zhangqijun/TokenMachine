@@ -5,7 +5,7 @@ import pytest
 import json
 from unittest.mock import AsyncMock, patch, MagicMock
 
-from inferx.models.schemas import ChatCompletionRequest
+from backend.models.schemas import ChatCompletionRequest
 
 
 class TestChatCompletionsAPI:
@@ -13,7 +13,7 @@ class TestChatCompletionsAPI:
 
     def test_chat_completion_success(self, client, test_deployment, test_api_key, mock_httpx_client):
         """Test successful chat completion."""
-        from inferx.models.database import Deployment
+        from backend.models.database import Deployment
         api_key, raw_key = test_api_key
 
         with patch("httpx.AsyncClient", return_value=mock_httpx_client):

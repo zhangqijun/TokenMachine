@@ -5,7 +5,7 @@ import pytest
 from datetime import datetime, timedelta
 from unittest.mock import patch
 
-from inferx.core.security import (
+from backend.core.security import (
     hash_password,
     verify_password,
     generate_api_key,
@@ -52,13 +52,13 @@ class TestAPIKeyGeneration:
 
     def test_generate_api_key_has_prefix(self):
         """Test that generated API key has correct prefix."""
-        with patch("inferx.core.security.settings.api_key_prefix", "test_sk_"):
+        with patch("backend.core.security.settings.api_key_prefix", "test_sk_"):
             api_key = generate_api_key(123)
             assert api_key.startswith("test_sk_")
 
     def test_generate_api_key_length(self):
         """Test that generated API key has expected length."""
-        with patch("inferx.core.security.settings.api_key_length", 16):
+        with patch("backend.core.security.settings.api_key_length", 16):
             api_key = generate_api_key(123)
             # prefix + 16 chars + 8 char hash
             assert len(api_key) >= 20

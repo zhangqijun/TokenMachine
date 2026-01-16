@@ -6,8 +6,8 @@ import pytest
 from pathlib import Path
 from unittest.mock import Mock, patch, MagicMock
 
-from inferx.services.model_service import ModelService
-from inferx.models.database import ModelCategory, ModelSource, ModelStatus
+from backend.services.model_service import ModelService
+from backend.models.database import ModelCategory, ModelSource, ModelStatus
 
 
 class TestModelService:

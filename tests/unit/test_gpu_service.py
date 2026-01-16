@@ -5,8 +5,8 @@ import pytest
 from datetime import datetime
 from unittest.mock import Mock, patch, MagicMock
 
-from inferx.services.gpu_service import GPUService
-from inferx.models.database import GPUStatus, DeploymentStatus
+from backend.services.gpu_service import GPUService
+from backend.models.database import GPUStatus, DeploymentStatus
 
 
 class TestGPUService:

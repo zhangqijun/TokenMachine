@@ -4,9 +4,9 @@ Unit tests for the DeploymentService.
 import pytest
 from unittest.mock import Mock, patch, AsyncMock, MagicMock
 
-from inferx.services.deployment_service import DeploymentService
-from inferx.models.database import DeploymentStatus, ModelStatus, GPUStatus
-from inferx.models.schemas import DeploymentCreate, DeploymentConfig
+from backend.services.deployment_service import DeploymentService
+from backend.models.database import DeploymentStatus, ModelStatus, GPUStatus
+from backend.models.schemas import DeploymentCreate, DeploymentConfig
 
 
 class TestDeploymentService:

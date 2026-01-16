@@ -4,12 +4,17 @@ export interface Model {
   id: string;
   name: string;
   version: string;
-  category: 'llm' | 'embedding' | 'reranker' | 'image';
-  quantization: 'fp16' | 'int8' | 'fp4' | 'fp8';
-  status: 'downloading' | 'ready' | 'error';
+  path: string;              // 模型存储路径
   size_gb: number;
-  download_progress?: number;
+  status: 'running' | 'stopped' | 'loading' | 'error';
+  backend: 'vllm' | 'sglang';
   created_at: string;
+  updated_at: string;
+
+  // 保留旧字段以兼容现有代码
+  category?: 'llm' | 'embedding' | 'reranker' | 'image';
+  quantization?: 'fp16' | 'int8' | 'fp4' | 'fp8';
+  download_progress?: number;
 }
 
 export interface Deployment {
@@ -72,62 +77,80 @@ export const mockModels: Model[] = [
     id: 'model_1',
     name: 'Qwen2.5-7B-Instruct',
     version: 'v2.0',
+    path: '/var/lib/backend/models/qwen2.5-7b-instruct',
+    size_gb: 14.5,
+    status: 'running',
+    backend: 'vllm',
+    created_at: '2025-01-10T00:00:00Z',
+    updated_at: '2025-01-15T10:30:00Z',
     category: 'llm',
     quantization: 'fp8',
-    status: 'ready',
-    size_gb: 14.5,
-    created_at: '2025-01-10T00:00:00Z',
   },
   {
     id: 'model_2',
     name: 'DeepSeek-R1-Distill-Qwen-32B',
     version: 'v1.0',
+    path: '/var/lib/backend/models/deepseek-r1-32b',
+    size_gb: 32.0,
+    status: 'running',
+    backend: 'vllm',
+    created_at: '2025-01-08T00:00:00Z',
+    updated_at: '2025-01-15T11:00:00Z',
     category: 'llm',
     quantization: 'fp8',
-    status: 'ready',
-    size_gb: 32.0,
-    created_at: '2025-01-08T00:00:00Z',
   },
   {
     id: 'model_3',
     name: 'GLM-4-9B-Chat',
     version: 'v3.0',
+    path: '/var/lib/backend/models/glm-4-9b-chat',
+    size_gb: 18.0,
+    status: 'stopped',
+    backend: 'sglang',
+    created_at: '2025-01-05T00:00:00Z',
+    updated_at: '2025-01-14T16:00:00Z',
     category: 'llm',
     quantization: 'int8',
-    status: 'ready',
-    size_gb: 18.0,
-    created_at: '2025-01-05T00:00:00Z',
   },
   {
     id: 'model_4',
     name: 'Llama-3-8B-Instruct',
     version: 'v1.0',
+    path: '/var/lib/backend/models/llama-3-8b-instruct',
+    size_gb: 16.0,
+    status: 'stopped',
+    backend: 'vllm',
+    created_at: '2025-01-01T00:00:00Z',
+    updated_at: '2025-01-13T09:00:00Z',
     category: 'llm',
     quantization: 'fp16',
-    status: 'ready',
-    size_gb: 16.0,
-    created_at: '2025-01-01T00:00:00Z',
   },
   {
     id: 'model_5',
     name: 'bge-large-zh-v1.5',
     version: 'v1.5',
+    path: '/var/lib/backend/models/bge-large-zh-v1.5',
+    size_gb: 2.5,
+    status: 'loading',
+    backend: 'vllm',
+    created_at: '2025-01-12T00:00:00Z',
+    updated_at: '2025-01-12T00:00:00Z',
     category: 'embedding',
     quantization: 'fp16',
-    status: 'downloading',
-    size_gb: 2.5,
     download_progress: 75,
-    created_at: '2025-01-12T00:00:00Z',
   },
   {
     id: 'model_6',
     name: 'jina-reranker-v1-base',
     version: 'v1.0',
+    path: '/var/lib/backend/models/jina-reranker-v1-base',
+    size_gb: 1.2,
+    status: 'stopped',
+    backend: 'vllm',
+    created_at: '2024-12-20T00:00:00Z',
+    updated_at: '2025-01-10T14:00:00Z',
     category: 'reranker',
     quantization: 'fp16',
-    status: 'ready',
-    size_gb: 1.2,
-    created_at: '2024-12-20T00:00:00Z',
   },
 ];
 
@@ -410,3 +433,339 @@ export const generateTimeSeriesData = (hours: number = 24) => {
 };
 
 export const mockTimeSeriesData = generateTimeSeriesData(24);
+
+// Worker and Resource Management Types
+export interface CPUInfo {
+  total: number;
+  allocated: number;
+  utilization_rate: number;
+}
+
+export interface MemoryInfo {
+  total: number;
+  used: number;
+  allocated: number;
+  utilization_rate: number;
+}
+
+export interface GPUDevice {
+  uuid: string;
+  name: string;
+  vendor: 'nvidia' | 'amd' | 'apple';
+  index: number;
+  core: {
+    total: number;
+    utilization_rate: number;
+  };
+  memory: {
+    total: number;
+    used: number;
+    allocated: number;
+    utilization_rate: number;
+    is_unified_memory: boolean;
+  };
+  temperature: number;
+  state: 'available' | 'in_use' | 'error';
+}
+
+export interface FileSystem {
+  path: string;
+  total: number;
+  used: number;
+  available: number;
+}
+
+export interface WorkerStatus {
+  cpu: CPUInfo;
+  memory: MemoryInfo;
+  gpu_devices: GPUDevice[];
+  filesystem: FileSystem[];
+}
+
+export interface Worker {
+  name: string;
+  state: 'running' | 'offline' | 'maintenance';
+  ip: string;
+  cluster_id: string;
+  labels: Record<string, string>;
+  status: WorkerStatus;
+  last_heartbeat: string;
+}
+
+// Cluster Management Types
+export interface Cluster {
+  id: string;
+  name: string;
+  type: 'docker' | 'kubernetes' | 'digitalocean' | 'aws';
+  is_default: boolean;
+  status: 'running' | 'stopped' | 'error';
+  worker_pools: WorkerPool[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WorkerPool {
+  id: string;
+  cluster_id: string;
+  name: string;
+  worker_count: number;
+  min_workers: number;
+  max_workers: number;
+  status: 'running' | 'scaling' | 'stopped';
+  config: WorkerPoolConfig;
+}
+
+export interface WorkerPoolConfig {
+  provider_specific: {
+    docker?: {
+      image: string;
+      volumes: string[];
+    };
+    kubernetes?: {
+      namespace: string;
+      replicas: number;
+    };
+  };
+}
+
+// Mock Workers
+export const mockWorkers: Worker[] = [
+  {
+    name: 'worker-1',
+    state: 'running',
+    ip: '192.168.1.10',
+    cluster_id: 'cluster_default',
+    labels: { env: 'production', zone: 'a' },
+    status: {
+      cpu: { total: 32, allocated: 16, utilization_rate: 65.5 },
+      memory: {
+        total: 128 * 1024 * 1024 * 1024, // 128GB in bytes
+        used: 85 * 1024 * 1024 * 1024,
+        allocated: 96 * 1024 * 1024 * 1024,
+        utilization_rate: 66.4,
+      },
+      gpu_devices: [
+        {
+          uuid: 'gpu-0-0',
+          name: 'NVIDIA RTX 4090',
+          vendor: 'nvidia',
+          index: 0,
+          core: { total: 16384, utilization_rate: 78.5 },
+          memory: {
+            total: 24 * 1024 * 1024 * 1024,
+            used: 18 * 1024 * 1024 * 1024,
+            allocated: 20 * 1024 * 1024 * 1024,
+            utilization_rate: 75.0,
+            is_unified_memory: false,
+          },
+          temperature: 68,
+          state: 'in_use',
+        },
+        {
+          uuid: 'gpu-0-1',
+          name: 'NVIDIA RTX 4090',
+          vendor: 'nvidia',
+          index: 1,
+          core: { total: 16384, utilization_rate: 82.3 },
+          memory: {
+            total: 24 * 1024 * 1024 * 1024,
+            used: 22 * 1024 * 1024 * 1024,
+            allocated: 22 * 1024 * 1024 * 1024,
+            utilization_rate: 91.7,
+            is_unified_memory: false,
+          },
+          temperature: 74,
+          state: 'in_use',
+        },
+      ],
+      filesystem: [
+        {
+          path: '/var/lib/backend',
+          total: 2 * 1024 * 1024 * 1024 * 1024, // 2TB
+          used: 1.2 * 1024 * 1024 * 1024 * 1024,
+          available: 0.8 * 1024 * 1024 * 1024 * 1024,
+        },
+      ],
+    },
+    last_heartbeat: new Date().toISOString(),
+  },
+  {
+    name: 'worker-2',
+    state: 'running',
+    ip: '192.168.1.11',
+    cluster_id: 'cluster_default',
+    labels: { env: 'production', zone: 'b' },
+    status: {
+      cpu: { total: 32, allocated: 8, utilization_rate: 25.3 },
+      memory: {
+        total: 128 * 1024 * 1024 * 1024,
+        used: 45 * 1024 * 1024 * 1024,
+        allocated: 64 * 1024 * 1024 * 1024,
+        utilization_rate: 35.2,
+      },
+      gpu_devices: [
+        {
+          uuid: 'gpu-1-0',
+          name: 'NVIDIA RTX 4090',
+          vendor: 'nvidia',
+          index: 0,
+          core: { total: 16384, utilization_rate: 0 },
+          memory: {
+            total: 24 * 1024 * 1024 * 1024,
+            used: 0,
+            allocated: 0,
+            utilization_rate: 0,
+            is_unified_memory: false,
+          },
+          temperature: 38,
+          state: 'available',
+        },
+        {
+          uuid: 'gpu-1-1',
+          name: 'NVIDIA RTX 4090',
+          vendor: 'nvidia',
+          index: 1,
+          core: { total: 16384, utilization_rate: 0 },
+          memory: {
+            total: 24 * 1024 * 1024 * 1024,
+            used: 0,
+            allocated: 0,
+            utilization_rate: 0,
+            is_unified_memory: false,
+          },
+          temperature: 38,
+          state: 'available',
+        },
+      ],
+      filesystem: [
+        {
+          path: '/var/lib/backend',
+          total: 2 * 1024 * 1024 * 1024 * 1024,
+          used: 0.8 * 1024 * 1024 * 1024 * 1024,
+          available: 1.2 * 1024 * 1024 * 1024 * 1024,
+        },
+      ],
+    },
+    last_heartbeat: new Date().toISOString(),
+  },
+  {
+    name: 'worker-3',
+    state: 'maintenance',
+    ip: '192.168.1.12',
+    cluster_id: 'cluster_default',
+    labels: { env: 'development' },
+    status: {
+      cpu: { total: 16, allocated: 0, utilization_rate: 0 },
+      memory: {
+        total: 64 * 1024 * 1024 * 1024,
+        used: 8 * 1024 * 1024 * 1024,
+        allocated: 0,
+        utilization_rate: 12.5,
+      },
+      gpu_devices: [
+        {
+          uuid: 'gpu-2-0',
+          name: 'NVIDIA RTX 3090',
+          vendor: 'nvidia',
+          index: 0,
+          core: { total: 10496, utilization_rate: 0 },
+          memory: {
+            total: 24 * 1024 * 1024 * 1024,
+            used: 0,
+            allocated: 0,
+            utilization_rate: 0,
+            is_unified_memory: false,
+          },
+          temperature: 35,
+          state: 'available',
+        },
+      ],
+      filesystem: [
+        {
+          path: '/var/lib/backend',
+          total: 1 * 1024 * 1024 * 1024 * 1024,
+          used: 0.3 * 1024 * 1024 * 1024 * 1024,
+          available: 0.7 * 1024 * 1024 * 1024 * 1024,
+        },
+      ],
+    },
+    last_heartbeat: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+  },
+];
+
+// Mock Clusters
+export const mockClusters: Cluster[] = [
+  {
+    id: 'cluster_default',
+    name: 'default',
+    type: 'docker',
+    is_default: true,
+    status: 'running',
+    worker_pools: [
+      {
+        id: 'pool_default_1',
+        cluster_id: 'cluster_default',
+        name: 'pool-1',
+        worker_count: 2,
+        min_workers: 2,
+        max_workers: 4,
+        status: 'running',
+        config: {
+          provider_specific: {
+            docker: {
+              image: 'tokenmachine/worker:latest',
+              volumes: ['/var/lib/backend/models:/models'],
+            },
+          },
+        },
+      },
+    ],
+    created_at: '2025-01-01T00:00:00Z',
+    updated_at: '2025-01-12T15:00:00Z',
+  },
+  {
+    id: 'cluster_prod',
+    name: 'production',
+    type: 'kubernetes',
+    is_default: false,
+    status: 'running',
+    worker_pools: [
+      {
+        id: 'pool_prod_1',
+        cluster_id: 'cluster_prod',
+        name: 'gpu-pool-a',
+        worker_count: 4,
+        min_workers: 4,
+        max_workers: 8,
+        status: 'running',
+        config: {
+          provider_specific: {
+            kubernetes: {
+              namespace: 'tokenmachine',
+              replicas: 4,
+            },
+          },
+        },
+      },
+      {
+        id: 'pool_prod_2',
+        cluster_id: 'cluster_prod',
+        name: 'gpu-pool-b',
+        worker_count: 4,
+        min_workers: 2,
+        max_workers: 6,
+        status: 'scaling',
+        config: {
+          provider_specific: {
+            kubernetes: {
+              namespace: 'tokenmachine',
+              replicas: 4,
+            },
+          },
+        },
+      },
+    ],
+    created_at: '2025-01-05T00:00:00Z',
+    updated_at: '2025-01-12T14:00:00Z',
+  },
+];

@@ -5,6 +5,8 @@ import type {
   GPU,
   ApiKey,
   UsageLog,
+  Worker,
+  Cluster,
 } from '../mock/data';
 import {
   mockModels,
@@ -13,6 +15,8 @@ import {
   mockApiKeys,
   mockUsageLogs,
   dashboardStats,
+  mockWorkers,
+  mockClusters,
 } from '../mock/data';
 
 interface AppState {
@@ -23,6 +27,8 @@ interface AppState {
   apiKeys: ApiKey[];
   usageLogs: UsageLog[];
   stats: typeof dashboardStats;
+  workers: Worker[];
+  clusters: Cluster[];
 
   // Loading states
   isLoading: boolean;
@@ -46,6 +52,8 @@ export const useStore = create<AppState>((set) => ({
   apiKeys: mockApiKeys,
   usageLogs: mockUsageLogs,
   stats: dashboardStats,
+  workers: mockWorkers,
+  clusters: mockClusters,
   isLoading: false,
 
   // Actions

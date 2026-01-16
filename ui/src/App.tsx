@@ -3,10 +3,14 @@ import { ConfigProvider, theme } from 'antd';
 import zhCN from 'antd/locale/zh_CN';
 import MainLayout from './components/layout/MainLayout';
 import Dashboard from './pages/Dashboard';
-import Models from './pages/Models';
+import Models from './pages/models';
 import Deployments from './pages/Deployments';
 import Monitoring from './pages/Monitoring';
 import ApiKeys from './pages/ApiKeys';
+import Resources from './pages/Resources';
+import Clusters from './pages/Clusters';
+import Playground from './pages/Playground';
+import Settings from './pages/Settings';
 
 function App() {
   return (
@@ -33,8 +37,12 @@ function App() {
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="models" element={<Models />} />
             <Route path="deployments" element={<Deployments />} />
+            <Route path="resources" element={<Resources />} />
+            <Route path="clusters" element={<Clusters />} />
+            <Route path="playground" element={<Playground />} />
             <Route path="monitoring" element={<Monitoring />} />
             <Route path="api-keys" element={<ApiKeys />} />
+            <Route path="settings" element={<Settings />} />
           </Route>
         </Routes>
       </BrowserRouter>

@@ -6,10 +6,14 @@ import {
   RocketOutlined,
   BarChartOutlined,
   KeyOutlined,
-  SettingOutlined,
+  SettingOutlined as SettingFilledOutlined,
   UserOutlined,
   LogoutOutlined,
   BellOutlined,
+  CloudServerOutlined,
+  ClusterOutlined,
+  MessageOutlined,
+  ControlOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 
@@ -39,6 +43,24 @@ const MainLayout = () => {
       onClick: () => navigate('/deployments'),
     },
     {
+      key: '/resources',
+      icon: <CloudServerOutlined />,
+      label: '资源管理',
+      onClick: () => navigate('/resources'),
+    },
+    {
+      key: '/clusters',
+      icon: <ClusterOutlined />,
+      label: '集群管理',
+      onClick: () => navigate('/clusters'),
+    },
+    {
+      key: '/playground',
+      icon: <MessageOutlined />,
+      label: '测试场',
+      onClick: () => navigate('/playground'),
+    },
+    {
       key: '/monitoring',
       icon: <BarChartOutlined />,
       label: '监控面板',
@@ -50,6 +72,15 @@ const MainLayout = () => {
       label: 'API Keys',
       onClick: () => navigate('/api-keys'),
     },
+    {
+      type: 'divider',
+    },
+    {
+      key: '/settings',
+      icon: <ControlOutlined />,
+      label: '系统设置',
+      onClick: () => navigate('/settings'),
+    },
   ];
 
   const userMenuItems: MenuProps['items'] = [
@@ -59,11 +90,7 @@ const MainLayout = () => {
       label: '个人设置',
     },
     {
-      key: 'settings',
-      icon: <SettingOutlined />,
-      label: '系统设置',
-    },
-    {
+      key: 'divider',
       type: 'divider',
     },
     {

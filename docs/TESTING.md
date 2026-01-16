@@ -1,10 +1,10 @@
-# Testing Guide for InferX
+# Testing Guide for TokenMachine
 
-This document describes the testing infrastructure and how to run tests for the InferX project.
+This document describes the testing infrastructure and how to run tests for the TokenMachine project.
 
 ## Overview
 
-The InferX project includes comprehensive test coverage for both backend and frontend:
+The TokenMachine project includes comprehensive test coverage for both backend and frontend:
 
 - **Backend Tests**: Python unit and integration tests using pytest
 - **Frontend Tests**: TypeScript/React component tests using Vitest
@@ -12,7 +12,7 @@ The InferX project includes comprehensive test coverage for both backend and fro
 ## Test Structure
 
 ```
-InferX/
+TokenMachine/
 ├── tests/
 │   ├── __init__.py
 │   ├── conftest.py              # Shared pytest fixtures
@@ -20,6 +20,11 @@ InferX/
 │   ├── unit/                    # Unit tests
 │   │   ├── test_config.py       # Configuration tests
 │   │   ├── test_security.py     # Security utilities tests
+│   │   ├── test_quota.py        # Quota manager tests
+│   │   ├── test_cluster_service.py
+│   │   ├── test_worker_service.py
+│   │   ├── test_billing_service.py
+│   │   ├── test_stats_service.py
 │   │   ├── test_model_service.py
 │   │   ├── test_gpu_service.py
 │   │   └── test_deployment_service.py
@@ -27,8 +32,12 @@ InferX/
 │       ├── conftest.py
 │       ├── test_chat_api.py
 │       ├── test_models_api.py
-│       └── test_admin_api.py
-└── web/
+│       ├── test_admin_api.py
+│       ├── test_cluster_api.py
+│       ├── test_worker_api.py
+│       ├── test_billing_api.py
+│       └── test_monitoring_api.py
+└── ui/
     └── src/
         └── test/
             ├── setup.ts         # Vitest setup
@@ -36,7 +45,9 @@ InferX/
             └── __tests__/       # Component tests
                 ├── MainLayout.test.tsx
                 ├── Dashboard.test.tsx
-                └── Deployments.test.tsx
+                ├── Deployments.test.tsx
+                ├── Clusters.test.tsx
+                └── Billing.test.tsx
 ```
 
 ## Backend Testing
@@ -96,12 +107,16 @@ Key fixtures available in `tests/conftest.py`:
 
 - `test_settings`: Test settings with safe defaults
 - `db_session`: Database session with transaction rollback
+- `test_organization`: Test organization fixture
 - `test_user`: Test user fixture
 - `test_admin_user`: Admin user fixture
 - `test_api_key`: API key fixture (returns both record and raw key)
 - `test_model`: Test model fixture
 - `test_gpu`: Test GPU fixture
 - `test_deployment`: Test deployment fixture
+- `test_cluster`: Test cluster fixture
+- `test_worker_pool`: Test worker pool fixture
+- `test_worker`: Test worker fixture
 - `mock_gpu_manager`: Mocked GPU manager
 - `mock_worker_pool`: Mocked worker pool
 
@@ -165,32 +180,47 @@ Available in `web/src/test/test-utils.tsx`:
 ### Backend Unit Test Example
 
 ```python
-# tests/unit/test_my_service.py
+# tests/unit/test_cluster_service.py
 import pytest
-from backend.services.my_service import MyService
+from backend.services.cluster_service import ClusterService
 
-class TestMyService:
-    def test_my_function(self, db_session, patch_gpu_manager):
-        service = MyService(db_session)
-        result = service.my_function("test")
-        assert result == "expected"
+class TestClusterService:
+    def test_create_cluster(self, db_session):
+        service = ClusterService(db_session)
+        cluster = service.create_cluster(
+            name="test-cluster",
+            cluster_type="standalone"
+        )
+        assert cluster.id is not None
+        assert cluster.name == "test-cluster"
+        assert cluster.type == "standalone"
+
+    def test_list_clusters(self, db_session, test_cluster):
+        service = ClusterService(db_session)
+        clusters = service.list_clusters()
+        assert len(clusters) >= 1
+        assert test_cluster in clusters
 ```
 
 ### Backend Integration Test Example
 
 ```python
-# tests/integration/test_my_api.py
-def test_my_endpoint(client, test_api_key):
-    api_key, raw_key = test_api_key
-
-    response = client.get(
-        "/api/v1/endpoint",
-        headers={"Authorization": f"Bearer {raw_key}"}
+# tests/integration/test_cluster_api.py
+def test_create_cluster(client, admin_token):
+    response = client.post(
+        "/api/v1/admin/clusters",
+        headers={"Authorization": f"Bearer {admin_token}"},
+        json={
+            "name": "test-cluster",
+            "type": "standalone",
+            "description": "Test cluster"
+        }
     )
 
     assert response.status_code == 200
     data = response.json()
-    assert data["key"] == "value"
+    assert data["id"] is not None
+    assert data["name"] == "test-cluster"
 ```
 
 ### Frontend Component Test Example
@@ -237,6 +267,13 @@ Backend tests use pytest markers:
 - `slow`: Long-running tests
 - `gpu`: Tests requiring GPU access
 - `auth`: Authentication-related tests
+- `rbac`: Role-based access control tests
+- `quota`: Quota management tests
+- `billing`: Billing and invoicing tests
+- `cluster`: Cluster management tests
+- `worker`: Worker management tests
+- `multi_tenant`: Multi-tenancy tests
+- `security`: Security-related tests
 
 ## Troubleshooting
 

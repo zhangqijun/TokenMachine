@@ -2,58 +2,95 @@
 
 ## 概述
 
-TokenMachine 使用 Docker Compose 进行部署，包含以下服务：
+TokenMachine 支持多环境部署，使用 Docker Compose 进行管理：
 
-- **postgres**: PostgreSQL 15 数据库
-- **redis**: Redis 7 缓存
-- **api**: FastAPI 后端服务 (端口 8000)
-- **web**: React 前端服务 (端口 8080/8443)
-- **prometheus**: 监控指标收集 (端口 9091)
-- **grafana**: 监控可视化面板 (端口 3001)
+- **开发环境** (development): 当前机器 - 单卡 RTX 4090
+- **测试环境** (test): Bulbaser - 7卡 RTX 3090 - 多节点分布式部署
+- **生产环境** (production): Bowser - RTX 3090 - HTTPS 证书 + 路由器配置
+
+## 环境配置
+
+### 开发环境 (Development)
+
+- **硬件**: 单卡 RTX 4090
+- **用途**: 本地开发和调试
+- **特点**:
+  - 完整服务栈 (API, Web, Database, Redis, Monitoring)
+  - DEBUG 模式启用
+  - 无 HTTPS (HTTP only)
+  - 较高的 GPU 内存利用率 (0.85)
+  - 支持更长的模型长度 (8192)
+
+### 测试环境 (Test)
+
+- **硬件**: 7卡 RTX 3090
+- **机器**: Bulbaser (10.0.0.100)
+- **用途**: 多节点分布式测试
+- **特点**:
+  - 多节点部署配置
+  - 支持 7 个 Worker
+  - 启用性能日志
+  - 允许测试模型
+
+### 生产环境 (Production)
+
+- **硬件**: RTX 3090
+- **机器**: Bowser (10.0.0.147)
+- **用途**: 公网生产服务
+- **特点**:
+  - HTTPS 证书配置
+  - 路由器端口转发
+  - 驱动问题兼容配置
+  - 安全加固配置
 
 ## 服务端口
 
-| 服务 | 内部端口 | 外部端口 | 说明 |
-|------|----------|----------|------|
-| Web | 80 | 8080 | HTTP (自动重定向到 HTTPS) |
-| Web | 443 | 8443 | HTTPS |
-| API | 8000 | 8000 | 后端 API |
-| API | 9090 | 9090 | Prometheus Metrics |
-| Prometheus | 9090 | 9091 | 监控数据 |
-| Grafana | 3000 | 3001 | 监控面板 |
-| PostgreSQL | 5432 | 5432 | 数据库 |
-| Redis | 6379 | 6379 | 缓存 |
+| 服务 | 开发环境 | 测试环境 | 生产环境 |
+|------|----------|----------|----------|
+| Web HTTP | 8081 | 8081 | 8080 (重定向) |
+| Web HTTPS | - | - | 8443 |
+| API | 8000 | 8000 | 8000 |
+| API Metrics | 9090 | 9090 | 9090 |
+| Grafana | 3001 | 3001 | 3001 |
+| Prometheus | 9091 | 9091 | 9091 |
+| PostgreSQL | 5432 | 5432 | 5432 |
+| Redis | 6379 | 6379 | 6379 |
 
-> 注意：由于公网限制，Web 服务使用非标准端口 (8080/8443)
+## 快速开始
 
-## 前置要求
+### 一键部署
 
-- Docker 27.0+
-- Docker Compose 2.38+
-- SSL 证书文件 (用于 HTTPS)
-
-## 部署步骤
-
-### 1. 准备 SSL 证书
-
-将 SSL 证书文件放在服务器的指定目录，例如 `~/zhangqijun.cn_apache/`：
-
-```
-~/zhangqijun.cn_apache/
-├── zhangqijun.cn.crt       # 证书文件
-├── zhangqijun.cn.key       # 私钥文件
-└── root_bundle.crt         # 证书链
-```
-
-### 2. 配置环境变量
-
-复制并编辑 `.env` 文件：
+使用部署脚本自动部署到指定环境：
 
 ```bash
-cp .env.production .env
+# 开发环境
+./scripts/deploy.sh development
+
+# 测试环境
+./scripts/deploy.sh test
+
+# 生产环境
+./scripts/deploy.sh production
 ```
 
-修改以下变量：
+### 手动部署
+
+如果需要手动部署，请按照以下步骤：
+
+#### 1. 准备环境配置文件
+
+```bash
+# 复制对应环境的配置文件
+cp .env.development infra/docker/.env    # 开发环境
+# 或
+cp .env.test infra/docker/.env          # 测试环境
+# 或
+cp .env.production infra/docker/.env    # 生产环境
+```
+
+#### 2. 修改敏感配置
+
+编辑环境文件，修改以下变量：
 
 ```env
 # 数据库密码
@@ -66,76 +103,48 @@ SECRET_KEY=your_secret_key
 GRAFANA_PASSWORD=your_grafana_password
 ```
 
-### 3. 修改证书路径 (如果需要)
-
-如果证书路径与默认不同，编辑 `docker-compose.yml` 中的 `web` 服务卷挂载：
-
-```yaml
-volumes:
-  - ~/your_cert_path:/etc/nginx/ssl:ro
+生成安全的 SECRET_KEY:
+```bash
+openssl rand -hex 32
 ```
 
-### 4. 调整端口映射 (如有冲突)
-
-如果默认端口与现有服务冲突，修改 `docker-compose.yml` 中的端口映射。
-
-例如 Grafana 默认使用 3001 端口（避免与其他服务冲突）：
-
-```yaml
-ports:
-  - "3001:3000"
-```
-
-### 5. 构建并启动服务
+#### 3. 部署服务
 
 ```bash
-# 构建镜像
-docker compose build
+cd infra/docker
 
-# 启动所有服务
+# 开发环境
 docker compose up -d
 
-# 查看服务状态
-docker compose ps
+# 测试环境 (使用多 GPU)
+docker compose -f docker-compose.yml -f docker-compose.test.yml --profile multi-gpu up -d
 
-# 查看日志
-docker compose logs -f
+# 生产环境 (使用 SSL)
+docker compose -f docker-compose.yml -f docker-compose.production.yml up -d
 ```
 
-### 6. 验证部署
+## 生产环境配置
+
+### SSL 证书配置
+
+生产环境需要 HTTPS 证书。将证书文件放在服务器目录：
 
 ```bash
-# 检查后端健康
-curl http://localhost:8000/health
-
-# 检查前端
-curl -k https://localhost/
-
-# 检查监控指标
-curl http://localhost:9090/metrics
+~/zhangqijun.cn_apache/
+├── zhangqijun.cn.crt       # 证书文件
+├── zhangqijun.cn.key       # 私钥文件
+└── root_bundle.crt         # 证书链
 ```
 
-## 访问地址
+### 路由器端口转发配置
 
-### 局域网访问
-- **前端**: https://10.0.0.147:8443
-- **API 文档**: https://10.0.0.147:8443/docs
-- **API 指标**: http://10.0.0.147:9090/metrics
-- **Grafana**: http://10.0.0.147:3001 (默认用户名 admin，密码见 .env)
-- **Prometheus**: http://10.0.0.147:9091
+SSH 到路由器 (10.0.0.1)，添加以下端口转发规则：
 
-### 公网访问 (需配置路由器端口转发)
-- **前端**: https://zhangqijun.cn:8443
-- **API 文档**: https://zhangqijun.cn:8443/docs
-- **Grafana**: https://zhangqijun.cn:3001
-
-#### 路由器端口转发配置
-需要在路由器上添加以下转发规则：
 ```bash
 # SSH 到路由器
 ssh root@10.0.0.1
 
-# 添加 HTTPS 转发 (8443 -> 10.0.0.147:8443)
+# HTTPS 转发 (8443 -> 10.0.0.147:8443)
 uci add firewall redirect
 uci set firewall.@redirect[-1].name='tokenmachine-https'
 uci set firewall.@redirect[-1].src='wan'
@@ -147,7 +156,7 @@ uci set firewall.@redirect[-1].target='DNAT'
 uci commit firewall
 /etc/init.d/firewall restart
 
-# 添加 HTTP 转发 (8080 -> 10.0.0.147:8080，自动重定向到 HTTPS)
+# HTTP 转发 (8080 -> 10.0.0.147:8080)
 uci add firewall redirect
 uci set firewall.@redirect[-1].name='tokenmachine-http'
 uci set firewall.@redirect[-1].src='wan'
@@ -159,7 +168,7 @@ uci set firewall.@redirect[-1].target='DNAT'
 uci commit firewall
 /etc/init.d/firewall restart
 
-# 添加 Grafana 转发 (3001 -> 10.0.0.147:3001)
+# Grafana 转发 (3001 -> 10.0.0.147:3001)
 uci add firewall redirect
 uci set firewall.@redirect[-1].name='tokenmachine-grafana'
 uci set firewall.@redirect[-1].src='wan'
@@ -172,20 +181,80 @@ uci commit firewall
 /etc/init.d/firewall restart
 ```
 
+### GPU 驱动问题处理
+
+生产环境 (Bowser) 的 RTX 3090 存在驱动问题，已在配置中添加以下兼容选项：
+
+```env
+VLLM_DISABLE_CUSTOM_ALL_REDUCE=true
+```
+
+如果遇到其他 GPU 相关问题，可能需要：
+1. 更新 NVIDIA 驱动
+2. 降低 GPU 内存利用率
+3. 减小张量并行度
+
+## 访问地址
+
+### 开发环境 (当前机器)
+
+```
+API:         http://localhost:8000
+API 文档:    http://localhost:8000/docs
+Web UI:      http://localhost:8081
+Grafana:     http://localhost:3001 (admin/admin)
+Prometheus:  http://localhost:9091
+```
+
+### 测试环境 (Bulbaser)
+
+```
+API:         http://10.0.0.100:8000
+API 文档:    http://10.0.0.100:8000/docs
+Web UI:      http://10.0.0.100:8081
+Grafana:     http://10.0.0.100:3001
+Prometheus:  http://10.0.0.100:9091
+```
+
+### 生产环境 (Bowser)
+
+#### 局域网访问
+
+```
+API:         https://10.0.0.147:8443/api
+API 文档:    https://10.0.0.147:8443/docs
+Web UI:      https://10.0.0.147:8443
+Grafana:     http://10.0.0.147:3001
+Prometheus:  http://10.0.0.147:9091
+```
+
+#### 公网访问
+
+```
+API:         https://zhangqijun.cn:8443/api
+API 文档:    https://zhangqijun.cn:8443/docs
+Web UI:      https://zhangqijun.cn:8443
+Grafana:     http://zhangqijun.cn:3001
+Prometheus:  http://zhangqijun.cn:9091
+```
+
 ## 常用命令
 
 ```bash
-# 启动服务
-docker compose up -d
+# 进入 docker 目录
+cd infra/docker
 
-# 停止服务
-docker compose down
-
-# 重启服务
-docker compose restart
+# 查看服务状态
+docker compose ps
 
 # 查看日志
 docker compose logs -f [service_name]
+
+# 重启服务
+docker compose restart [service_name]
+
+# 停止服务
+docker compose down
 
 # 重新构建并启动
 docker compose up -d --build
@@ -198,49 +267,26 @@ docker compose exec web sh
 docker compose down -v
 ```
 
-## 故障排查
+## 环境切换
 
-### 端口被占用
+在机器之间切换部署环境时，需要：
 
-如果遇到端口占用错误，使用以下命令查找占用进程：
+1. **SSH 到目标机器**
+   ```bash
+   ssh bowser     # 生产环境
+   ssh bulbaser   # 测试环境
+   # 当前机器     # 开发环境
+   ```
 
-```bash
-# 查找占用端口的进程
-sudo lsof -i :<port>
+2. **运行部署脚本**
+   ```bash
+   ./scripts/deploy.sh [environment]
+   ```
 
-# 或使用 netstat
-sudo netstat -tulpn | grep :<port>
-```
-
-解决方案：
-1. 停止占用端口的服务
-2. 或修改 `docker-compose.yml` 中的端口映射
-
-### 容器启动失败
-
-查看容器日志：
-
-```bash
-docker compose logs [service_name]
-```
-
-### 数据库连接问题
-
-确保 PostgreSQL 容器健康：
-
-```bash
-docker compose ps postgres
-```
-
-如果容器不健康，检查数据卷权限或重建容器。
-
-### 证书问题
-
-确保证书文件存在且 nginx 配置路径正确：
-
-```bash
-ls -la ~/zhangqijun.cn_apache/
-```
+3. **验证部署**
+   ```bash
+   curl http://localhost:8000/health
+   ```
 
 ## 数据持久化
 
@@ -253,28 +299,26 @@ ls -la ~/zhangqijun.cn_apache/
 - `prometheus_data`: Prometheus 监控数据
 - `grafana_data`: Grafana 配置
 
-## 安全建议
-
-1. 修改默认密码
-2. 使用强密码生成 SECRET_KEY: `openssl rand -hex 32`
-3. 限制数据库和 Redis 端口仅内部访问
-4. 定期备份数据卷
-5. 启用防火墙规则
-
 ## 备份与恢复
 
 ### 备份
 
 ```bash
 # 备份数据卷
-docker run --rm -v add-deploy-method_188a3c406eb78b61_postgres_data:/data -v $(pwd):/backup ubuntu tar czf /backup/postgres_backup.tar.gz /data
+docker run --rm \
+  -v tokenmachine_postgres_data:/data \
+  -v $(pwd):/backup \
+  ubuntu tar czf /backup/postgres_backup.tar.gz /data
 ```
 
 ### 恢复
 
 ```bash
 # 恢复数据卷
-docker run --rm -v add-deploy-method_188a3c406eb78b61_postgres_data:/data -v $(pwd):/backup ubuntu tar xzf /backup/postgres_backup.tar.gz -C /
+docker run --rm \
+  -v tokenmachine_postgres_data:/data \
+  -v $(pwd):/backup \
+  ubuntu tar xzf /backup/postgres_backup.tar.gz -C /
 ```
 
 ## 监控
@@ -284,3 +328,91 @@ docker run --rm -v add-deploy-method_188a3c406eb78b61_postgres_data:/data -v $(p
 - Prometheus 收集所有服务的指标
 - Grafana 提供可视化面板
 - 默认监控端口：9091 (Prometheus), 3001 (Grafana)
+
+## 故障排查
+
+### 端口被占用
+
+```bash
+# 查找占用端口的进程
+sudo lsof -i :<port>
+
+# 或使用 netstat
+sudo netstat -tulpn | grep :<port>
+```
+
+### 容器启动失败
+
+查看容器日志：
+```bash
+docker compose logs [service_name]
+```
+
+### 数据库连接问题
+
+确保 PostgreSQL 容器健康：
+```bash
+docker compose ps postgres
+```
+
+### GPU 相关问题
+
+```bash
+# 检查 GPU 状态
+nvidia-smi
+
+# 检查容器 GPU 访问
+docker compose exec api nvidia-smi
+```
+
+### SSL 证书问题
+
+确保证书文件存在且权限正确：
+```bash
+ls -la ~/zhangqijun.cn_apache/
+```
+
+## 安全建议
+
+1. **修改默认密码**: 部署前修改所有默认密码
+2. **生成安全密钥**: 使用 `openssl rand -hex 32` 生成 SECRET_KEY
+3. **限制内部端口**: 数据库和 Redis 端口仅内部访问
+4. **定期备份**: 定期备份数据卷
+5. **启用防火墙**: 配置适当的防火墙规则
+6. **HTTPS 证书**: 生产环境必须使用 HTTPS
+7. **监控日志**: 定期检查应用和访问日志
+
+## 多节点部署 (测试环境)
+
+测试环境 (Bulbaser) 支持多节点分布式部署：
+
+### 配置说明
+
+在 `.env.test` 中配置节点信息：
+
+```env
+NODE_ID=node1
+NODE_LIST=node1:10.0.0.100,node2:10.0.0.101,node3:10.0.0.102
+WORKER_COUNT=7
+```
+
+### 启动多节点
+
+```bash
+# 启动多 GPU 配置
+docker compose -f docker-compose.yml -f docker-compose.test.yml --profile multi-gpu up -d
+```
+
+## 生产环境检查清单
+
+部署到生产环境前，确认：
+
+- [ ] SSL 证书已配置
+- [ ] 路由器端口转发已设置
+- [ ] 所有默认密码已修改
+- [ ] SECRET_KEY 已生成
+- [ ] CORS 配置正确
+- [ ] GPU 驱动兼容配置已添加
+- [ ] 数据备份计划已制定
+- [ ] 监控和日志已配置
+- [ ] 防火墙规则已配置

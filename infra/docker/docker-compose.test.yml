@@ -1,0 +1,96 @@
+# Test Docker Compose Override
+# Usage: docker compose -f docker-compose.yml -f docker-compose.test.yml up -d
+# 测试环境 (Bulbaser) - 7卡 RTX 3090 - 多节点分布式部署
+
+services:
+  # API with multi-node test settings
+  api:
+    container_name: tokenmachine-api-test
+    environment:
+      ENVIRONMENT: test
+      DEBUG: "true"
+      VLLM_TENSOR_PARALLEL_SIZE: 2
+      WORKER_COUNT: "7"
+      NODE_ID: node1
+      NODE_LIST: node1:10.0.0.100,node2:10.0.0.101,node3:10.0.0.102
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    volumes:
+      - model_data:/var/lib/tokenmachine/models
+      - log_data:/var/log/tokenmachine
+      # Mount additional test-specific paths
+      - /tmp/test_models:/tmp/test_models:ro
+
+  # Web with test settings
+  web:
+    container_name: tokenmachine-web-test
+    ports:
+      - "8081:80"
+    environment:
+      API_BASE_URL: http://10.0.0.100:8000
+    networks:
+      - tokenmachine-network
+
+  # Additional worker instances for multi-GPU testing
+  api-worker-2:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile
+    container_name: tokenmachine-api-worker-2
+    environment:
+      DATABASE_URL: postgresql://tokenmachine:${POSTGRES_PASSWORD:-tokenmachine_password}@postgres:5432/tokenmachine
+      REDIS_URL: redis://redis:6379/0
+      ENVIRONMENT: test
+      WORKER_MODE: "true"
+      WORKER_ID: worker-2
+      WORKER_PORT: 8002
+    volumes:
+      - model_data:/var/lib/tokenmachine/models
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ['1']
+              capabilities: [gpu]
+    depends_on:
+      - api
+    networks:
+      - tokenmachine-network
+    restart: unless-stopped
+    profiles:
+      - multi-gpu
+
+  api-worker-3:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile
+    container_name: tokenmachine-api-worker-3
+    environment:
+      DATABASE_URL: postgresql://tokenmachine:${POSTGRES_PASSWORD:-tokenmachine_password}@postgres:5432/tokenmachine
+      REDIS_URL: redis://redis:6379/0
+      ENVIRONMENT: test
+      WORKER_MODE: "true"
+      WORKER_ID: worker-3
+      WORKER_PORT: 8003
+    volumes:
+      - model_data:/var/lib/tokenmachine/models
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ['2']
+              capabilities: [gpu]
+    depends_on:
+      - api
+    networks:
+      - tokenmachine-network
+    restart: unless-stopped
+    profiles:
+      - multi-gpu

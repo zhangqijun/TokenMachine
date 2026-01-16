@@ -48,7 +48,7 @@ const Deployments = () => {
     test: 'green',
   };
 
-  const availableModels = models.filter(m => m.status === 'running' || m.status === 'stopped' || m.status === 'error');
+  const availableModels = models.filter(m => m.status === 'ready');
   const availableGpus = gpus.filter(g => g.status === 'available');
 
   const columns = [
@@ -343,7 +343,7 @@ const Deployments = () => {
             >
               {availableModels.map(model => (
                 <Select.Option key={model.id} value={model.id}>
-                  {model.name} ({model.version}, {model.quantization?.toUpperCase() || 'FP16'})
+                  {model.name} ({model.version}, {model.quantization.toUpperCase()})
                 </Select.Option>
               ))}
             </Select>

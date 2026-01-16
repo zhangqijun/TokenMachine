@@ -243,7 +243,7 @@ const Dashboard = () => {
       </Row>
 
       {/* Tables */}
-      <Row gutter={16} style={{ marginBottom: 24 }}>
+      <Row gutter={16}>
         <Col span={12}>
           <Card title="活跃部署" bordered={false}>
             <Table
@@ -261,60 +261,6 @@ const Dashboard = () => {
               dataSource={gpus}
               columns={gpuColumns}
               rowKey="id"
-              size="small"
-              pagination={false}
-            />
-          </Card>
-        </Col>
-      </Row>
-
-      {/* Activity Log */}
-      <Row gutter={16}>
-        <Col span={24}>
-          <Card title="活动日志" bordered={false}>
-            <Table
-              dataSource={[
-                { time: '15:30:25', event: '模型部署', description: 'qwen2.5-7b-prod 部署成功', status: 'success' },
-                { time: '15:28:10', event: 'API 调用', description: '处理了 125,430 个请求', status: 'info' },
-                { time: '15:25:00', event: '模型下载', description: 'bge-large-zh-v1.5 下载完成 (75%)', status: 'warning' },
-                { time: '15:20:45', event: '用户操作', description: 'admin 创建了新的 API Key', status: 'success' },
-                { time: '15:15:30', event: '系统告警', description: 'GPU 3 温度过高 (82°C)', status: 'error' },
-              ]}
-              columns={[
-                {
-                  title: '时间',
-                  dataIndex: 'time',
-                  key: 'time',
-                  width: 100,
-                },
-                {
-                  title: '事件',
-                  dataIndex: 'event',
-                  key: 'event',
-                  render: (event: string) => <span style={{ fontWeight: 500 }}>{event}</span>,
-                },
-                {
-                  title: '描述',
-                  dataIndex: 'description',
-                  key: 'description',
-                },
-                {
-                  title: '状态',
-                  dataIndex: 'status',
-                  key: 'status',
-                  render: (status: string) => {
-                    const statusConfig = {
-                      success: { color: 'success', text: '成功' },
-                      info: { color: 'processing', text: '信息' },
-                      warning: { color: 'warning', text: '警告' },
-                      error: { color: 'error', text: '错误' },
-                    };
-                    const config = statusConfig[status as keyof typeof statusConfig];
-                    return <Tag color={config.color}>{config.text}</Tag>;
-                  },
-                },
-              ]}
-              rowKey="time"
               size="small"
               pagination={false}
             />

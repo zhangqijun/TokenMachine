@@ -5,8 +5,6 @@ import type {
   GPU,
   ApiKey,
   UsageLog,
-  Worker,
-  Cluster,
 } from '../mock/data';
 import {
   mockModels,
@@ -15,8 +13,6 @@ import {
   mockApiKeys,
   mockUsageLogs,
   dashboardStats,
-  mockWorkers,
-  mockClusters,
 } from '../mock/data';
 
 interface AppState {
@@ -27,8 +23,6 @@ interface AppState {
   apiKeys: ApiKey[];
   usageLogs: UsageLog[];
   stats: typeof dashboardStats;
-  workers: Worker[];
-  clusters: Cluster[];
 
   // Loading states
   isLoading: boolean;
@@ -37,7 +31,6 @@ interface AppState {
   refreshData: () => Promise<void>;
   addModel: (model: Omit<Model, 'id' | 'created_at'>) => Promise<void>;
   deleteModel: (id: string) => Promise<void>;
-  updateModelStatus: (id: string, status: Model['status']) => Promise<void>;
   createDeployment: (deployment: Omit<Deployment, 'id' | 'created_at' | 'updated_at'>) => Promise<void>;
   stopDeployment: (id: string) => Promise<void>;
   createApiKey: (key: Omit<ApiKey, 'id' | 'key_prefix' | 'created_at' | 'last_used_at'>) => Promise<void>;
@@ -53,8 +46,6 @@ export const useStore = create<AppState>((set) => ({
   apiKeys: mockApiKeys,
   usageLogs: mockUsageLogs,
   stats: dashboardStats,
-  workers: mockWorkers,
-  clusters: mockClusters,
   isLoading: false,
 
   // Actions
@@ -81,19 +72,6 @@ export const useStore = create<AppState>((set) => ({
     await new Promise(resolve => setTimeout(resolve, 500));
     set(state => ({
       models: state.models.filter(m => m.id !== id),
-      isLoading: false,
-    }));
-  },
-
-  updateModelStatus: async (id, status) => {
-    set({ isLoading: true });
-    await new Promise(resolve => setTimeout(resolve, 800));
-    set(state => ({
-      models: state.models.map(m =>
-        m.id === id
-          ? { ...m, status, updated_at: new Date().toISOString() }
-          : m
-      ),
       isLoading: false,
     }));
   },

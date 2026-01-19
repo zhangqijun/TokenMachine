@@ -1,19 +1,22 @@
-import { Layout, Menu, Avatar, Dropdown, Space, Badge } from 'antd';
+import { Layout, Menu, Avatar, Dropdown, Space, Badge, message } from 'antd';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import Logo from '../common/Logo';
 import {
   DashboardOutlined,
   DatabaseOutlined,
   RocketOutlined,
   BarChartOutlined,
-  KeyOutlined,
+  SafetyOutlined,
   SettingOutlined,
   UserOutlined,
   LogoutOutlined,
   BellOutlined,
+  ClusterOutlined,
+  ExperimentOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 
-const { Header, Sider, Content } = Layout;
+const { Header, Content } = Layout;
 
 const MainLayout = () => {
   const navigate = useNavigate();
@@ -27,10 +30,22 @@ const MainLayout = () => {
       onClick: () => navigate('/dashboard'),
     },
     {
+      key: '/cluster',
+      icon: <ClusterOutlined />,
+      label: '集群管理',
+      onClick: () => navigate('/cluster'),
+    },
+    {
       key: '/models',
       icon: <DatabaseOutlined />,
       label: '模型管理',
       onClick: () => navigate('/models'),
+    },
+    {
+      key: '/playground',
+      icon: <ExperimentOutlined />,
+      label: '测试场',
+      onClick: () => navigate('/playground'),
     },
     {
       key: '/deployments',
@@ -46,9 +61,15 @@ const MainLayout = () => {
     },
     {
       key: '/api-keys',
-      icon: <KeyOutlined />,
+      icon: <SafetyOutlined />,
       label: 'API Keys',
       onClick: () => navigate('/api-keys'),
+    },
+    {
+      key: '/settings',
+      icon: <SettingOutlined />,
+      label: '系统设置',
+      onClick: () => navigate('/settings'),
     },
   ];
 
@@ -57,11 +78,13 @@ const MainLayout = () => {
       key: 'profile',
       icon: <UserOutlined />,
       label: '个人设置',
+      onClick: () => navigate('/settings'),
     },
     {
       key: 'settings',
       icon: <SettingOutlined />,
       label: '系统设置',
+      onClick: () => navigate('/settings'),
     },
     {
       type: 'divider',
@@ -71,82 +94,85 @@ const MainLayout = () => {
       icon: <LogoutOutlined />,
       label: '退出登录',
       danger: true,
+      onClick: () => {
+        // 清除token
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        message.success('已退出登录');
+        // 跳转到登录页
+        navigate('/login');
+      },
     },
   ];
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Sider
-        width={240}
+      <Header
         style={{
-          overflow: 'auto',
-          height: '100vh',
+          padding: '0 24px',
+          background: '#001529',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
           position: 'fixed',
-          left: 0,
+          zIndex: 1,
+          width: '100%',
           top: 0,
-          bottom: 0,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
         }}
       >
-        <div
-          style={{
-            height: 64,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 20,
-            fontWeight: 'bold',
-            color: '#fff',
-            borderBottom: '1px solid rgba(255,255,255,0.1)',
-          }}
-        >
-          TokenMachine
-        </div>
-        <Menu
-          theme="dark"
-          mode="inline"
-          selectedKeys={[location.pathname]}
-          items={menuItems}
-          style={{ borderRight: 0 }}
-        />
-      </Sider>
-      <Layout style={{ marginLeft: 240 }}>
-        <Header
-          style={{
-            padding: '0 24px',
-            background: '#fff',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            borderBottom: '1px solid #f0f0f0',
-          }}
-        >
-          <div style={{ fontSize: 16, fontWeight: 500 }}>
-            AI 模型部署与管理平台
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div
+            style={{
+              marginRight: 48,
+              display: 'flex',
+              alignItems: 'center',
+              cursor: 'pointer',
+            }}
+            onClick={() => navigate('/dashboard')}
+          >
+            <Logo
+              size={40}
+              variant="full"
+              showText={true}
+              textColor="#fff"
+              backgroundColor="#1890ff"
+            />
           </div>
-          <Space size={16}>
-            <Badge count={3}>
-              <BellOutlined style={{ fontSize: 18, color: '#666' }} />
-            </Badge>
-            <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
-              <Space style={{ cursor: 'pointer' }}>
-                <Avatar icon={<UserOutlined />} />
-                <span>管理员</span>
-              </Space>
-            </Dropdown>
-          </Space>
-        </Header>
-        <Content
-          style={{
-            margin: 24,
-            padding: 24,
-            background: '#fff',
-            borderRadius: 8,
-            minHeight: 'calc(100vh - 112px)',
-          }}
-        >
+          <Menu
+            theme="dark"
+            mode="horizontal"
+            selectedKeys={[location.pathname]}
+            items={menuItems}
+            style={{ flex: 1, border: 'none', background: 'transparent' }}
+          />
+        </div>
+        <Space size={16}>
+          <Badge count={3}>
+            <BellOutlined style={{ fontSize: 18, color: '#fff', cursor: 'pointer' }} />
+          </Badge>
+          <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
+            <Space style={{ cursor: 'pointer' }}>
+              <Avatar
+                style={{ backgroundColor: '#1890ff' }}
+                icon={<UserOutlined />}
+              />
+              <span style={{ color: '#fff' }}>管理员</span>
+            </Space>
+          </Dropdown>
+        </Space>
+      </Header>
+      <Content
+        style={{
+          marginTop: 64,
+          minHeight: 'calc(100vh - 64px)',
+          background: '#f0f2f5',
+        }}
+      >
+        <div style={{ padding: 24 }}>
           <Outlet />
-        </Content>
-      </Layout>
+        </div>
+      </Content>
     </Layout>
   );
 };

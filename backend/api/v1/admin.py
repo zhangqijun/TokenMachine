@@ -12,6 +12,7 @@ from backend.models.database import User, ApiKey, Deployment, Model
 from backend.models.schemas import (
     ModelCreate,
     ModelResponse,
+    AddLocalModelRequest,
     DeploymentCreate,
     DeploymentResponse,
     DeploymentUpdate,
@@ -269,6 +270,53 @@ async def mock_download_model(
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         logger.error(f"Mock download failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
+@router.post("/models/local", response_model=ModelResponse, status_code=status.HTTP_201_CREATED)
+async def add_local_model(
+    data: AddLocalModelRequest,
+    admin: User = Depends(verify_admin_access),
+    db: Session = Depends(get_current_db),
+):
+    """
+    Add a local model by registering its path.
+
+    This endpoint validates the local model directory, checks for required files,
+    calculates the model size, and registers it in the database with READY status.
+
+    The model must have at least one of:
+    - config.json
+    - config.yaml
+    - pytorch_model.bin
+    - .safetensors files
+
+    Example request body:
+    {
+        "name": "Qwen3-Coder-30B",
+        "version": "v1.0.0",
+        "local_path": "/home/ht706/Qwen3-Coder-30B-A3B-Instruct-Int4-W4A16",
+        "category": "llm",
+        "quantization": "int8"
+    }
+    """
+    from backend.models.database import ModelCategory
+
+    service = ModelService(db)
+
+    try:
+        model = service.add_local_model(
+            name=data.name,
+            version=data.version,
+            local_path=data.local_path,
+            category=ModelCategory(data.category.value),
+            quantization=data.quantization
+        )
+        return ModelResponse.model_validate(model)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Failed to add local model: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 

@@ -125,6 +125,15 @@ class ModelUpdate(BaseModel):
     error_message: Optional[str] = None
 
 
+class AddLocalModelRequest(BaseModel):
+    """Request schema for adding a local model."""
+    name: str = Field(..., min_length=1, max_length=255, description="Model name (e.g., Qwen3-Coder-30B)")
+    version: str = Field(..., min_length=1, max_length=50, description="Model version (e.g., v1.0.0)")
+    local_path: str = Field(..., min_length=1, description="Local model path (e.g., /home/ht706/Qwen3-Coder-30B-A3B-Instruct-Int4-W4A16)")
+    category: ModelCategory = Field(default=ModelCategory.LLM, description="Model category")
+    quantization: Optional[str] = Field(default="int8", description="Model quantization (fp16, int8, int4, etc.)")
+
+
 class ModelResponse(BaseModel):
     """Model response schema."""
     model_config = ConfigDict(from_attributes=True)

@@ -304,3 +304,92 @@ class ModelService:
         else:
             # Default to 16 GB
             return 16 * 1024
+
+    def add_local_model(
+        self,
+        name: str,
+        version: str,
+        local_path: str,
+        category: ModelCategory = ModelCategory.LLM,
+        quantization: str = "fp16"
+    ) -> Model:
+        """
+        Add a local model by validating and registering it.
+
+        This method validates the local model path, checks for required files,
+        calculates the model size, and registers it in the database.
+
+        Args:
+            name: Model name (e.g., "Qwen3-Coder-30B")
+            version: Model version (e.g., "v1.0.0")
+            local_path: Absolute path to local model directory
+            category: Model category
+            quantization: Model quantization type
+
+        Returns:
+            Created Model instance
+
+        Raises:
+            ValueError: If model already exists or path is invalid
+        """
+        # Check if model already exists
+        existing = self.db.query(Model).filter(
+            Model.name == name,
+            Model.version == version
+        ).first()
+        if existing:
+            raise ValueError(f"Model {name}:{version} already exists")
+
+        # Validate local path exists
+        if not os.path.exists(local_path):
+            raise ValueError(f"Local model path does not exist: {local_path}")
+
+        if not os.path.isdir(local_path):
+            raise ValueError(f"Path is not a directory: {local_path}")
+
+        # Validate model has at least config.json or config.yaml
+        config_files = ["config.json", "config.yaml", "pytorch_model.bin"]
+        has_config = any(
+            os.path.exists(os.path.join(local_path, f))
+            for f in config_files
+        )
+        if not has_config:
+            # Check for safetensors files as alternative
+            has_safetensors = any(
+                f.endswith(".safetensors")
+                for f in os.listdir(local_path)
+                if os.path.isfile(os.path.join(local_path, f))
+            )
+            if not has_safetensors:
+                raise ValueError(
+                    f"Invalid model directory: missing config files or model weights. "
+                    f"Expected one of: {config_files} or .safetensors files"
+                )
+
+        # Calculate model size
+        size_gb = self._calculate_model_size(local_path)
+
+        # Create model record with READY status (local models are already available)
+        model = Model(
+            name=name,
+            version=version,
+            source=ModelSource.LOCAL,
+            category=category,
+            quantization=quantization,
+            path=local_path,
+            storage_path=local_path,
+            storage_type="local",
+            size_gb=size_gb,
+            status=ModelStatus.READY,
+            download_progress=100
+        )
+        self.db.add(model)
+        self.db.commit()
+        self.db.refresh(model)
+
+        logger.info(
+            f"Added local model {name}:{version} from {local_path} "
+            f"(size: {size_gb} GB, ID: {model.id})"
+        )
+
+        return model

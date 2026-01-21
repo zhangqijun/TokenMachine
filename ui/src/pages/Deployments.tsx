@@ -373,7 +373,6 @@ const Deployments = () => {
                 <Select>
                   <Select.Option value="vllm">vLLM</Select.Option>
                   <Select.Option value="sglang">SGLang</Select.Option>
-                  <Select.Option value="chitu">Chitu</Select.Option>
                 </Select>
               </Form.Item>
             </Col>

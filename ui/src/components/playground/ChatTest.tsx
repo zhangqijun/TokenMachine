@@ -60,7 +60,6 @@ const ChatTest = () => {
 **支持引擎：**
 - vLLM (高性能推理)
 - SGLang (结构化生成)
-- Chitu (国产芯片支持)
 
 TokenMachine 让 AI 模型部署变得简单高效！`,
       timestamp: '10:30:02',

@@ -20,7 +20,7 @@ export interface Deployment {
   environment: 'dev' | 'test' | 'staging' | 'prod';
   replicas: number;
   gpu_per_replica: number;
-  backend: 'vllm' | 'sglang' | 'chitu';
+  backend: 'vllm' | 'sglang';
   status: 'starting' | 'running' | 'stopping' | 'stopped' | 'error';
   qps: number;
   latency_ms: number;

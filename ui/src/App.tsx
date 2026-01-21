@@ -11,6 +11,7 @@ import ClusterOverview from './pages/ClusterOverview';
 import WorkerDetail from './pages/WorkerDetail';
 import Playground from './pages/Playground';
 import Settings from './pages/Settings';
+import BackendManagement from './pages/BackendManagement';
 import Login from './pages/Login';
 
 function App() {
@@ -42,6 +43,7 @@ function App() {
             <Route path="deployments" element={<Deployments />} />
             <Route path="cluster" element={<ClusterOverview />} />
             <Route path="cluster/workers/:id" element={<WorkerDetail />} />
+            <Route path="backend" element={<BackendManagement />} />
             <Route path="monitoring" element={<Monitoring />} />
             <Route path="api-keys" element={<ApiKeys />} />
             <Route path="settings" element={<Settings />} />

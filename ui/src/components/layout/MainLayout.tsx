@@ -13,6 +13,7 @@ import {
   BellOutlined,
   ClusterOutlined,
   ExperimentOutlined,
+  ThunderboltOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 
@@ -52,6 +53,12 @@ const MainLayout = () => {
       icon: <RocketOutlined />,
       label: '部署管理',
       onClick: () => navigate('/deployments'),
+    },
+    {
+      key: '/backend',
+      icon: <ThunderboltOutlined />,
+      label: '后端管理',
+      onClick: () => navigate('/backend'),
     },
     {
       key: '/monitoring',

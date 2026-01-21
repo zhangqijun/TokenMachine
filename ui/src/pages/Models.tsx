@@ -24,7 +24,7 @@ import {
 } from '@ant-design/icons';
 import ModelCard from '../components/models/ModelCard';
 import ModelList from '../components/models/ModelList';
-import { mockModels } from '../data/mockModels';
+import { mockModels } from '../mock/data';
 
 type ViewMode = 'card' | 'list';
 type SortBy = 'popularity' | 'calls' | 'name' | 'created';

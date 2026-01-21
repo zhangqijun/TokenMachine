@@ -6,13 +6,13 @@ import Dashboard from './pages/Dashboard';
 import Models from './pages/Models';
 import Deployments from './pages/Deployments';
 import Monitoring from './pages/Monitoring';
-import ApiKeys from './pages/ApiKeys';
+import Gateway from './pages/Gateway';
 import ClusterOverview from './pages/ClusterOverview';
 import WorkerDetail from './pages/WorkerDetail';
 import Playground from './pages/Playground';
 import Settings from './pages/Settings';
-import BackendManagement from './pages/BackendManagement';
 import Login from './pages/Login';
+import NodesDeployments from './pages/NodesDeployments';
 
 function App() {
   return (
@@ -38,14 +38,14 @@ function App() {
           <Route path="/" element={<MainLayout />}>
             <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
+            <Route path="nodes-deployments" element={<NodesDeployments />} />
             <Route path="models" element={<Models />} />
             <Route path="playground" element={<Playground />} />
             <Route path="deployments" element={<Deployments />} />
             <Route path="cluster" element={<ClusterOverview />} />
             <Route path="cluster/workers/:id" element={<WorkerDetail />} />
-            <Route path="backend" element={<BackendManagement />} />
             <Route path="monitoring" element={<Monitoring />} />
-            <Route path="api-keys" element={<ApiKeys />} />
+            <Route path="gateway" element={<Gateway />} />
             <Route path="settings" element={<Settings />} />
           </Route>
         </Routes>

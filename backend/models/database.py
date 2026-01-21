@@ -654,3 +654,55 @@ class BenchmarkDataset(Base):
         Index('ix_benchmark_dataset_category', 'category'),
         Index('ix_benchmark_dataset_name', 'name'),
     )
+
+
+# ============================================================================
+# Backend Engine Models
+# ============================================================================
+
+class BackendEngineType(str, Enum):
+    """Backend engine type enumeration."""
+    VLLM = "vllm"
+    SGLANG = "sglang"
+    LLAMA_CPP = "llama_cpp"
+
+
+class BackendEngineStatus(str, Enum):
+    """Backend engine status enumeration."""
+    NOT_INSTALLED = "not_installed"
+    INSTALLING = "installing"
+    INSTALLED = "installed"
+    ERROR = "error"
+    OUTDATED = "outdated"
+
+
+class BackendEngine(Base):
+    """Backend engine model - manages inference engine installations and versions."""
+    __tablename__ = "backend_engines"
+
+    id = Column(Integer, primary_key=True)
+    engine_type = Column(SQLEnum(BackendEngineType), nullable=False, index=True)
+    version = Column(String(50), nullable=False)
+    status = Column(SQLEnum(BackendEngineStatus), default=BackendEngineStatus.NOT_INSTALLED, nullable=False, index=True)
+
+    # Installation information
+    install_path = Column(String(1024))  # Installation path
+    image_name = Column(String(255))  # Docker image name
+    tarball_path = Column(String(1024))  # Path to tarball file
+    installed_at = Column(TIMESTAMP)  # Installation time
+
+    # Configuration
+    config = Column(JSON)  # Engine-specific configuration
+    env_vars = Column(JSON)  # Environment variables
+
+    # Statistics
+    size_mb = Column(Integer)  # Disk space usage in MB
+    active_deployments = Column(Integer, default=0, nullable=False)  # Number of active deployments
+
+    created_at = Column(TIMESTAMP, default=func.now(), nullable=False)
+    updated_at = Column(TIMESTAMP, default=func.now(), onupdate=func.now(), nullable=False)
+
+    # Unique constraint on engine_type + version
+    __table_args__ = (
+        Index('ix_backend_engine_type_version', 'engine_type', 'version', unique=True),
+    )

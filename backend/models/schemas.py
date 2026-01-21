@@ -670,3 +670,112 @@ class BenchmarkDatasetResponse(BaseModel):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+# ============================================================================
+# Backend Engine Schemas
+# ============================================================================
+
+class BackendEngineType(str, Enum):
+    """Backend engine type enumeration."""
+    VLLM = "vllm"
+    SGLANG = "sglang"
+    LLAMA_CPP = "llama_cpp"
+
+
+class BackendEngineStatus(str, Enum):
+    """Backend engine status enumeration."""
+    NOT_INSTALLED = "not_installed"
+    INSTALLING = "installing"
+    INSTALLED = "installed"
+    ERROR = "error"
+    OUTDATED = "outdated"
+
+
+class BackendEngineFeatures(BaseModel):
+    """Backend engine features."""
+    tensor_parallel: bool = False
+    prefix_caching: bool = False
+    multi_lora: bool = False
+    speculative_decoding: bool = False
+    quantization: List[str] = []
+    model_formats: List[str] = []
+
+
+class BackendEngineCompatibility(BaseModel):
+    """Backend engine compatibility information."""
+    gpu_vendors: List[str] = []
+    min_gpu_memory_mb: int = 0
+    supported_models: List[str] = []
+
+
+class BackendEngineResponse(BaseModel):
+    """Backend engine response."""
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    engine_type: str
+    version: str
+    status: str
+    install_path: Optional[str] = None
+    image_name: Optional[str] = None
+    tarball_path: Optional[str] = None
+    installed_at: Optional[datetime] = None
+    size_mb: Optional[int] = None
+    active_deployments: int
+    config: Optional[Dict[str, Any]] = None
+    env_vars: Optional[Dict[str, Any]] = None
+    created_at: datetime
+    updated_at: datetime
+
+
+class BackendEngineInfo(BaseModel):
+    """Backend engine detailed information."""
+    id: int
+    name: str  # vllm, sglang, llama_cpp
+    display_name: str
+    version: str
+    status: str
+    icon: str
+    description: str
+    homepage: str
+    features: BackendEngineFeatures
+    compatibility: BackendEngineCompatibility
+    config: Optional[Dict[str, Any]] = None
+    env_vars: Optional[Dict[str, Any]] = None
+    stats: Dict[str, Any]
+
+
+class BackendEngineInstallRequest(BaseModel):
+    """Backend engine installation request."""
+    version: str = Field(..., min_length=1, max_length=50, description="Engine version")
+    image_name: Optional[str] = Field(None, max_length=255, description="Custom image name")
+    install_path: Optional[str] = Field(None, max_length=1024, description="Installation path")
+    config: Optional[Dict[str, Any]] = Field(None, description="Engine configuration")
+    env_vars: Optional[Dict[str, str]] = Field(None, description="Environment variables")
+
+
+class BackendEngineInstallResponse(BaseModel):
+    """Backend engine installation response."""
+    id: int
+    engine_type: str
+    version: str
+    status: str
+    install_command: Optional[str] = None
+    message: str
+
+
+class BackendEngineListResponse(BaseModel):
+    """Backend engine list response."""
+    items: List[BackendEngineInfo]
+    total: int
+
+
+class BackendEngineStatsResponse(BaseModel):
+    """Backend engine statistics response."""
+    engine_type: str
+    version: str
+    status: str
+    active_deployments: int
+    size_mb: Optional[int] = None
+    installed_at: Optional[str] = None

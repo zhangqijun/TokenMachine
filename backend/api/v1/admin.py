@@ -3,6 +3,7 @@ Admin API endpoints for managing models, deployments, GPUs, and API keys.
 """
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status, Query
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from loguru import logger
 
@@ -90,6 +91,185 @@ async def delete_model(
     service = ModelService(db)
     if not service.delete_model(model_id):
         raise HTTPException(status_code=404, detail="Model not found")
+
+
+# ============================================================================
+# Model Download Management (ModelScope)
+# ============================================================================
+
+class ModelDownloadRequest(BaseModel):
+    """Request body for model download."""
+    repo_id: str = Field(..., description="ModelScope repository ID (e.g., Qwen/qwen-72b-chat)")
+    revision: str = Field(default="master", description="Git revision (branch/tag/commit)")
+
+
+class MockDownloadRequest(BaseModel):
+    """Request body for mock model download (testing)."""
+    local_path: str = Field(..., description="Local model path to copy from (e.g., /home/ht706/Qwen3-Coder-30B-A3B-Instruct-Int4-W4A16)")
+    mock_repo_id: str = Field(default="", description="Mock ModelScope repo ID for display (optional)")
+
+
+@router.post("/models/{model_id}/download")
+async def download_model(
+    model_id: int,
+    data: ModelDownloadRequest,
+    admin: User = Depends(verify_admin_access),
+    db: Session = Depends(get_current_db),
+):
+    """
+    Download a model from ModelScope.
+
+    This creates a download task and starts downloading the model asynchronously.
+    The model will be stored in shared storage and accessible by all workers.
+    """
+    from backend.services.model_download_service import ModelDownloadService
+
+    service = ModelDownloadService(db)
+
+    try:
+        task = await service.create_download_task(
+            model_id=model_id,
+            modelscope_repo_id=data.repo_id,
+            revision=data.revision
+        )
+
+        return {
+            "task_id": task.id,
+            "model_id": model_id,
+            "status": task.status.value,
+            "storage_path": task.model.storage_path,
+            "message": "Download task created successfully"
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.get("/models/{model_id}/download/status")
+async def get_download_status(
+    model_id: int,
+    admin: User = Depends(verify_admin_access),
+    db: Session = Depends(get_current_db),
+):
+    """Get the download status for a model."""
+    from backend.services.model_download_service import ModelDownloadService
+
+    service = ModelDownloadService(db)
+
+    try:
+        status = await service.get_download_status(model_id)
+        return status
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.get("/download/tasks")
+async def list_download_tasks(
+    status_filter: str = Query(None, alias="status", description="Filter by status"),
+    limit: int = Query(100, ge=1, le=1000, description="Maximum number of tasks"),
+    admin: User = Depends(verify_admin_access),
+    db: Session = Depends(get_current_db),
+):
+    """List all download tasks."""
+    from backend.services.model_download_service import ModelDownloadService
+
+    service = ModelDownloadService(db)
+    tasks = service.list_download_tasks(status=status_filter, limit=limit)
+
+    return {
+        "tasks": tasks,
+        "total": len(tasks)
+    }
+
+
+@router.get("/models/{model_id}/download/logs")
+async def get_download_logs(
+    model_id: int,
+    tail: int = Query(100, ge=1, le=10000, description="Number of lines to return"),
+    admin: User = Depends(verify_admin_access),
+    db: Session = Depends(get_current_db),
+):
+    """Get download logs for a model."""
+    import os
+
+    model = db.query(Model).filter(Model.id == model_id).first()
+    if not model or not model.download_task_id:
+        raise HTTPException(status_code=404, detail="Download task not found")
+
+    # Find log file
+    log_dir = f"{os.getenv('LOG_PATH', '/var/lib/tokenmachine/logs')}/downloads"
+    log_pattern = f"{model.modelscope_repo_id.replace('/', '_')}_"
+    log_files = [
+        f for f in os.listdir(log_dir)
+        if f.startswith(log_pattern) and f.endswith(".log")
+    ]
+
+    if not log_files:
+        raise HTTPException(status_code=404, detail="Log file not found")
+
+    # Get the most recent log file
+    log_file = sorted(log_files)[-1]
+    log_path = os.path.join(log_dir, log_file)
+
+    # Read last N lines
+    try:
+        with open(log_path, "r") as f:
+            lines = f.readlines()
+            lines_tail = lines[-tail:] if len(lines) > tail else lines
+
+        return {
+            "log_file": log_path,
+            "lines": [line.strip() for line in lines_tail]
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to read log file: {str(e)}")
+
+
+@router.post("/models/{model_id}/download/mock")
+async def mock_download_model(
+    model_id: int,
+    data: MockDownloadRequest,
+    admin: User = Depends(verify_admin_access),
+    db: Session = Depends(get_current_db),
+):
+    """
+    Mock model download for testing using a local model.
+
+    This endpoint simulates the download process by copying a local model
+    to the storage path and simulating progress updates. Useful for testing
+    the download workflow without actually downloading from ModelScope.
+
+    Example:
+        local_path: "/home/ht706/Qwen3-Coder-30B-A3B-Instruct-Int4-W4A16"
+        mock_repo_id: "Qwen/qwen3-coder-30b" (optional, for display only)
+    """
+    from backend.services.model_download_service import ModelDownloadService
+
+    service = ModelDownloadService(db)
+
+    try:
+        # Pass mock_repo_id only if provided
+        mock_repo_id = data.mock_repo_id if data.mock_repo_id else None
+
+        task = await service.create_mock_download_task(
+            model_id=model_id,
+            local_path=data.local_path,
+            mock_repo_id=mock_repo_id
+        )
+
+        return {
+            "task_id": task.id,
+            "model_id": model_id,
+            "status": task.status.value,
+            "storage_path": task.model.storage_path,
+            "local_path": data.local_path,
+            "message": "Mock download task created successfully",
+            "note": "This is a simulated download for testing. Files will be copied from local_path."
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Mock download failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
 # ============================================================================

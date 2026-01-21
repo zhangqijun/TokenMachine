@@ -132,13 +132,27 @@ class Model(Base):
     created_at = Column(TIMESTAMP, default=func.now(), nullable=False)
     updated_at = Column(TIMESTAMP, default=func.now(), onupdate=func.now(), nullable=False)
 
+    # ModelScope specific fields
+    modelscope_repo_id = Column(String(255), index=True)  # ModelScope repo ID (e.g., Qwen/qwen-72b-chat)
+    modelscope_revision = Column(String(50), default="master")
+
+    # Storage information
+    storage_path = Column(String(1024))  # /var/lib/tokenmachine/models/Qwen--qwen-72b-chat
+    storage_type = Column(String(50), default="nfs")  # nfs, local, s3
+
+    # Download task association
+    download_task_id = Column(Integer, ForeignKey("model_download_tasks.id", ondelete="SET NULL"), nullable=True, index=True)  # Changed to Integer for SQLite compatibility
+
     # Unique constraint on name + version + quantization
     __table_args__ = (
         Index('ix_model_name_version_quant', 'name', 'version', 'quantization', unique=True),
+        Index('ix_model_modelscope_repo', 'modelscope_repo_id'),
+        Index('ix_model_storage_path', 'storage_path'),
     )
 
     # Relationships
     deployments = relationship("Deployment", back_populates="model", cascade="all, delete-orphan")
+    download_task = relationship("ModelDownloadTask", foreign_keys=[download_task_id])
 
 
 class DeploymentStatus(str, Enum):
@@ -653,6 +667,101 @@ class BenchmarkDataset(Base):
     __table_args__ = (
         Index('ix_benchmark_dataset_category', 'category'),
         Index('ix_benchmark_dataset_name', 'name'),
+    )
+
+
+# ============================================================================
+# Model Download & Distribution Models
+# ============================================================================
+
+class ModelDownloadTaskStatus(str, Enum):
+    """Model download task status enumeration."""
+    PENDING = "pending"
+    DOWNLOADING = "downloading"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    CANCELLED = "cancelled"
+
+
+class ModelDownloadTask(Base):
+    """Model download task model - tracks ModelScope model downloads."""
+    __tablename__ = "model_download_tasks"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)  # Changed to Integer for SQLite compatibility
+    model_id = Column(Integer, ForeignKey("models.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    # ModelScope configuration
+    modelscope_repo_id = Column(String(255), nullable=False)
+    modelscope_revision = Column(String(50), default="master")
+
+    # Download status
+    status = Column(SQLEnum(ModelDownloadTaskStatus), default=ModelDownloadTaskStatus.PENDING, nullable=False, index=True)
+    progress = Column(Integer, default=0)  # 0-100
+    current_file = Column(String(512))  # Currently downloading file
+    error_message = Column(Text)
+
+    # Progress tracking (parsed from ModelScope SDK output)
+    downloaded_files = Column(Integer, default=0)
+    total_files = Column(Integer)
+    downloaded_bytes = Column(BigInteger, default=0)
+    total_bytes = Column(BigInteger)
+    download_speed_mbps = Column(DECIMAL(10, 2))
+
+    # Timestamps
+    created_at = Column(TIMESTAMP, default=func.now(), nullable=False, index=True)
+    started_at = Column(TIMESTAMP)
+    completed_at = Column(TIMESTAMP)
+    updated_at = Column(TIMESTAMP, default=func.now(), onupdate=func.now(), nullable=False)
+
+    # Relationships
+    model = relationship("Model", foreign_keys=[model_id])
+
+    # Indexes
+    __table_args__ = (
+        Index('ix_download_tasks_status', 'status'),
+        Index('ix_download_tasks_model', 'model_id'),
+    )
+
+
+class WorkerCacheSyncStatus(str, Enum):
+    """Worker cache sync status enumeration."""
+    SYNCED = "synced"
+    SYNCING = "syncing"
+    OUTDATED = "outdated"
+
+
+class WorkerModelCache(Base):
+    """Worker model cache - tracks which models are available on each worker."""
+    __tablename__ = "worker_model_cache"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)  # Changed to Integer for SQLite compatibility
+    worker_id = Column(Integer, ForeignKey("workers.id", ondelete="CASCADE"), nullable=False, index=True)
+    model_id = Column(Integer, ForeignKey("models.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    # Cache status
+    is_cached = Column(Boolean, default=False, nullable=False, index=True)  # Model is available on worker
+    cache_path = Column(String(1024))  # Local path (if worker supports local cache)
+    cache_size_gb = Column(DECIMAL(10, 2))
+
+    # Usage statistics
+    last_loaded_at = Column(TIMESTAMP)
+    load_count = Column(Integer, default=0)
+
+    # Sync status
+    sync_status = Column(SQLEnum(WorkerCacheSyncStatus), default=WorkerCacheSyncStatus.SYNCED, nullable=False)
+    last_synced_at = Column(TIMESTAMP)
+
+    created_at = Column(TIMESTAMP, default=func.now(), nullable=False)
+    updated_at = Column(TIMESTAMP, default=func.now(), onupdate=func.now(), nullable=False)
+
+    # Relationships
+    worker = relationship("Worker")
+    model = relationship("Model")
+
+    # Unique constraint and indexes
+    __table_args__ = (
+        Index('ix_worker_cache_worker_model', 'worker_id', 'model_id', unique=True),
+        Index('ix_worker_cache_cached', 'is_cached'),
     )
 
 

@@ -55,6 +55,17 @@ class Settings(BaseSettings):
     model_storage_path: str = "/var/lib/tokenmachine/models"
     log_path: str = "/var/log/tokenmachine"
 
+    # ModelScope Configuration
+    modelscope_cache_dir: str = "/var/lib/tokenmachine/cache/modelscope"
+    modelscope_sdk_debug: bool = False
+
+    # Model Download Configuration
+    download_max_concurrent: int = 3
+    download_timeout_seconds: int = 7200  # 2 hours
+
+    # NFS Configuration
+    nfs_mount_point: str = "/mnt/models"  # Worker mount point
+
     # GPU
     gpu_memory_utilization: float = 0.9
     max_model_len: int = 4096
@@ -139,3 +150,5 @@ def ensure_directories(settings: Settings) -> None:
     os.makedirs(settings.model_storage_path, exist_ok=True)
     os.makedirs(settings.log_path, exist_ok=True)
     os.makedirs(os.path.join(settings.log_path, "workers"), exist_ok=True)
+    os.makedirs(os.path.join(settings.log_path, "downloads"), exist_ok=True)
+    os.makedirs(settings.modelscope_cache_dir, exist_ok=True)

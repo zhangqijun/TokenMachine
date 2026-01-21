@@ -538,3 +538,114 @@ class AuditLog(Base):
     # Relationships
     user = relationship("User", back_populates="audit_logs")
     organization = relationship("Organization", back_populates="audit_logs")
+
+
+# ============================================================================
+# Playground Models
+# ============================================================================
+
+class PlaygroundSession(Base):
+    """Dialogue testing session model."""
+    __tablename__ = "playground_sessions"
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    user_id = Column(BigInteger, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    deployment_id = Column(BigInteger, ForeignKey("deployments.id", ondelete="SET NULL"), nullable=True)
+    session_name = Column(String(255), default="Untitled Session")
+    model_parameters = Column(JSON, nullable=False)  # Renamed from model_config to avoid SQLAlchemy conflict
+    input_tokens = Column(BigInteger, default=0)
+    output_tokens = Column(BigInteger, default=0)
+    total_cost = Column(DECIMAL(10, 6), default=0.0000)
+    created_at = Column(TIMESTAMP, default=func.now(), nullable=False)
+    updated_at = Column(TIMESTAMP, default=func.now(), onupdate=func.now(), nullable=False)
+
+    # Relationships
+    messages = relationship("PlaygroundMessage", back_populates="session", cascade="all, delete-orphan")
+
+    __table_args__ = (
+        Index('ix_playground_session_user_id', 'user_id'),
+        Index('ix_playground_session_created_at', 'created_at'),
+    )
+
+
+class PlaygroundMessage(Base):
+    """Dialogue message model."""
+    __tablename__ = "playground_messages"
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    session_id = Column(BigInteger, ForeignKey("playground_sessions.id", ondelete="CASCADE"), nullable=False, index=True)
+    role = Column(String(20), nullable=False)  # user, assistant, system
+    content = Column(Text, nullable=False)
+    input_tokens = Column(Integer, default=0)
+    output_tokens = Column(Integer, default=0)
+    timestamp = Column(TIMESTAMP, default=func.now(), nullable=False)
+
+    # Relationships
+    session = relationship("PlaygroundSession", back_populates="messages")
+
+    __table_args__ = (
+        Index('ix_playground_message_session_id', 'session_id'),
+        Index('ix_playground_message_timestamp', 'timestamp'),
+    )
+
+
+class TaskType(str, Enum):
+    """Benchmark task type enumeration."""
+    EVAL = "eval"
+    PERF = "perf"
+
+
+class TaskStatus(str, Enum):
+    """Benchmark task status enumeration."""
+    PENDING = "pending"
+    RUNNING = "running"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    CANCELLED = "cancelled"
+
+
+class BenchmarkTask(Base):
+    """Benchmark task model."""
+    __tablename__ = "benchmark_tasks"
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    user_id = Column(BigInteger, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    deployment_id = Column(BigInteger, ForeignKey("deployments.id", ondelete="SET NULL"), nullable=True)
+    task_name = Column(String(255), nullable=False)
+    task_type = Column(SQLEnum(TaskType), nullable=False)
+    status = Column(SQLEnum(TaskStatus), default=TaskStatus.PENDING, nullable=False, index=True)
+    config = Column(JSON, nullable=False)  # EvalScope configuration
+    result = Column(JSON)  # Benchmark results
+    output_dir = Column(String(1024))  # EvalScope output directory
+    error_message = Column(Text)
+    started_at = Column(TIMESTAMP)
+    completed_at = Column(TIMESTAMP)
+    celery_task_id = Column(String(255), index=True)  # Celery task ID
+    created_at = Column(TIMESTAMP, default=func.now(), nullable=False)
+    updated_at = Column(TIMESTAMP, default=func.now(), onupdate=func.now(), nullable=False)
+
+    __table_args__ = (
+        Index('ix_benchmark_task_user_id', 'user_id'),
+        Index('ix_benchmark_task_status', 'status'),
+        Index('ix_benchmark_task_created_at', 'created_at'),
+        Index('ix_benchmark_task_celery_task_id', 'celery_task_id'),
+    )
+
+
+class BenchmarkDataset(Base):
+    """Benchmark dataset model."""
+    __tablename__ = "benchmark_datasets"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(255), unique=True, nullable=False, index=True)
+    category = Column(String(100), index=True)  # mmlu, gsm8k, ceval, custom
+    description = Column(Text)
+    dataset_size = Column(Integer)
+    meta_data = Column(JSON)  # Dataset metadata (renamed to avoid SQLAlchemy conflict)
+    is_active = Column(Boolean, default=True, nullable=False)
+    created_at = Column(TIMESTAMP, default=func.now(), nullable=False)
+
+    __table_args__ = (
+        Index('ix_benchmark_dataset_category', 'category'),
+        Index('ix_benchmark_dataset_name', 'name'),
+    )

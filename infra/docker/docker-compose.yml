@@ -107,7 +107,10 @@ services:
     ports:
       - "8081:80"
     environment:
-      API_BASE_URL: http://localhost:8000
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      API_BASE_URL: ${API_BASE_URL:-http://localhost:8000/api}
+      PUBLIC_DOMAIN: ${PUBLIC_DOMAIN:-localhost}
+      USE_MOCK_DATA: ${USE_MOCK_DATA:-true}
     depends_on:
       - api
     networks:

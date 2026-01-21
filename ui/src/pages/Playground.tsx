@@ -1,13 +1,10 @@
 import { Tabs } from 'antd';
 import {
   MessageOutlined,
-  ApiOutlined,
-  RobotOutlined,
-  TrophyOutlined,
+  ThunderboltOutlined,
+  ExperimentOutlined,
 } from '@ant-design/icons';
 import ChatTest from '../components/playground/ChatTest';
-import MCPToolsTest from '../components/playground/MCPToolsTest';
-import AgentTest from '../components/playground/AgentTest';
 import BenchmarkTest from '../components/playground/BenchmarkTest';
 
 const Playground = () => {
@@ -23,31 +20,11 @@ const Playground = () => {
       children: <ChatTest />,
     },
     {
-      key: 'mcp',
-      label: (
-        <span>
-          <ApiOutlined />
-          MCP 工具
-        </span>
-      ),
-      children: <MCPToolsTest />,
-    },
-    {
-      key: 'agent',
-      label: (
-        <span>
-          <RobotOutlined />
-          Agent 测试
-        </span>
-      ),
-      children: <AgentTest />,
-    },
-    {
       key: 'benchmark',
       label: (
         <span>
-          <TrophyOutlined />
-          Benchmark 测试
+          <ExperimentOutlined />
+          批量测试
         </span>
       ),
       children: <BenchmarkTest />,

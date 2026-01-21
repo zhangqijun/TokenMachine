@@ -1,5 +1,15 @@
-import { Card, Row, Col, Table, Tag, Progress, Space, Select, DatePicker, Button } from 'antd';
-import { ReloadOutlined } from '@ant-design/icons';
+import { useState, useEffect } from 'react';
+import { Card, Row, Col, Table, Tag, Progress, Space, Select, DatePicker, Button, Statistic } from 'antd';
+import {
+  ReloadOutlined,
+  ThunderboltOutlined,
+  ClockCircleOutlined,
+  DatabaseOutlined,
+  ArrowUpOutlined,
+  ArrowDownOutlined,
+  CheckCircleOutlined,
+  WarningOutlined,
+} from '@ant-design/icons';
 import ReactECharts from 'echarts-for-react';
 import dayjs from 'dayjs';
 import { useStore } from '../store';
@@ -10,6 +20,21 @@ const { RangePicker } = DatePicker;
 
 const Monitoring = () => {
   const { gpus, deployments } = useStore();
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [refreshInterval, setRefreshInterval] = useState<number>(5);
+  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+
+  // Auto refresh effect
+  useEffect(() => {
+    if (!autoRefresh) return;
+
+    const timer = setInterval(() => {
+      setLastRefresh(new Date());
+      // 这里可以添加实际的数据刷新逻辑
+    }, refreshInterval * 1000);
+
+    return () => clearInterval(timer);
+  }, [autoRefresh, refreshInterval]);
 
   // Prepare chart data
   const timestamps = mockTimeSeriesData.map(d => dayjs(d.timestamp).format('HH:mm'));
@@ -17,6 +42,20 @@ const Monitoring = () => {
   const latencyData = mockTimeSeriesData.map(d => d.latency);
   const tokensData = mockTimeSeriesData.map(d => d.tokens / 1000);
   const gpuUtilData = mockTimeSeriesData.map(d => d.gpuUtil);
+
+  // Calculate stats
+  const avgQPS = Math.round(qpsData.reduce((a, b) => a + b, 0) / qpsData.length);
+  const avgLatency = Math.round(latencyData.reduce((a, b) => a + b, 0) / latencyData.length);
+  const avgGPU = Math.round(gpuUtilData.reduce((a, b) => a + b, 0) / gpuUtilData.length);
+  const totalTokens = Math.round(tokensData.reduce((a, b) => a + b, 0));
+
+  // Additional stats
+  const maxQPS = Math.max(...qpsData);
+  const minQPS = Math.min(...qpsData);
+  const p95Latency = Math.round(latencyData.sort((a, b) => a - b)[Math.floor(latencyData.length * 0.95)]);
+  const p99Latency = Math.round(latencyData.sort((a, b) => a - b)[Math.floor(latencyData.length * 0.99)]);
+  const errorRate = 0.02; // 2% error rate
+  const totalRequests = qpsData.reduce((a, b) => a + b, 0) * 60; // Total requests in time range
 
   // Combined metrics chart
   const metricsChartOption = {
@@ -203,6 +242,26 @@ const Monitoring = () => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <h2 style={{ margin: 0 }}>监控面板</h2>
         <Space>
+          <Select
+            value={refreshInterval}
+            onChange={setRefreshInterval}
+            style={{ width: 120 }}
+            disabled={!autoRefresh}
+          >
+            <Select.Option value={5}>5 秒</Select.Option>
+            <Select.Option value={10}>10 秒</Select.Option>
+            <Select.Option value={30}>30 秒</Select.Option>
+            <Select.Option value={60}>1 分钟</Select.Option>
+          </Select>
+          <Button
+            type={autoRefresh ? 'primary' : 'default'}
+            onClick={() => setAutoRefresh(!autoRefresh)}
+          >
+            {autoRefresh ? '自动刷新开' : '自动刷新关'}
+          </Button>
+          <Button icon={<ReloadOutlined />}>
+            手动刷新
+          </Button>
           <RangePicker
             defaultValue={[dayjs().subtract(24, 'hours'), dayjs()]}
             showTime
@@ -217,38 +276,99 @@ const Monitoring = () => {
         </Space>
       </div>
 
-      {/* Overview Stats */}
+      {/* Auto refresh indicator */}
+      {autoRefresh && (
+        <div style={{ marginBottom: 16, padding: '8px 16px', background: '#f0f5ff', borderRadius: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
+          <CheckCircleOutlined style={{ color: '#52c41a' }} />
+          <span style={{ fontSize: 13, color: '#595959' }}>
+            自动刷新已启用，每 {refreshInterval} 秒更新一次 • 上次更新：{dayjs(lastRefresh).format('HH:mm:ss')}
+          </span>
+        </div>
+      )}
+
+      {/* Overview Stats - 8 cards */}
       <Row gutter={16} style={{ marginBottom: 24 }}>
-        <Col span={6}>
+        <Col span={3}>
           <Card>
-            <div style={{ fontSize: 14, color: '#666', marginBottom: 8 }}>平均 QPS</div>
-            <div style={{ fontSize: 28, fontWeight: 'bold', color: '#1890ff' }}>
-              {Math.round(qpsData.reduce((a, b) => a + b, 0) / qpsData.length)}
-            </div>
+            <Statistic
+              title="平均 QPS"
+              value={avgQPS}
+              valueStyle={{ color: '#1890ff', fontSize: 24 }}
+              prefix={<ThunderboltOutlined />}
+            />
           </Card>
         </Col>
-        <Col span={6}>
+        <Col span={3}>
           <Card>
-            <div style={{ fontSize: 14, color: '#666', marginBottom: 8 }}>平均延迟</div>
-            <div style={{ fontSize: 28, fontWeight: 'bold', color: '#52c41a' }}>
-              {Math.round(latencyData.reduce((a, b) => a + b, 0) / latencyData.length)} ms
-            </div>
+            <Statistic
+              title="峰值 QPS"
+              value={maxQPS}
+              valueStyle={{ color: '#722ed1', fontSize: 24 }}
+              prefix={<ArrowUpOutlined />}
+            />
           </Card>
         </Col>
-        <Col span={6}>
+        <Col span={3}>
           <Card>
-            <div style={{ fontSize: 14, color: '#666', marginBottom: 8 }}>GPU 平均利用率</div>
-            <div style={{ fontSize: 28, fontWeight: 'bold', color: '#faad14' }}>
-              {Math.round(gpuUtilData.reduce((a, b) => a + b, 0) / gpuUtilData.length)}%
-            </div>
+            <Statistic
+              title="平均延迟"
+              value={avgLatency}
+              suffix="ms"
+              valueStyle={{ color: '#52c41a', fontSize: 24 }}
+              prefix={<ClockCircleOutlined />}
+            />
           </Card>
         </Col>
-        <Col span={6}>
+        <Col span={3}>
           <Card>
-            <div style={{ fontSize: 14, color: '#666', marginBottom: 8 }}>Token 消耗</div>
-            <div style={{ fontSize: 28, fontWeight: 'bold', color: '#722ed1' }}>
-              {(tokensData.reduce((a, b) => a + b, 0) / 1000).toFixed(0)}K
-            </div>
+            <Statistic
+              title="P95 延迟"
+              value={p95Latency}
+              suffix="ms"
+              valueStyle={{ color: '#faad14', fontSize: 24 }}
+            />
+          </Card>
+        </Col>
+        <Col span={3}>
+          <Card>
+            <Statistic
+              title="P99 延迟"
+              value={p99Latency}
+              suffix="ms"
+              valueStyle={{ color: '#ff4d4f', fontSize: 24 }}
+            />
+          </Card>
+        </Col>
+        <Col span={3}>
+          <Card>
+            <Statistic
+              title="GPU 利用率"
+              value={avgGPU}
+              suffix="%"
+              valueStyle={{ color: '#13c2c2', fontSize: 24 }}
+              prefix={<DatabaseOutlined />}
+            />
+          </Card>
+        </Col>
+        <Col span={3}>
+          <Card>
+            <Statistic
+              title="Token 消耗"
+              value={totalTokens}
+              valueStyle={{ color: '#eb2f96', fontSize: 24 }}
+              formatter={(value) => `${Number(value).toLocaleString()}`}
+            />
+          </Card>
+        </Col>
+        <Col span={3}>
+          <Card>
+            <Statistic
+              title="错误率"
+              value={errorRate * 100}
+              suffix="%"
+              valueStyle={{ color: errorRate > 0.05 ? '#ff4d4f' : '#52c41a', fontSize: 24 }}
+              prefix={<WarningOutlined />}
+            />
           </Card>
         </Col>
       </Row>
@@ -278,7 +398,65 @@ const Monitoring = () => {
         </Col>
       </Row>
 
-      {/* Tables */}
+      {/* Tables - Enhanced with more data */}
+      <Row gutter={16} style={{ marginBottom: 16 }}>
+        <Col span={24}>
+          <Card title="API 请求统计详情" bordered={false}>
+            <Table
+              dataSource={[
+                { key: '1', endpoint: '/v1/chat/completions', requests: 125400, avgLatency: 45, p95: 78, p99: 120, errorRate: 0.01 },
+                { key: '2', endpoint: '/v1/embeddings', requests: 45200, avgLatency: 23, p95: 45, p99: 67, errorRate: 0.02 },
+                { key: '3', endpoint: '/v1/completions', requests: 32100, avgLatency: 38, p95: 72, p99: 105, errorRate: 0.03 },
+                { key: '4', endpoint: '/v1/models', requests: 8900, avgLatency: 12, p95: 25, p99: 38, errorRate: 0.00 },
+              ]}
+              columns={[
+                { title: 'API 端点', dataIndex: 'endpoint', key: 'endpoint', width: 250 },
+                {
+                  title: '请求数',
+                  dataIndex: 'requests',
+                  key: 'requests',
+                  render: (v) => v.toLocaleString(),
+                  sorter: (a: any, b: any) => a.requests - b.requests,
+                },
+                {
+                  title: '平均延迟',
+                  dataIndex: 'avgLatency',
+                  key: 'avgLatency',
+                  render: (v) => `${v}ms`,
+                  sorter: (a: any, b: any) => a.avgLatency - b.avgLatency,
+                },
+                {
+                  title: 'P95 延迟',
+                  dataIndex: 'p95',
+                  key: 'p95',
+                  render: (v) => `${v}ms`,
+                },
+                {
+                  title: 'P99 延迟',
+                  dataIndex: 'p99',
+                  key: 'p99',
+                  render: (v) => `${v}ms`,
+                },
+                {
+                  title: '错误率',
+                  dataIndex: 'errorRate',
+                  key: 'errorRate',
+                  render: (v) => (
+                    <span style={{ color: v > 0.02 ? '#ff4d4f' : '#52c41a' }}>
+                      {(v * 100).toFixed(2)}%
+                    </span>
+                  ),
+                  sorter: (a: any, b: any) => a.errorRate - b.errorRate,
+                },
+              ]}
+              rowKey="key"
+              size="small"
+              pagination={{ pageSize: 10 }}
+            />
+          </Card>
+        </Col>
+      </Row>
+
       <Row gutter={16}>
         <Col span={12}>
           <Card title="模型性能排行" bordered={false}>

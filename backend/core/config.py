@@ -4,7 +4,15 @@ Configuration management for TokenMachine.
 import os
 from typing import Optional
 from functools import lru_cache
+from enum import Enum
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Environment(str, Enum):
+    """Application environment types."""
+    DEVELOPMENT = "development"
+    TEST = "test"
+    PRODUCTION = "production"
 
 
 class Settings(BaseSettings):
@@ -20,7 +28,7 @@ class Settings(BaseSettings):
     # Application
     app_name: str = "TokenMachine"
     app_version: str = "0.1.0"
-    environment: str = "development"
+    environment: Environment = Environment.DEVELOPMENT
     debug: bool = True
 
     # API
@@ -77,15 +85,28 @@ class Settings(BaseSettings):
     log_rotation: str = "500 MB"
     log_retention: str = "30 days"
 
+    # Feature flags
+    use_mock_data: bool = False  # Use mock data instead of real data
+
     @property
     def is_development(self) -> bool:
         """Check if running in development mode."""
-        return self.environment == "development"
+        return self.environment == Environment.DEVELOPMENT
+
+    @property
+    def is_test(self) -> bool:
+        """Check if running in test mode."""
+        return self.environment == Environment.TEST
 
     @property
     def is_production(self) -> bool:
         """Check if running in production mode."""
-        return self.environment == "production"
+        return self.environment == Environment.PRODUCTION
+
+    @property
+    def is_deployment(self) -> bool:
+        """Check if running in deployment environment (test or production)."""
+        return self.environment in (Environment.TEST, Environment.PRODUCTION)
 
     def get_worker_port(self, worker_index: int) -> int:
         """Get port for a specific worker."""

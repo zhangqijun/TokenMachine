@@ -24,7 +24,7 @@ show_usage() {
     echo -e "${BLUE}TokenMachine Deployment Script${NC}"
     echo "================================"
     echo ""
-    echo "用法: $0 [environment]"
+    echo "用法: $0 [environment] [options]"
     echo ""
     echo -e "${GREEN}可用环境:${NC}"
     for env in "${ENVIRONMENTS[@]}"; do
@@ -32,10 +32,16 @@ show_usage() {
         echo "  - $name: $desc"
     done
     echo ""
+    echo "选项:"
+    echo "  --init-mock     初始化 mock 数据 (开发/测试环境)"
+    echo "  --skip-mock     跳过 mock 数据初始化"
+    echo "  --clear-data    清空现有数据后初始化"
+    echo ""
     echo "示例:"
-    echo "  $0 development   # 部署到开发环境"
-    echo "  $0 test          # 部署到测试环境"
-    echo "  $0 production    # 部署到生产环境"
+    echo "  $0 development          # 部署到开发环境"
+    echo "  $0 development --init-mock  # 部署并初始化 mock 数据"
+    echo "  $0 test --init-mock     # 部署测试环境并初始化数据"
+    echo "  $0 production           # 部署到生产环境"
     echo ""
     exit 1
 }
@@ -46,6 +52,30 @@ if [ $# -eq 0 ]; then
 fi
 
 ENVIRONMENT=$1
+INIT_MOCK=false
+SKIP_MOCK=false
+CLEAR_DATA=false
+
+# 解析参数
+shift
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --init-mock)
+            INIT_MOCK=true
+            ;;
+        --skip-mock)
+            SKIP_MOCK=true
+            ;;
+        --clear-data)
+            CLEAR_DATA=true
+            ;;
+        *)
+            echo -e "${RED}未知选项: $1${NC}"
+            show_usage
+            ;;
+    esac
+    shift
+done
 
 # 验证环境
 VALID_ENV=false
@@ -61,6 +91,14 @@ if [ "$VALID_ENV" = false ]; then
     echo -e "${RED}错误: 无效的环境 '$ENVIRONMENT'${NC}"
     echo ""
     show_usage
+fi
+
+# 自动决定是否初始化 mock 数据（开发/测试环境默认初始化）
+if [ "$INIT_MOCK" = false ] && [ "$SKIP_MOCK" = false ]; then
+    if [ "$ENVIRONMENT" = "development" ] || [ "$ENVIRONMENT" = "test" ]; then
+        INIT_MOCK=true
+        echo -e "${YELLOW}注意: 开发/测试环境将自动初始化 mock 数据${NC}"
+    fi
 fi
 
 # 显示环境信息
@@ -131,15 +169,27 @@ fi
 
 # 停止现有服务
 echo -e "${YELLOW}停止现有服务...${NC}"
-eval "docker compose -f $COMPOSE_FILES down"
+if [ "$ENVIRONMENT" = "development" ]; then
+    docker-compose -f docker-compose.yml down
+else
+    eval "docker-compose -f $COMPOSE_FILES down"
+fi
 
 # 构建镜像
 echo -e "${YELLOW}构建 Docker 镜像...${NC}"
-eval "docker compose -f $COMPOSE_FILES build"
+if [ "$ENVIRONMENT" = "development" ]; then
+    docker-compose -f docker-compose.yml build
+else
+    eval "docker-compose -f $COMPOSE_FILES build"
+fi
 
 # 启动服务
 echo -e "${YELLOW}启动服务...${NC}"
-eval "docker compose -f $COMPOSE_FILES up -d"
+if [ "$ENVIRONMENT" = "development" ]; then
+    docker-compose -f docker-compose.yml up -d
+else
+    eval "docker-compose -f $COMPOSE_FILES up -d"
+fi
 
 # 等待服务就绪
 echo -e "${YELLOW}等待服务启动...${NC}"
@@ -147,7 +197,47 @@ sleep 15
 
 # 检查服务状态
 echo -e "${YELLOW}检查服务状态...${NC}"
-eval "docker compose -f $COMPOSE_FILES ps"
+if [ "$ENVIRONMENT" = "development" ]; then
+    docker-compose -f docker-compose.yml ps
+else
+    eval "docker-compose -f $COMPOSE_FILES ps"
+fi
+
+# 初始化 mock 数据（如果需要）
+if [ "$INIT_MOCK" = true ]; then
+    echo ""
+    echo -e "${YELLOW}初始化 mock 数据...${NC}"
+
+    # 构建初始化命令
+    if [ "$ENVIRONMENT" = "development" ]; then
+        INIT_CMD="docker-compose -f docker-compose.yml exec -T api python scripts/init_mock_data.py --environment $ENVIRONMENT"
+    else
+        INIT_CMD="docker-compose -f $COMPOSE_FILES exec -T api python scripts/init_mock_data.py --environment $ENVIRONMENT"
+    fi
+
+    if [ "$CLEAR_DATA" = true ]; then
+        INIT_CMD="$INIT_CMD --clear"
+    fi
+
+    # 等待 API 容器完全就绪
+    echo -e "${YELLOW}等待 API 容器就绪...${NC}"
+    for i in {1..30}; do
+        if docker-compose -f docker-compose.yml exec -T api python -c "import sys; sys.exit(0)" 2>/dev/null; then
+            break
+        fi
+        echo -n "."
+        sleep 2
+    done
+    echo ""
+
+    # 执行初始化
+    if eval $INIT_CMD; then
+        echo -e "${GREEN}✓ Mock 数据初始化成功${NC}"
+    else
+        echo -e "${RED}✗ Mock 数据初始化失败${NC}"
+        echo -e "${YELLOW}可以稍后手动执行: docker-compose exec api python scripts/init_mock_data.py${NC}"
+    fi
+fi
 
 # 显示访问信息
 echo ""
@@ -192,6 +282,6 @@ case $ENVIRONMENT in
 esac
 
 echo ""
-echo -e "${YELLOW}查看日志:${NC} docker compose logs -f"
-echo -e "${YELLOW}停止服务:${NC} docker compose down"
+echo -e "${YELLOW}查看日志:${NC} docker-compose logs -f"
+echo -e "${YELLOW}停止服务:${NC} docker-compose down"
 echo ""

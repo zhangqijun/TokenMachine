@@ -24,8 +24,10 @@ services:
       - "8080:80"   # HTTP (redirect to HTTPS)
       - "8443:443"  # HTTPS
     environment:
+      ENVIRONMENT: production
       API_BASE_URL: https://zhangqijun.cn:8443/api
-      SSL_ENABLED: "true"
+      PUBLIC_DOMAIN: zhangqijun.cn
+      USE_MOCK_DATA: "false"
     volumes:
       # Mount SSL certificates
       - ~/zhangqijun.cn_apache:/etc/nginx/ssl:ro

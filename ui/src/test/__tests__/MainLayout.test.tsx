@@ -45,14 +45,14 @@ describe('MainLayout', () => {
 
     // Check for common navigation items
     expect(screen.getByText(/仪表盘/i)).toBeInTheDocument()
-    expect(screen.getByText(/部署管理/i)).toBeInTheDocument()
-    expect(screen.getByText(/模型管理/i)).toBeInTheDocument()
+    expect(screen.getByText(/节点与后端/i)).toBeInTheDocument()
+    expect(screen.getByText(/模型与实例/i)).toBeInTheDocument()
   })
 
   it('navigates when clicking menu items', () => {
     render(<MainLayout />)
 
-    const deploymentsLink = screen.getByText(/部署管理/i)
+    const deploymentsLink = screen.getByText(/节点与后端/i)
     deploymentsLink.click()
 
     // Navigation should be triggered

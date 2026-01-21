@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Table,
   Button,
@@ -12,6 +12,7 @@ import {
   Row,
   Col,
   Statistic,
+  Select,
 } from 'antd';
 import {
   PlusOutlined,
@@ -19,6 +20,7 @@ import {
   StopOutlined,
   DeleteOutlined,
   ReloadOutlined,
+  FilterOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import AddWorkerModal from '../components/cluster/AddWorkerModal';
@@ -52,6 +54,8 @@ const ClusterOverview = () => {
   const navigate = useNavigate();
   const [isAddModalVisible, setIsAddModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [filterKey, setFilterKey] = useState<string>('');
+  const [filterValues, setFilterValues] = useState<string[]>([]);
 
   // Mock data
   const [workers, setWorkers] = useState<Worker[]>([
@@ -102,6 +106,45 @@ const ClusterOverview = () => {
     running_gpus: workers.reduce((sum, w) => sum + w.gpu_count, 0),
     unhealthy: workers.filter(w => w.status === 'Unhealthy').length,
   };
+
+  // 收集所有的 label keys 和对应的 values
+  const labelKeyValues = useMemo(() => {
+    const keyValueMap: Record<string, Set<string>> = {};
+
+    workers.forEach(w => {
+      Object.entries(w.labels).forEach(([key, value]) => {
+        if (!keyValueMap[key]) {
+          keyValueMap[key] = new Set<string>();
+        }
+        keyValueMap[key].add(value);
+      });
+    });
+
+    // 转换为数组格式并排序
+    return Object.entries(keyValueMap)
+      .map(([key, values]) => ({
+        key,
+        values: Array.from(values).sort(),
+      }))
+      .sort((a, b) => a.key.localeCompare(b.key));
+  }, [workers]);
+
+  // 获取当前选中 key 的所有可选 values
+  const currentKeyValues = useMemo(() => {
+    if (!filterKey) return [];
+    const keyData = labelKeyValues.find(item => item.key === filterKey);
+    return keyData?.values || [];
+  }, [filterKey, labelKeyValues]);
+
+  // 根据筛选条件过滤workers
+  const filteredWorkers = useMemo(() => {
+    return workers.filter(worker => {
+      if (!filterKey || filterValues.length === 0) return true;
+
+      const workerValue = worker.labels[filterKey];
+      return filterValues.includes(workerValue);
+    });
+  }, [workers, filterKey, filterValues]);
 
   const getStatusColor = (status: Worker['status']) => {
     const colorMap: Record<Worker['status'], string> = {
@@ -311,10 +354,67 @@ const ClusterOverview = () => {
         </Col>
       </Row>
 
-      <Card title="Worker 节点列表">
+      <Card
+        title="Worker 节点列表"
+        extra={
+          <Space>
+            <FilterOutlined />
+            <Select
+              placeholder="选择标签键"
+              style={{ width: 150 }}
+              value={filterKey || undefined}
+              onChange={(value) => {
+                setFilterKey(value);
+                setFilterValues([]); // 切换key时清空已选values
+              }}
+              allowClear
+              onClear={() => {
+                setFilterKey('');
+                setFilterValues([]);
+              }}
+            >
+              {labelKeyValues.map(item => (
+                <Select.Option key={item.key} value={item.key}>{item.key}</Select.Option>
+              ))}
+            </Select>
+            {filterKey && (
+              <Space size={4} wrap>
+                {currentKeyValues.map(value => {
+                  const isSelected = filterValues.includes(value);
+                  return (
+                    <Tag
+                      key={value}
+                      color={isSelected ? 'blue' : 'default'}
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => {
+                        if (isSelected) {
+                          setFilterValues(filterValues.filter(v => v !== value));
+                        } else {
+                          setFilterValues([...filterValues, value]);
+                        }
+                      }}
+                    >
+                      {value}
+                    </Tag>
+                  );
+                })}
+              </Space>
+            )}
+            {filterValues.length > 0 && (
+              <Tag
+                closable
+                onClose={() => setFilterValues([])}
+                color="blue"
+              >
+                已选 {filterValues.length} 项
+              </Tag>
+            )}
+          </Space>
+        }
+      >
         <Table
           columns={columns}
-          dataSource={workers}
+          dataSource={filteredWorkers}
           rowKey="id"
           loading={loading}
           pagination={{ pageSize: 10 }}
@@ -325,6 +425,7 @@ const ClusterOverview = () => {
         visible={isAddModalVisible}
         onCancel={() => setIsAddModalVisible(false)}
         onOk={(worker) => {
+          // 注意：这里不再直接关闭modal，而是等待worker注册完成
           setWorkers([
             ...workers,
             {
@@ -337,8 +438,13 @@ const ClusterOverview = () => {
               last_heartbeat: '刚刚',
             },
           ]);
-          setIsAddModalVisible(false);
-          message.success('Worker 添加成功');
+        }}
+        onWorkerRegistered={(workerName) => {
+          // Worker注册成功后的回调
+          message.success(`Worker ${workerName} 注册成功！`);
+          setWorkers(prev => prev.map(w =>
+            w.name === workerName ? { ...w, status: 'Ready' as const } : w
+          ));
         }}
       />
     </div>

@@ -1,0 +1,96 @@
+# HTTP to HTTPS redirect (for production)
+server {
+    listen 80;
+    server_name _;
+
+    # Inject environment variables into HTML
+    location / {
+        sub_filter '__ENVIRONMENT__' '$ENVIRONMENT' '';
+        sub_filter '__API_BASE_URL__' '$API_BASE_URL' '';
+        sub_filter '__PUBLIC_DOMAIN__' '$PUBLIC_DOMAIN' '';
+        sub_filter '__USE_MOCK_DATA__' '$USE_MOCK_DATA' '';
+        sub_filter_once off;
+        sub_filter_types *;
+
+        root /usr/share/nginx/html;
+        try_files $uri $uri/ /index.html;
+    }
+
+    # For production with SSL, redirect HTTP to HTTPS
+    # Uncomment for production
+    # return 301 https://$server_name:$https_port$request_uri;
+}
+
+# HTTPS server (production only)
+# server {
+#     listen 443 ssl http2;
+#     server_name zhangqijun.cn;
+#
+#     # SSL certificates
+#     ssl_certificate /etc/nginx/ssl/zhangqijun.cn.crt;
+#     ssl_certificate_key /etc/nginx/ssl/zhangqijun.cn.key;
+#     ssl_trusted_certificate /etc/nginx/ssl/root_bundle.crt;
+#
+#     # SSL settings
+#     ssl_protocols TLSv1.2 TLSv1.3;
+#     ssl_ciphers HIGH:!aNULL:!MD5;
+#     ssl_prefer_server_ciphers on;
+#     ssl_session_cache shared:SSL:10m;
+#     ssl_session_timeout 10m;
+#
+#     root /usr/share/nginx/html;
+#     index index.html;
+#
+#     # Enable gzip compression
+#     gzip on;
+#     gzip_vary on;
+#     gzip_min_length 1024;
+#     gzip_types text/plain text/css text/xml text/javascript application/javascript application/xml+rss application/json;
+#
+#     # Inject environment variables
+#     sub_filter '__ENVIRONMENT__' '$ENVIRONMENT' '';
+#     sub_filter '__API_BASE_URL__' '$API_BASE_URL' '';
+#     sub_filter '__PUBLIC_DOMAIN__' '$PUBLIC_DOMAIN' '';
+#     sub_filter '__USE_MOCK_DATA__' '$USE_MOCK_DATA' '';
+#     sub_filter_once off;
+#     sub_filter_types *;
+#
+#     # API proxy
+#     location /api/ {
+#         proxy_pass http://api:8000/api/;
+#         proxy_http_version 1.1;
+#         proxy_set_header Host $host;
+#         proxy_set_header X-Real-IP $remote_addr;
+#         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+#         proxy_set_header X-Forwarded-Proto https;
+#     }
+#
+#     # Health check proxy
+#     location /health {
+#         proxy_pass http://api:8000/health;
+#         proxy_http_version 1.1;
+#         proxy_set_header Host $host;
+#         proxy_set_header X-Real-IP $remote_addr;
+#         proxy_set_header X-Forwarded-Proto https;
+#     }
+#
+#     # Metrics proxy
+#     location /metrics {
+#         proxy_pass http://api:8000/metrics;
+#         proxy_http_version 1.1;
+#         proxy_set_header Host $host;
+#         proxy_set_header X-Real-IP $remote_addr;
+#         proxy_set_header X-Forwarded-Proto https;
+#     }
+#
+#     # Frontend routes - handle SPA routing
+#     location / {
+#         try_files $uri $uri/ /index.html;
+#     }
+#
+#     # Cache static assets
+#     location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+#         expires 1y;
+#         add_header Cache-Control "public, immutable";
+#     }
+# }

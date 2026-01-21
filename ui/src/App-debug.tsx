@@ -4,12 +4,12 @@ import zhCN from 'antd/locale/zh_CN';
 import MainLayout from './components/layout/MainLayout';
 import Dashboard from './pages/Dashboard';
 // 逐个添加其他页面
-import Models from './pages/models';
+import Models from './pages/Models';
 import Deployments from './pages/Deployments';
 import Monitoring from './pages/Monitoring';
-import ApiKeys from './pages/ApiKeys';
-import Resources from './pages/Resources';
-import Clusters from './pages/Clusters';
+import Gateway from './pages/Gateway';
+import ClusterOverview from './pages/ClusterOverview';
+import NodesDeployments from './pages/NodesDeployments';
 import Playground from './pages/Playground';
 import Settings from './pages/Settings';
 
@@ -36,13 +36,13 @@ function App() {
           <Route path="/" element={<MainLayout />}>
             <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
+            <Route path="nodes-deployments" element={<NodesDeployments />} />
             <Route path="models" element={<Models />} />
             <Route path="deployments" element={<Deployments />} />
-            <Route path="resources" element={<Resources />} />
-            <Route path="clusters" element={<Clusters />} />
+            <Route path="cluster" element={<ClusterOverview />} />
             <Route path="playground" element={<Playground />} />
             <Route path="monitoring" element={<Monitoring />} />
-            <Route path="api-keys" element={<ApiKeys />} />
+            <Route path="gateway" element={<Gateway />} />
             <Route path="settings" element={<Settings />} />
           </Route>
         </Routes>

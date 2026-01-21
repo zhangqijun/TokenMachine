@@ -367,8 +367,8 @@ const InterfaceSettings = () => {
                   <Form.Item label="默认页面" name="default_dashboard">
                     <Radio.Group>
                       <Radio value="overview">系统概览</Radio>
-                      <Radio value="models">模型管理</Radio>
-                      <Radio value="deployments">部署管理</Radio>
+                      <Radio value="models">模型与实例</Radio>
+                      <Radio value="deployments">节点与后端</Radio>
                       <Radio value="monitoring">监控面板</Radio>
                     </Radio.Group>
                   </Form.Item>

@@ -60,7 +60,7 @@ const PermissionManagement = () => {
   const permissions: Permission[] = [
     {
       id: '1',
-      name: '模型管理',
+      name: '模型与实例',
       key: 'model',
       type: 'module',
       children: [
@@ -72,7 +72,7 @@ const PermissionManagement = () => {
     },
     {
       id: '2',
-      name: '部署管理',
+      name: '节点与后端',
       key: 'deployment',
       type: 'module',
       children: [

@@ -11,14 +11,14 @@ test.describe('Menu Structure', () => {
     console.log('菜单项:', menuItems);
 
     // 验证菜单项
-    const expectedMenus = ['仪表盘', '模型管理', '集群管理', 'API 密钥', '测试场', '系统设置'];
+    const expectedMenus = ['仪表盘', '节点与后端', '模型与实例', '测试场', '监控面板', '网关管理', '系统设置'];
     for (const menu of expectedMenus) {
       const exists = menuItems.some(item => item.includes(menu));
       expect(exists).toBe(true);
     }
 
     // 验证没有不应该存在的菜单
-    const notExpectedMenus = ['部署管理', '资源管理', '监控面板'];
+    const notExpectedMenus = ['部署管理', '资源管理'];
     for (const menu of notExpectedMenus) {
       const exists = menuItems.some(item => item.includes(menu));
       expect(exists).toBe(false);

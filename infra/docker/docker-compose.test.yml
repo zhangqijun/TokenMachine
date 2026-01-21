@@ -32,7 +32,10 @@ services:
     ports:
       - "8081:80"
     environment:
-      API_BASE_URL: http://10.0.0.100:8000
+      ENVIRONMENT: test
+      API_BASE_URL: http://10.0.0.100:8000/api
+      PUBLIC_DOMAIN: 10.0.0.100
+      USE_MOCK_DATA: "true"
     networks:
       - tokenmachine-network
 

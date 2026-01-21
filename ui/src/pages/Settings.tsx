@@ -48,7 +48,7 @@ const Settings = () => {
       label: '系统概览',
     },
     {
-      type: 'divider',
+      type: 'divider' as const,
     },
     {
       key: 'users',
@@ -71,7 +71,7 @@ const Settings = () => {
       label: '监控告警',
     },
     {
-      type: 'divider',
+      type: 'divider' as const,
     },
     {
       key: 'config',

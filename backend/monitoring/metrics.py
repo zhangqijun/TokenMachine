@@ -222,3 +222,76 @@ api_key_tokens_used_total = Counter(
     'Total tokens used per API key',
     ['api_key_prefix']
 )
+
+# ============================================================================
+# Model Download Metrics
+# ============================================================================
+
+model_download_total = Counter(
+    'tokenmachine_model_download_total',
+    'Total model download tasks',
+    ['status']  # success, failed, cancelled
+)
+
+model_download_duration_seconds = Histogram(
+    'tokenmachine_model_download_duration_seconds',
+    'Model download duration in seconds',
+    buckets=[60, 300, 900, 1800, 3600, 7200]
+)
+
+model_download_size_bytes = Gauge(
+    'tokenmachine_model_download_size_bytes',
+    'Model size in bytes',
+    ['model_id', 'model_name', 'modelscope_repo_id']
+)
+
+model_downloading_active = Gauge(
+    'tokenmachine_model_downloading_active',
+    'Number of active download tasks'
+)
+
+model_download_progress = Gauge(
+    'tokenmachine_model_download_progress',
+    'Model download progress percentage',
+    ['model_id', 'task_id', 'modelscope_repo_id']
+)
+
+model_download_speed_mbps = Gauge(
+    'tokenmachine_model_download_speed_mbps',
+    'Model download speed in MB/s',
+    ['model_id', 'task_id']
+)
+
+# ============================================================================
+# Worker Model Cache Metrics
+# ============================================================================
+
+worker_model_cache_total = Gauge(
+    'tokenmachine_worker_model_cache_total',
+    'Number of models cached on worker',
+    ['worker_id']
+)
+
+worker_model_cache_size_gb = Gauge(
+    'tokenmachine_worker_model_cache_size_gb',
+    'Total size of cached models on worker in GB',
+    ['worker_id']
+)
+
+worker_model_load_count = Counter(
+    'tokenmachine_worker_model_load_count',
+    'Total number of times a model was loaded on a worker',
+    ['worker_id', 'model_id']
+)
+
+worker_model_cache_hit = Counter(
+    'tokenmachine_worker_model_cache_hit',
+    'Number of cache hits when loading a model',
+    ['worker_id']
+)
+
+worker_model_cache_miss = Counter(
+    'tokenmachine_worker_model_cache_miss',
+    'Number of cache misses when loading a model',
+    ['worker_id']
+)

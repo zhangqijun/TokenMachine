@@ -546,7 +546,7 @@ class PlaygroundSession(Base):
     user_id = Column(BigInteger, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     deployment_id = Column(BigInteger, ForeignKey("deployments.id", ondelete="SET NULL"), nullable=True)
     session_name = Column(String(255), default="Untitled Session")
-    model_config = Column(JSON, nullable=False)  # {model, temperature, topP, maxTokens, ...}
+    model_parameters = Column(JSON, nullable=False)  # Renamed from model_config to avoid SQLAlchemy conflict
     input_tokens = Column(BigInteger, default=0)
     output_tokens = Column(BigInteger, default=0)
     total_cost = Column(DECIMAL(10, 6), default=0.0000)
@@ -635,7 +635,7 @@ class BenchmarkDataset(Base):
     category = Column(String(100), index=True)  # mmlu, gsm8k, ceval, custom
     description = Column(Text)
     dataset_size = Column(Integer)
-    metadata = Column(JSON)  # Dataset metadata
+    meta_data = Column(JSON)  # Dataset metadata (renamed to avoid SQLAlchemy conflict)
     is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(TIMESTAMP, default=func.now(), nullable=False)
 

@@ -23,10 +23,11 @@ from backend.models.database import (
     Base, User, Model, Deployment, GPU, ApiKey, UsageLog,
     Organization, Cluster, WorkerPool, Worker, GPUDevice,
     Invoice, ModelInstance,
+    PlaygroundSession, PlaygroundMessage, BenchmarkTask, BenchmarkDataset,
     OrganizationPlan, UserRole, ModelCategory, ModelSource,
     ModelStatus, ModelQuantization, DeploymentStatus, DeploymentEnvironment,
     GPUStatus, WorkerStatus, WorkerPoolStatus, ClusterType, ClusterStatus,
-    InvoiceStatus, UsageLogStatus, ModelInstanceStatus
+    InvoiceStatus, UsageLogStatus, ModelInstanceStatus, TaskType, TaskStatus
 )
 from backend.core.config import get_settings
 
@@ -41,7 +42,7 @@ def test_settings():
     from backend.core.config import Settings
     return Settings(
         app_name="TokenMachine-Test",
-        environment="testing",
+        environment="test",
         debug=True,
         database_url="sqlite:///:memory:",
         redis_url="redis://localhost:6379/1",
@@ -576,3 +577,64 @@ def client(test_settings, db_session):
         yield test_client
 
     app.dependency_overrides.clear()
+
+
+# ============================================================================
+# Playground Fixtures
+# ============================================================================
+
+@pytest.fixture
+def test_playground_session(db_session, test_user):
+    """Create a test playground session."""
+    session = PlaygroundSession(
+        user_id=test_user.id,
+        session_name="Test Session",
+        model_parameters={
+            "model": "llama-3-8b-instruct",
+            "temperature": 0.7,
+            "topP": 0.9,
+            "maxTokens": 2048
+        }
+    )
+    db_session.add(session)
+    db_session.commit()
+    db_session.refresh(session)
+    return session
+
+
+@pytest.fixture
+def test_benchmark_task(db_session, test_user):
+    """Create a test benchmark task."""
+    task = BenchmarkTask(
+        user_id=test_user.id,
+        task_name="Test Benchmark",
+        task_type=TaskType.EVAL,
+        status=TaskStatus.PENDING,
+        config={
+            "model": "llama-3-8b-instruct",
+            "dataset": "mmlu"
+        }
+    )
+    db_session.add(task)
+    db_session.commit()
+    db_session.refresh(task)
+    return task
+
+
+@pytest.fixture
+def test_benchmark_dataset(db_session):
+    """Create a test benchmark dataset."""
+    dataset = BenchmarkDataset(
+        name="mmlu",
+        category="knowledge",
+        description="Massive Multitask Language Understanding",
+        dataset_size=10000,
+        meta_data={
+            "languages": ["en"],
+            "subjects": ["math", "history", "science"]
+        }
+    )
+    db_session.add(dataset)
+    db_session.commit()
+    db_session.refresh(dataset)
+    return dataset

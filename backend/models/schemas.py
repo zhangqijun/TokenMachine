@@ -383,18 +383,24 @@ class PlaygroundSessionCreate(BaseModel):
     """Create playground session request."""
     deployment_id: Optional[int] = None
     session_name: Optional[str] = "Untitled Session"
-    model_config: Dict[str, Any] = Field(
+    model_parameters: Dict[str, Any] = Field(
         ...,
-        example={
-            "model": "llama-3-8b-instruct",
-            "temperature": 0.7,
-            "topP": 0.9,
-            "maxTokens": 2048,
-            "frequencyPenalty": 0.0,
-            "presencePenalty": 0.0,
-            "systemPrompt": "You are a helpful assistant"
+        alias="model_config",
+        json_schema_extra={
+            "example": {
+                "model": "llama-3-8b-instruct",
+                "temperature": 0.7,
+                "topP": 0.9,
+                "maxTokens": 2048,
+                "frequencyPenalty": 0.0,
+                "presencePenalty": 0.0,
+                "systemPrompt": "You are a helpful assistant"
+            }
         }
     )
+
+    class Config:
+        populate_by_name = True
 
 
 class PlaygroundMessageCreate(BaseModel):
@@ -420,7 +426,7 @@ class PlaygroundSessionResponse(BaseModel):
     user_id: int
     deployment_id: Optional[int]
     session_name: str
-    model_config: Dict[str, Any]
+    model_parameters: Dict[str, Any] = Field(alias="model_config")
     input_tokens: int
     output_tokens: int
     total_cost: float
@@ -428,7 +434,7 @@ class PlaygroundSessionResponse(BaseModel):
     updated_at: datetime
     messages: List[PlaygroundMessageResponse] = []
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
 
 # ============================================================================
@@ -483,7 +489,7 @@ class BenchmarkDatasetResponse(BaseModel):
     category: Optional[str]
     description: Optional[str]
     dataset_size: Optional[int]
-    metadata: Optional[Dict[str, Any]] = None
+    meta_data: Optional[Dict[str, Any]] = None
     is_active: bool
     created_at: datetime
 

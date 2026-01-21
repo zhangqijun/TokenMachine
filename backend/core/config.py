@@ -88,6 +88,19 @@ class Settings(BaseSettings):
     # Feature flags
     use_mock_data: bool = False  # Use mock data instead of real data
 
+    # Playground
+    inference_service_url: str = "http://localhost:8000"
+    token_cost_rate: float = 0.0001  # Cost per token in CNY
+
+    # Celery (for async benchmark tasks)
+    celery_broker_url: str = "redis://localhost:6379/1"
+    celery_result_backend: str = "redis://localhost:6379/1"
+
+    # EvalScope (for benchmark testing)
+    evalscope_service_url: str = "http://localhost:9000"
+    evalscope_timeout: int = 3600  # 1 hour timeout for benchmark tasks
+    benchmark_output_dir: str = "/var/lib/tokenmachine/benchmark_outputs"
+
     @property
     def is_development(self) -> bool:
         """Check if running in development mode."""

@@ -5,7 +5,7 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 from backend.models.database import PlaygroundSession, PlaygroundMessage
 from backend.models.schemas import PlaygroundSessionCreate
-from backend.core.config import settings
+from backend.core.config import get_settings
 import httpx
 
 
@@ -22,6 +22,7 @@ class PlaygroundService:
 
     def __init__(self, db: Session):
         self.db = db
+        self.settings = get_settings()
         if HAS_TIKTOKEN:
             self.encoding = tiktoken.get_encoding("cl100k_base")
 
@@ -43,7 +44,7 @@ class PlaygroundService:
             user_id=user_id,
             deployment_id=data.deployment_id,
             session_name=data.session_name,
-            model_config=data.model_config
+            model_parameters=data.model_parameters  # Use model_parameters (internal field name)
         )
         self.db.add(session)
         self.db.commit()
@@ -115,10 +116,10 @@ class PlaygroundService:
         messages.append({"role": "user", "content": content})
 
         # Add system prompt if configured
-        if session.model_config.get("systemPrompt"):
+        if session.model_parameters.get("systemPrompt"):
             messages.insert(0, {
                 "role": "system",
-                "content": session.model_config["systemPrompt"]
+                "content": session.model_parameters["systemPrompt"]
             })
 
         # 3. Call inference API
@@ -127,19 +128,19 @@ class PlaygroundService:
             if session.deployment:
                 # Use deployment endpoint if available
                 # For now, use the default inference service URL
-                api_url = f"{settings.INFERENCE_SERVICE_URL}/v1/chat/completions"
+                api_url = f"{self.settings.inference_service_url}/v1/chat/completions"
             else:
-                api_url = f"{settings.INFERENCE_SERVICE_URL}/v1/chat/completions"
+                api_url = f"{self.settings.inference_service_url}/v1/chat/completions"
 
             with httpx.Client(timeout=60) as client:
                 response = client.post(api_url, json={
-                    "model": session.model_config.get("model", "default"),
+                    "model": session.model_parameters.get("model", "default"),
                     "messages": messages,
-                    "temperature": session.model_config.get("temperature", 0.7),
-                    "max_tokens": session.model_config.get("maxTokens", 2048),
-                    "top_p": session.model_config.get("topP", 0.9),
-                    "frequency_penalty": session.model_config.get("frequencyPenalty", 0.0),
-                    "presence_penalty": session.model_config.get("presencePenalty", 0.0)
+                    "temperature": session.model_parameters.get("temperature", 0.7),
+                    "max_tokens": session.model_parameters.get("maxTokens", 2048),
+                    "top_p": session.model_parameters.get("topP", 0.9),
+                    "frequency_penalty": session.model_parameters.get("frequencyPenalty", 0.0),
+                    "presence_penalty": session.model_parameters.get("presencePenalty", 0.0)
                 })
                 response.raise_for_status()
                 response_data = response.json()
@@ -149,7 +150,7 @@ class PlaygroundService:
 
         except Exception as e:
             # For testing/demo: simulate AI response if inference service is not available
-            if settings.DEBUG:
+            if self.settings.debug:
                 assistant_content = f"[Demo Response] I received your message: {content}"
                 usage = {
                     "prompt_tokens": user_message.input_tokens,
@@ -170,7 +171,7 @@ class PlaygroundService:
         # 5. Update session statistics
         session.input_tokens += usage.get("prompt_tokens", user_message.input_tokens)
         session.output_tokens += usage.get("completion_tokens", assistant_message.output_tokens)
-        session.total_cost = float((session.input_tokens + session.output_tokens) * settings.TOKEN_COST_RATE)
+        session.total_cost = float((session.input_tokens + session.output_tokens) * self.settings.token_cost_rate)
 
         self.db.commit()
         self.db.refresh(assistant_message)

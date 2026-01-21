@@ -638,3 +638,177 @@ def test_benchmark_dataset(db_session):
     db_session.commit()
     db_session.refresh(dataset)
     return dataset
+
+
+# ============================================================================
+# Gateway Management Fixtures
+# ============================================================================
+
+@pytest.fixture
+def test_routing_strategy(db_session):
+    """Create a test routing strategy."""
+    from backend.models.database import RoutingStrategy, RoutingMode
+
+    strategy = RoutingStrategy(
+        name="test-routing-strategy",
+        description="Test routing strategy for gateway",
+        mode=RoutingMode.SEMANTIC,
+        rules=[
+            {
+                "pattern": "^qwen.*",
+                "target": "qwen-instance-1",
+                "weight": 100,
+                "priority": 1
+            }
+        ],
+        is_enabled=True,
+        enable_aggregation=False,
+        bound_keys_count=0,
+        today_requests=0,
+        p95_latency_ms=0
+    )
+    db_session.add(strategy)
+    db_session.commit()
+    db_session.refresh(strategy)
+    return strategy
+
+
+@pytest.fixture
+def test_model_instance(db_session, test_deployment):
+    """Create a test model instance."""
+    instance = ModelInstance(
+        deployment_id=test_deployment.id,
+        name="test-model-instance-1",
+        status=ModelInstanceStatus.RUNNING,
+        endpoint="http://localhost:8001",
+        gpu_memory_mb=16000,
+        tensor_parallel_size=1
+    )
+    db_session.add(instance)
+    db_session.commit()
+    db_session.refresh(instance)
+    return instance
+
+
+@pytest.fixture
+def test_instance_health(db_session, test_model_instance):
+    """Create a test instance health record."""
+    from backend.models.database import InstanceHealth, InstanceHealthStatus
+
+    health = InstanceHealth(
+        model_instance_id=test_model_instance.id,
+        status=InstanceHealthStatus.HEALTHY,
+        fail_count=0,
+        consecutive_success_count=10,
+        queue_depth=5,
+        response_time_ms=150,
+        gpu_utilization=Decimal("75.5"),
+        error_rate=Decimal("0.1")
+    )
+    db_session.add(health)
+    db_session.commit()
+    db_session.refresh(health)
+    return health
+
+
+@pytest.fixture
+def test_gateway_config(db_session):
+    """Create a test gateway config."""
+    from backend.models.database import GatewayConfig
+
+    config = GatewayConfig(
+        enable_dynamic_lb=True,
+        schedule_strategy="queue",
+        queue_threshold=50,
+        response_threshold=5000,
+        gpu_threshold=95,
+        enable_failover=True,
+        check_method="active",
+        check_interval=10,
+        timeout=5,
+        fail_threshold=3,
+        response_time_threshold=5000,
+        error_rate_threshold=10,
+        queue_depth_threshold=100,
+        auto_recover=True,
+        recover_threshold=3
+    )
+    db_session.add(config)
+    db_session.commit()
+    db_session.refresh(config)
+    return config
+
+
+@pytest.fixture
+def test_api_key_route_binding(db_session, test_api_key, test_routing_strategy):
+    """Create a test API key route binding."""
+    from backend.models.database import ApiKeyRouteBinding
+
+    api_key, _ = test_api_key
+    binding = ApiKeyRouteBinding(
+        api_key_id=api_key.id,
+        routing_strategy_id=test_routing_strategy.id,
+        traffic_weight=100
+    )
+    db_session.add(binding)
+    db_session.commit()
+    db_session.refresh(binding)
+    return binding
+
+
+# ============================================================================
+# Authentication Headers for Tests
+# ============================================================================
+
+@pytest.fixture
+def admin_headers(db_session, test_admin_user):
+    """Create authentication headers for admin user."""
+    from backend.core.security import generate_api_key, hash_api_key
+    from backend.models.database import ApiKey
+
+    # Generate API key for admin
+    api_key_str = generate_api_key()
+    key_hash, key_prefix = hash_api_key(api_key_str)
+
+    api_key = ApiKey(
+        key_hash=key_hash,
+        key_prefix=key_prefix,
+        user_id=test_admin_user.id,
+        organization_id=test_admin_user.organization_id,
+        name="Admin Test Key",
+        quota_tokens=10000000,
+        tokens_used=0,
+        is_active=True
+    )
+    db_session.add(api_key)
+    db_session.commit()
+    db_session.refresh(api_key)
+
+    return {"Authorization": f"Bearer {api_key_str}"}
+
+
+@pytest.fixture
+def api_key_headers(db_session, test_user):
+    """Create authentication headers for regular user."""
+    from backend.core.security import generate_api_key, hash_api_key
+    from backend.models.database import ApiKey
+
+    # Generate API key for user
+    api_key_str = generate_api_key()
+    key_hash, key_prefix = hash_api_key(api_key_str)
+
+    api_key = ApiKey(
+        key_hash=key_hash,
+        key_prefix=key_prefix,
+        user_id=test_user.id,
+        organization_id=test_user.organization_id,
+        name="User Test Key",
+        quota_tokens=1000000,
+        tokens_used=0,
+        is_active=True
+    )
+    db_session.add(api_key)
+    db_session.commit()
+    db_session.refresh(api_key)
+
+    return {"Authorization": f"Bearer {api_key_str}"}

@@ -1,6 +1,6 @@
 """
-Gateway API v1 module.
+API v1 module.
 """
-from backend.api.v1 import gateway
+from backend.api.v1 import gateway, monitoring
 
-__all__ = ["gateway"]
+__all__ = ["gateway", "monitoring"]

@@ -6,6 +6,9 @@ from typing import Optional, List, Dict, Any, Literal
 from enum import Enum
 from pydantic import BaseModel, Field, field_validator, ConfigDict
 
+# Import TaskType from database models for reuse
+from backend.models.database import TaskType
+
 
 # ============================================================================
 # User Schemas
@@ -370,3 +373,118 @@ class MonitoringStats(BaseModel):
     api_requests_error: int
     tokens_generated_total: int
     avg_latency_ms: float
+
+
+# ============================================================================
+# Playground (Dialogue Testing) Schemas
+# ============================================================================
+
+class PlaygroundSessionCreate(BaseModel):
+    """Create playground session request."""
+    deployment_id: Optional[int] = None
+    session_name: Optional[str] = "Untitled Session"
+    model_config: Dict[str, Any] = Field(
+        ...,
+        example={
+            "model": "llama-3-8b-instruct",
+            "temperature": 0.7,
+            "topP": 0.9,
+            "maxTokens": 2048,
+            "frequencyPenalty": 0.0,
+            "presencePenalty": 0.0,
+            "systemPrompt": "You are a helpful assistant"
+        }
+    )
+
+
+class PlaygroundMessageCreate(BaseModel):
+    """Send message request."""
+    content: str = Field(..., min_length=1, max_length=10000)
+
+
+class PlaygroundMessageResponse(BaseModel):
+    """Message response."""
+    id: int
+    role: str
+    content: str
+    input_tokens: int
+    output_tokens: int
+    timestamp: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class PlaygroundSessionResponse(BaseModel):
+    """Session response."""
+    id: int
+    user_id: int
+    deployment_id: Optional[int]
+    session_name: str
+    model_config: Dict[str, Any]
+    input_tokens: int
+    output_tokens: int
+    total_cost: float
+    created_at: datetime
+    updated_at: datetime
+    messages: List[PlaygroundMessageResponse] = []
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+# ============================================================================
+# Benchmark (Batch Testing) Schemas
+# ============================================================================
+
+class BenchmarkTaskCreate(BaseModel):
+    """Create benchmark task request."""
+    deployment_id: Optional[int] = None
+    task_name: str = Field(..., min_length=1, max_length=255)
+    task_type: TaskType
+    config: Dict[str, Any] = Field(
+        ...,
+        example={
+            "model": "llama-3-8b-instruct",
+            "dataset": "mmlu",
+            "data_type": "all",
+            "limit": 100,
+            "generation_config": {
+                "max_tokens": 2048,
+                "temperature": 0.7
+            }
+        }
+    )
+
+
+class BenchmarkTaskResponse(BaseModel):
+    """Benchmark task response."""
+    id: int
+    user_id: int
+    deployment_id: Optional[int]
+    task_name: str
+    task_type: str
+    status: str
+    config: Dict[str, Any]
+    result: Optional[Dict[str, Any]] = None
+    output_dir: Optional[str] = None
+    error_message: Optional[str] = None
+    started_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
+    celery_task_id: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class BenchmarkDatasetResponse(BaseModel):
+    """Benchmark dataset response."""
+    id: int
+    name: str
+    category: Optional[str]
+    description: Optional[str]
+    dataset_size: Optional[int]
+    metadata: Optional[Dict[str, Any]] = None
+    is_active: bool
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)

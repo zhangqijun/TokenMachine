@@ -103,6 +103,12 @@ class ModelDownloadRequest(BaseModel):
     revision: str = Field(default="master", description="Git revision (branch/tag/commit)")
 
 
+class MockDownloadRequest(BaseModel):
+    """Request body for mock model download (testing)."""
+    local_path: str = Field(..., description="Local model path to copy from (e.g., /home/ht706/Qwen3-Coder-30B-A3B-Instruct-Int4-W4A16)")
+    mock_repo_id: str = Field(default="", description="Mock ModelScope repo ID for display (optional)")
+
+
 @router.post("/models/{model_id}/download")
 async def download_model(
     model_id: int,
@@ -216,6 +222,54 @@ async def get_download_logs(
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to read log file: {str(e)}")
+
+
+@router.post("/models/{model_id}/download/mock")
+async def mock_download_model(
+    model_id: int,
+    data: MockDownloadRequest,
+    admin: User = Depends(verify_admin_access),
+    db: Session = Depends(get_current_db),
+):
+    """
+    Mock model download for testing using a local model.
+
+    This endpoint simulates the download process by copying a local model
+    to the storage path and simulating progress updates. Useful for testing
+    the download workflow without actually downloading from ModelScope.
+
+    Example:
+        local_path: "/home/ht706/Qwen3-Coder-30B-A3B-Instruct-Int4-W4A16"
+        mock_repo_id: "Qwen/qwen3-coder-30b" (optional, for display only)
+    """
+    from backend.services.model_download_service import ModelDownloadService
+
+    service = ModelDownloadService(db)
+
+    try:
+        # Pass mock_repo_id only if provided
+        mock_repo_id = data.mock_repo_id if data.mock_repo_id else None
+
+        task = await service.create_mock_download_task(
+            model_id=model_id,
+            local_path=data.local_path,
+            mock_repo_id=mock_repo_id
+        )
+
+        return {
+            "task_id": task.id,
+            "model_id": model_id,
+            "status": task.status.value,
+            "storage_path": task.model.storage_path,
+            "local_path": data.local_path,
+            "message": "Mock download task created successfully",
+            "note": "This is a simulated download for testing. Files will be copied from local_path."
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Mock download failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
 # ============================================================================

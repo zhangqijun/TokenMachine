@@ -491,3 +491,227 @@ class ModelDownloadService:
             }
             for task in tasks
         ]
+
+    async def create_mock_download_task(
+        self,
+        model_id: int,
+        local_path: str,
+        mock_repo_id: Optional[str] = None
+    ) -> ModelDownloadTask:
+        """
+        Create a mock download task for testing using a local model.
+
+        This simulates the download process by copying/linking a local model
+        to the storage path and simulating progress updates.
+
+        Args:
+            model_id: Database model ID
+            local_path: Local model path (e.g., "/home/ht706/Qwen3-Coder-30B-A3B-Instruct-Int4-W4A16")
+            mock_repo_id: Mock ModelScope repo ID for display (optional)
+
+        Returns:
+            ModelDownloadTask: Download task object
+
+        Raises:
+            ValueError: If model not found or local path doesn't exist
+        """
+        # 1. Validate model
+        model = self.db.query(Model).filter(Model.id == model_id).first()
+        if not model:
+            raise ValueError(f"Model {model_id} not found")
+
+        if model.status == ModelStatus.READY:
+            raise ValueError("Model already downloaded")
+
+        # 2. Validate local path
+        if not os.path.exists(local_path):
+            raise ValueError(f"Local path does not exist: {local_path}")
+
+        # 3. Check for existing active task
+        existing_task = self.db.query(ModelDownloadTask).filter(
+            ModelDownloadTask.model_id == model_id,
+            ModelDownloadTask.status.in_([
+                ModelDownloadTaskStatus.PENDING,
+                ModelDownloadTaskStatus.DOWNLOADING
+            ])
+        ).first()
+
+        if existing_task:
+            logger.info(f"Active download task already exists: {existing_task.id}")
+            return existing_task
+
+        # 4. Calculate storage path and model size
+        safe_name = os.path.basename(local_path.rstrip('/'))
+        storage_path = f"{self.storage_base}/{safe_name}"
+
+        # Calculate actual model size
+        total_bytes = self._calculate_model_size(local_path)
+        total_files = sum([
+            1 for dirpath, dirnames, filenames in os.walk(local_path)
+            for filename in filenames
+            if not filename.startswith('.')
+        ])
+
+        # 5. Create download task
+        task = ModelDownloadTask(
+            model_id=model_id,
+            modelscope_repo_id=mock_repo_id or f"local/{safe_name}",
+            modelscope_revision="local",
+            status=ModelDownloadTaskStatus.PENDING,
+            total_files=total_files,
+            total_bytes=total_bytes
+        )
+
+        self.db.add(task)
+        self.db.commit()
+        self.db.refresh(task)
+
+        # 6. Update model record
+        model.modelscope_repo_id = mock_repo_id or f"local/{safe_name}"
+        model.modelscope_revision = "local"
+        model.storage_path = storage_path
+        model.download_task_id = task.id
+        model.status = ModelStatus.DOWNLOADING
+        self.db.commit()
+
+        logger.info(f"Created mock download task {task.id} for model {model_id} from {local_path}")
+
+        # 7. Execute mock download asynchronously
+        asyncio.create_task(self._execute_mock_download(task.id, local_path))
+
+        return task
+
+    async def _execute_mock_download(self, task_id: int, local_path: str):
+        """
+        Execute mock download task (runs in background).
+
+        Simulates download progress and copies/links local model to storage path.
+
+        Args:
+            task_id: Download task ID
+            local_path: Local model path to copy from
+        """
+        task = self.db.query(ModelDownloadTask).filter(
+            ModelDownloadTask.id == task_id
+        ).first()
+
+        if not task:
+            logger.error(f"Task {task_id} not found")
+            return
+
+        log_file = None
+
+        try:
+            # Update status
+            task.status = ModelDownloadTaskStatus.DOWNLOADING
+            task.started_at = datetime.now()
+            self.db.commit()
+
+            # Create log file
+            log_dir = f"{self.log_path}/downloads"
+            os.makedirs(log_dir, exist_ok=True)
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            log_file = f"{log_dir}/mock_{task.modelscope_repo_id.replace('/', '_')}_{timestamp}.log"
+
+            # Get storage path
+            storage_path = task.model.storage_path
+            os.makedirs(storage_path, exist_ok=True)
+
+            # Log start
+            with open(log_file, "w") as log:
+                log.write(f"[{datetime.now()}] Starting MOCK download from local path\n")
+                log.write(f"[{datetime.now()}] Source: {local_path}\n")
+                log.write(f"[{datetime.now()}] Destination: {storage_path}\n")
+                log.write(f"[{datetime.now()}] Total size: {task.total_bytes} bytes ({task.total_bytes / (1024**3):.2f} GB)\n")
+                log.flush()
+
+                # Simulate download progress (0% to 100% in 20 steps)
+                import shutil
+
+                # First, copy the files (this is the real work)
+                log.write(f"[{datetime.now()}] Copying model files...\n")
+                log.flush()
+
+                # Copy contents from local_path to storage_path
+                for item in os.listdir(local_path):
+                    src = os.path.join(local_path, item)
+                    dst = os.path.join(storage_path, item)
+
+                    if os.path.isdir(src):
+                        shutil.copytree(src, dst, dirs_exist_ok=True)
+                    else:
+                        shutil.copy2(src, dst)
+
+                log.write(f"[{datetime.now()}] Files copied successfully\n")
+                log.flush()
+
+                # Now simulate progress updates
+                total_steps = 20
+                step_duration = 0.5  # seconds per step (total ~10 seconds)
+
+                for i in range(1, total_steps + 1):
+                    await asyncio.sleep(step_duration)
+
+                    progress = int((i / total_steps) * 100)
+                    downloaded_bytes = int((progress / 100) * task.total_bytes)
+
+                    task.progress = progress
+                    task.downloaded_bytes = downloaded_bytes
+                    task.downloaded_files = int((progress / 100) * task.total_files)
+                    task.current_file = f"Simulating file {i}/{total_steps}"
+
+                    # Calculate mock download speed
+                    if progress > 0:
+                        elapsed_seconds = i * step_duration
+                        speed_mbps = (downloaded_bytes / (1024 * 1024)) / elapsed_seconds
+                        task.download_speed_mbps = speed_mbps
+
+                    self.db.commit()
+
+                    log.write(f"[{datetime.now()}] Progress: {progress}% | "
+                             f"Speed: {speed_mbps:.2f} MB/s | "
+                             f"Downloaded: {downloaded_bytes / (1024**3):.2f} GB\n")
+                    log.flush()
+
+                # Download completed
+                log.write(f"[{datetime.now()}] Mock download completed successfully\n")
+                log.write(f"[{datetime.now()}] Model copied to: {storage_path}\n")
+                logger.info(f"Mock download task {task_id} completed successfully")
+
+                # Update task and model
+                task.status = ModelDownloadTaskStatus.COMPLETED
+                task.completed_at = datetime.now()
+                task.progress = 100
+                task.downloaded_bytes = task.total_bytes
+
+                # Update model status
+                model = task.model
+                model.status = ModelStatus.READY
+                model.size_gb = task.total_bytes / (1024 ** 3)
+                model.path = storage_path
+                self.db.commit()
+
+                # Save download metadata
+                self._save_download_metadata(storage_path, task)
+
+                # Notify all workers
+                await self._notify_workers_model_ready(model.id)
+
+                logger.info(f"Model {model.id} is ready, workers notified")
+
+        except Exception as e:
+            error_msg = str(e)
+            if log_file:
+                with open(log_file, "a") as log:
+                    log.write(f"[{datetime.now()}] Exception: {error_msg}\n")
+
+            logger.exception(f"Mock download task {task_id} raised exception")
+
+            task.status = ModelDownloadTaskStatus.FAILED
+            task.error_message = error_msg
+
+            # Update model status
+            model = task.model
+            model.status = ModelStatus.ERROR
+            model.error_message = error_msg
+            self.db.commit()

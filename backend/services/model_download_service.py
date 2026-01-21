@@ -628,21 +628,21 @@ class ModelDownloadService:
                 # Simulate download progress (0% to 100% in 20 steps)
                 import shutil
 
-                # First, copy the files (this is the real work)
-                log.write(f"[{datetime.now()}] Copying model files...\n")
+                # First, use symlink for instant "copy" (much faster for testing)
+                log.write(f"[{datetime.now()}] Creating symlink to model files...\n")
                 log.flush()
 
-                # Copy contents from local_path to storage_path
-                for item in os.listdir(local_path):
-                    src = os.path.join(local_path, item)
-                    dst = os.path.join(storage_path, item)
+                # Remove existing storage_path if it exists
+                if os.path.exists(storage_path):
+                    if os.path.islink(storage_path):
+                        os.unlink(storage_path)
+                    elif os.path.isdir(storage_path):
+                        shutil.rmtree(storage_path)
 
-                    if os.path.isdir(src):
-                        shutil.copytree(src, dst, dirs_exist_ok=True)
-                    else:
-                        shutil.copy2(src, dst)
+                # Create symbolic link to local model
+                os.symlink(local_path, storage_path)
 
-                log.write(f"[{datetime.now()}] Files copied successfully\n")
+                log.write(f"[{datetime.now()}] Symlink created successfully\n")
                 log.flush()
 
                 # Now simulate progress updates

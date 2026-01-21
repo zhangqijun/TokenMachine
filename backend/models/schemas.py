@@ -670,3 +670,195 @@ class BenchmarkDatasetResponse(BaseModel):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+# ============================================================================
+# Gateway Management Schemas
+# ============================================================================
+
+class RoutingMode(str, Enum):
+    """路由模式枚举"""
+    SEMANTIC = "semantic"
+    WEIGHT = "weight"
+    ROUND_ROBIN = "round_robin"
+    LEAST_CONN = "least_conn"
+
+
+class RoutingRule(BaseModel):
+    """路由规则"""
+    pattern: str = Field(..., description="匹配模式（支持正则表达式）")
+    target: str = Field(..., description="目标实例名称")
+    weight: int = Field(default=100, ge=0, le=100, description="权重百分比")
+    priority: int = Field(default=1, ge=1, le=10, description="优先级（数字越小优先级越高）")
+
+
+class RoutingStrategyBase(BaseModel):
+    """路由策略基础 schema"""
+    name: str = Field(..., min_length=1, max_length=255, description="策略名称")
+    description: Optional[str] = Field(None, description="策略描述")
+    mode: RoutingMode = Field(default=RoutingMode.SEMANTIC, description="路由模式")
+    rules: List[RoutingRule] = Field(default_factory=list, description="路由规则列表")
+    is_enabled: bool = Field(default=True, description="是否启用")
+    enable_aggregation: bool = Field(default=False, description="启用 API 聚合")
+    unified_endpoint: Optional[str] = Field(None, description="统一端点路径")
+    response_mode: Optional[str] = Field("best", description="响应模式: best/all/custom")
+
+
+class RoutingStrategyCreate(RoutingStrategyBase):
+    """创建路由策略请求"""
+    pass
+
+
+class RoutingStrategyUpdate(BaseModel):
+    """更新路由策略请求"""
+    name: Optional[str] = Field(None, min_length=1, max_length=255)
+    description: Optional[str] = None
+    mode: Optional[RoutingMode] = None
+    rules: Optional[List[RoutingRule]] = None
+    is_enabled: Optional[bool] = None
+    enable_aggregation: Optional[bool] = None
+    unified_endpoint: Optional[str] = None
+    response_mode: Optional[str] = None
+
+
+class RoutingStrategyResponse(RoutingStrategyBase):
+    """路由策略响应"""
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    bound_keys_count: int
+    today_requests: int
+    p95_latency_ms: int
+    created_at: datetime
+    updated_at: datetime
+
+
+class ApiKeyRouteBindingCreate(BaseModel):
+    """创建 API 密钥路由绑定"""
+    api_key_id: int = Field(..., ge=1)
+    routing_strategy_id: int = Field(..., ge=1)
+    traffic_weight: int = Field(default=100, ge=0, le=100, description="流量权重")
+
+
+class ApiKeyRouteBindingResponse(BaseModel):
+    """API 密钥路由绑定响应"""
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    api_key_id: int
+    routing_strategy_id: int
+    traffic_weight: int
+    created_at: datetime
+
+
+class GatewayConfigUpdate(BaseModel):
+    """更新网关配置"""
+    # 负载均衡配置
+    enable_dynamic_lb: Optional[bool] = None
+    schedule_strategy: Optional[str] = Field(None, pattern="^(queue|response|resource|combined)$")
+    queue_threshold: Optional[int] = Field(None, ge=1, le=200)
+    response_threshold: Optional[int] = Field(None, ge=100, le=30000)
+    gpu_threshold: Optional[int] = Field(None, ge=50, le=100)
+
+    # 健康检查配置
+    enable_failover: Optional[bool] = None
+    check_method: Optional[str] = Field(None, pattern="^(active|passive)$")
+    check_interval: Optional[int] = Field(None, ge=1, le=300)
+    timeout: Optional[int] = Field(None, ge=1, le=60)
+    fail_threshold: Optional[int] = Field(None, ge=1, le=10)
+    response_time_threshold: Optional[int] = Field(None, ge=100, le=30000)
+    error_rate_threshold: Optional[int] = Field(None, ge=1, le=100)
+    queue_depth_threshold: Optional[int] = Field(None, ge=10, le=500)
+    auto_recover: Optional[bool] = None
+    recover_threshold: Optional[int] = Field(None, ge=1, le=10)
+
+
+class GatewayConfigResponse(BaseModel):
+    """网关配置响应"""
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    # 负载均衡配置
+    enable_dynamic_lb: bool
+    schedule_strategy: str
+    queue_threshold: int
+    response_threshold: int
+    gpu_threshold: int
+
+    # 健康检查配置
+    enable_failover: bool
+    check_method: str
+    check_interval: int
+    timeout: int
+    fail_threshold: int
+    response_time_threshold: int
+    error_rate_threshold: int
+    queue_depth_threshold: int
+    auto_recover: bool
+    recover_threshold: int
+
+    updated_at: datetime
+
+
+class InstanceHealthStatus(str, Enum):
+    """实例健康状态枚举"""
+    HEALTHY = "healthy"
+    WARNING = "warning"
+    FAILED = "failed"
+
+
+class InstanceHealthResponse(BaseModel):
+    """实例健康状态响应"""
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    model_instance_id: int
+    status: InstanceHealthStatus
+    last_check_at: datetime
+    fail_count: int
+    consecutive_success_count: int
+    queue_depth: int
+    response_time_ms: int
+    gpu_utilization: float
+    error_rate: float
+    created_at: datetime
+    updated_at: datetime
+
+
+class FailoverEventType(str, Enum):
+    """故障转移事件类型枚举"""
+    TIMEOUT = "timeout"
+    ERROR = "error"
+    OVERLOAD = "overload"
+    MANUAL = "manual"
+    HEALTH_CHECK_FAILED = "health_check_failed"
+
+
+class FailoverEventResponse(BaseModel):
+    """故障转移事件响应"""
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    source_instance_id: Optional[int]
+    target_instance_id: Optional[int]
+    event_type: FailoverEventType
+    reason: Optional[str]
+    triggered_by: Optional[str]
+    created_at: datetime
+
+
+class ManualFailoverRequest(BaseModel):
+    """手动故障转移请求"""
+    source_instance_id: int = Field(..., ge=1, description="源实例 ID")
+    target_instance_id: Optional[int] = Field(None, ge=1, description="目标实例 ID（可选，自动选择）")
+    reason: Optional[str] = Field(None, description="转移原因")
+
+
+class InstanceLoadResponse(BaseModel):
+    """实例负载响应"""
+    model_instance_id: int
+    instance_name: str
+    queue_depth: int
+    response_time_ms: int
+    gpu_utilization: float
+    status: InstanceHealthStatus

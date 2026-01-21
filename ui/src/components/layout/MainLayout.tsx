@@ -11,9 +11,8 @@ import {
   UserOutlined,
   LogoutOutlined,
   BellOutlined,
-  ClusterOutlined,
   ExperimentOutlined,
-  ThunderboltOutlined,
+  CloudServerOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 
@@ -31,15 +30,15 @@ const MainLayout = () => {
       onClick: () => navigate('/dashboard'),
     },
     {
-      key: '/cluster',
-      icon: <ClusterOutlined />,
-      label: '集群管理',
-      onClick: () => navigate('/cluster'),
+      key: '/nodes-deployments',
+      icon: <CloudServerOutlined />,
+      label: '节点与引擎',
+      onClick: () => navigate('/nodes-deployments'),
     },
     {
       key: '/models',
       icon: <DatabaseOutlined />,
-      label: '模型管理',
+      label: '模型与实例',
       onClick: () => navigate('/models'),
     },
     {
@@ -49,28 +48,16 @@ const MainLayout = () => {
       onClick: () => navigate('/playground'),
     },
     {
-      key: '/deployments',
-      icon: <RocketOutlined />,
-      label: '部署管理',
-      onClick: () => navigate('/deployments'),
-    },
-    {
-      key: '/backend',
-      icon: <ThunderboltOutlined />,
-      label: '后端管理',
-      onClick: () => navigate('/backend'),
-    },
-    {
       key: '/monitoring',
       icon: <BarChartOutlined />,
       label: '监控面板',
       onClick: () => navigate('/monitoring'),
     },
     {
-      key: '/api-keys',
+      key: '/gateway',
       icon: <SafetyOutlined />,
-      label: 'API Keys',
-      onClick: () => navigate('/api-keys'),
+      label: '网关管理',
+      onClick: () => navigate('/gateway'),
     },
     {
       key: '/settings',

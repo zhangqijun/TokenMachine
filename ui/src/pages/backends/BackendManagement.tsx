@@ -1,493 +1,631 @@
-import { useState, useMemo } from 'react';
-import { Row, Col, Button, Space, Select, message, Modal, Form, Input, Empty } from 'antd';
+import { useState } from 'react';
 import {
-  ReloadOutlined,
-  FilterOutlined,
+  Card,
+  Tabs,
+  Table,
+  Button,
+  Tag,
+  Space,
+  Modal,
+  Form,
+  Input,
+  Select,
+  message,
+  Typography,
+  Progress,
+  Popconfirm,
+  Row,
+  Col,
+  Statistic,
+  Divider,
+  Tooltip,
+} from 'antd';
+import {
+  DeleteOutlined,
+  DownloadOutlined,
   CheckCircleOutlined,
+  LoadingOutlined,
   WarningOutlined,
+  RocketOutlined,
+  ThunderboltOutlined,
+  InfoCircleOutlined,
+  DatabaseOutlined,
 } from '@ant-design/icons';
-import BackendCard from './components/BackendCard';
-import type { BackendInfo } from './types';
+import dayjs from 'dayjs';
+
+const { Title, Text } = Typography;
+
+interface BackendVersion {
+  id: string;
+  version: string;
+  status: 'installed' | 'installing' | 'failed';
+  imageName: string;
+  installPath: string;
+  installedAt: string;
+  size: string;
+  runningInstances: number;
+}
+
+interface BackendInfo {
+  type: 'vllm' | 'sglang' | 'llamacpp';
+  name: string;
+  displayName: string;
+  description: string;
+  icon: React.ReactNode;
+  homepage: string;
+  versions: BackendVersion[];
+}
 
 const BackendManagement = () => {
-  const [loading, setLoading] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [selectedBackend, setSelectedBackend] = useState<BackendInfo | null>(null);
-  const [configModalVisible, setConfigModalVisible] = useState(false);
-  const [logsModalVisible, setLogsModalVisible] = useState(false);
+  const [activeTab, setActiveTab] = useState<'vllm' | 'sglang' | 'llamacpp'>('vllm');
+  const [isInstallModalOpen, setIsInstallModalOpen] = useState(false);
+  const [installing, setInstalling] = useState(false);
+  const [installProgress, setInstallProgress] = useState(0);
+  const [currentInstallingVersion, setCurrentInstallingVersion] = useState('');
   const [form] = Form.useForm();
 
-  // Mock data - 后端列表
-  const [backends, setBackends] = useState<BackendInfo[]>([
-    {
-      id: 'vllm',
+  // Mock data - 已安装的引擎版本
+  const [backends, setBackends] = useState<Record<string, BackendInfo>>({
+    vllm: {
+      type: 'vllm',
       name: 'vllm',
       displayName: 'vLLM',
-      version: '0.6.3',
-      status: 'installed',
-      icon: 'thunderbolt',
-      description: '高性能的LLM推理引擎，支持PagedAttention和连续批处理',
+      description: '高性能推理引擎，支持 PagedAttention 和连续批处理',
+      icon: <RocketOutlined />,
       homepage: 'https://github.com/vllm-project/vllm',
-      documentation: 'https://docs.vllm.ai/',
-      features: {
-        tensorParallel: true,
-        prefixCaching: true,
-        multiLora: false,
-        speculativeDecoding: true,
-        quantization: ['fp16', 'int8', 'int4', 'awq', 'gptq'],
-        modelFormats: ['hf', 'vllm'],
-      },
-      performance: {
-        avgTps: 145,
-        memoryEfficiency: 92,
-        startupTime: 12,
-      },
-      compatibility: {
-        gpuVendors: ['NVIDIA'],
-        minGpuMemory: 16,
-        supportedModels: ['Llama', 'Qwen', 'Mistral', 'ChatGLM'],
-      },
-      config: {
-        installedPath: '/opt/vllm',
-        configPath: '/etc/vllm/config.yaml',
-        port: 8000,
-      },
-      stats: {
-        activeDeployments: 5,
-        totalRequests: 125430,
-        lastHealthCheck: new Date(Date.now() - 300000).toISOString(),
-      },
+      versions: [
+        {
+          id: 'vllm-0.6.3',
+          version: '0.6.3',
+          status: 'installed',
+          imageName: 'vllm/vllm-openapi:v0.6.3',
+          installPath: '/opt/vllm/v0.6.3',
+          installedAt: '2025-01-15 10:30:00',
+          size: '2.3 GB',
+          runningInstances: 5,
+        },
+        {
+          id: 'vllm-0.6.0',
+          version: '0.6.0',
+          status: 'installed',
+          imageName: 'vllm/vllm-openapi:v0.6.0',
+          installPath: '/opt/vllm/v0.6.0',
+          installedAt: '2025-01-10 14:20:00',
+          size: '2.1 GB',
+          runningInstances: 0,
+        },
+        {
+          id: 'vllm-0.5.0',
+          version: '0.5.0',
+          status: 'installed',
+          imageName: 'vllm/vllm-openapi:v0.5.0',
+          installPath: '/opt/vllm/v0.5.0',
+          installedAt: '2025-01-05 09:15:00',
+          size: '2.0 GB',
+          runningInstances: 0,
+        },
+      ],
     },
-    {
-      id: 'sglang',
+    sglang: {
+      type: 'sglang',
       name: 'sglang',
       displayName: 'SGLang',
-      version: '0.3.2',
-      status: 'outdated',
-      updateAvailable: '0.4.0',
-      icon: 'star',
-      description: '优化的结构化语言生成推理引擎，提供高效的内存管理和调度',
+      description: '高吞吐量推理引擎，优化结构化生成',
+      icon: <ThunderboltOutlined />,
       homepage: 'https://github.com/sgl-project/sglang',
-      features: {
-        tensorParallel: true,
-        prefixCaching: true,
-        multiLora: true,
-        speculativeDecoding: false,
-        quantization: ['fp16', 'int8', 'int4'],
-        modelFormats: ['hf', 'sglang'],
-      },
-      compatibility: {
-        gpuVendors: ['NVIDIA'],
-        minGpuMemory: 24,
-        supportedModels: ['Llama', 'Qwen', 'Yi'],
-      },
-      config: {
-        installedPath: '/opt/sglang',
-        port: 8001,
-      },
-      stats: {
-        activeDeployments: 2,
-        totalRequests: 45210,
-        lastHealthCheck: new Date(Date.now() - 600000).toISOString(),
-      },
+      versions: [
+        {
+          id: 'sglang-0.3.2',
+          version: '0.3.2',
+          status: 'installed',
+          imageName: 'lmsysorg/sglang:v0.3.2',
+          installPath: '/opt/sglang/v0.3.2',
+          installedAt: '2025-01-12 09:15:00',
+          size: '1.8 GB',
+          runningInstances: 2,
+        },
+        {
+          id: 'sglang-0.3.0',
+          version: '0.3.0',
+          status: 'installed',
+          imageName: 'lmsysorg/sglang:v0.3.0',
+          installPath: '/opt/sglang/v0.3.0',
+          installedAt: '2025-01-08 16:30:00',
+          size: '1.7 GB',
+          runningInstances: 0,
+        },
+      ],
     },
-    {
-      id: 'chitu',
-      name: 'chitu',
-      displayName: 'Chitu',
-      version: '1.2.1',
-      status: 'installed',
-      icon: 'database',
-      description: '国产AI芯片推理引擎，支持华为昇腾、沐曦等国产硬件',
-      homepage: 'https://github.com/ChituEngine',
-      features: {
-        tensorParallel: true,
-        prefixCaching: true,
-        multiLora: false,
-        speculativeDecoding: false,
-        quantization: ['fp16', 'int8', 'int4'],
-        modelFormats: ['hf', 'chitu'],
-      },
-      performance: {
-        avgTps: 98,
-        memoryEfficiency: 88,
-        startupTime: 18,
-      },
-      compatibility: {
-        gpuVendors: ['华为昇腾', '沐曦', '海光'],
-        minGpuMemory: 32,
-        supportedModels: ['ChatGLM', 'Qwen', 'Baichuan'],
-      },
-      config: {
-        installedPath: '/opt/chitu',
-        port: 8002,
-      },
-      stats: {
-        activeDeployments: 3,
-        totalRequests: 28950,
-        lastHealthCheck: new Date(Date.now() - 180000).toISOString(),
-      },
-    },
-    {
-      id: 'llamacpp',
+    llamacpp: {
+      type: 'llamacpp',
       name: 'llamacpp',
       displayName: 'llama.cpp',
-      version: 'b3925',
-      status: 'not_installed',
-      icon: 'cloud',
-      description: '轻量级C++推理引擎，支持在CPU和消费级GPU上运行大模型',
+      description: '轻量级推理引擎，支持 CPU 和 Apple Silicon',
+      icon: <DatabaseOutlined />,
       homepage: 'https://github.com/ggerganov/llama.cpp',
-      features: {
-        tensorParallel: false,
-        prefixCaching: false,
-        multiLora: false,
-        speculativeDecoding: true,
-        quantization: ['q4_0', 'q4_k', 'q5_0', 'q5_k', 'q6_k', 'q8_0'],
-        modelFormats: ['gguf'],
-      },
-      compatibility: {
-        gpuVendors: ['NVIDIA', 'AMD', 'Apple', 'CPU'],
-        minGpuMemory: 8,
-        supportedModels: ['Llama', 'Mistral', 'Qwen'],
-      },
-      config: {},
-      stats: {
-        activeDeployments: 0,
-        totalRequests: 0,
-        lastHealthCheck: new Date().toISOString(),
-      },
+      versions: [
+        {
+          id: 'llamacpp-b4380',
+          version: 'b4380',
+          status: 'installed',
+          imageName: 'ghcr.io/ggerganov/llama.cpp:latest-b4380',
+          installPath: '/opt/llamacpp/b4380',
+          installedAt: '2025-01-18 11:20:00',
+          size: '850 MB',
+          runningInstances: 1,
+        },
+      ],
     },
-    {
-      id: 'mindie',
-      name: 'mindie',
-      displayName: 'MindIE',
-      version: '2.1.0',
-      status: 'error',
-      icon: 'sync',
-      description: '华为昇腾专用的推理引擎，提供最佳的性能优化',
-      homepage: 'https://www.hiascend.com/software/mindie',
-      features: {
-        tensorParallel: true,
-        prefixCaching: true,
-        multiLora: true,
-        speculativeDecoding: false,
-        quantization: ['fp16', 'int8', 'int4'],
-        modelFormats: ['hf', 'mindie'],
-      },
-      compatibility: {
-        gpuVendors: ['华为昇腾'],
-        minGpuMemory: 32,
-        supportedModels: ['ChatGLM', 'Qwen', 'Baichuan', 'Llama'],
-      },
-      config: {
-        installedPath: '/opt/mindie',
-        port: 8003,
-      },
-      stats: {
-        activeDeployments: 0,
-        totalRequests: 0,
-        lastHealthCheck: new Date(Date.now() - 3600000).toISOString(),
-      },
-    },
-    {
-      id: 'ktransformer',
-      name: 'ktransformer',
-      displayName: 'KTransformer',
-      version: '0.8.5',
-      status: 'not_installed',
-      icon: 'setting',
-      description: '高效的大模型推理服务框架，支持多种硬件和模型格式',
-      homepage: 'https://github.com/Infini-Tensor/KTransformer',
-      features: {
-        tensorParallel: true,
-        prefixCaching: true,
-        multiLora: true,
-        speculativeDecoding: false,
-        quantization: ['fp16', 'int8', 'int4', 'gptq'],
-        modelFormats: ['hf', 'awq', 'gptq'],
-      },
-      compatibility: {
-        gpuVendors: ['NVIDIA', '华为昇腾'],
-        minGpuMemory: 16,
-        supportedModels: ['Llama', 'Qwen', 'ChatGLM', 'Yi'],
-      },
-      config: {},
-      stats: {
-        activeDeployments: 0,
-        totalRequests: 0,
-        lastHealthCheck: new Date().toISOString(),
-      },
-    },
-  ]);
+  });
 
-  // 过滤后端
-  const filteredBackends = useMemo(() => {
-    if (statusFilter === 'all') return backends;
-    return backends.filter((b) => b.status === statusFilter);
-  }, [backends, statusFilter]);
-
-  const handleRefresh = async () => {
-    setLoading(true);
-    // TODO: 调用API刷新后端状态
-    setTimeout(() => {
-      setLoading(false);
-      message.success('刷新成功');
-    }, 1000);
+  // 可安装的版本列表（模拟）
+  const availableVersions: Record<string, string[]> = {
+    vllm: ['0.6.3', '0.6.2', '0.6.0', '0.5.0', '0.4.0'],
+    sglang: ['0.3.2', '0.3.1', '0.3.0', '0.2.0'],
+    llamacpp: ['b4380', 'b4025', 'b3956', 'b3856'],
   };
 
-  const handleInstall = async (backendId: string) => {
-    Modal.confirm({
-      title: '确认安装',
-      content: `确定要安装 ${backends.find(b => b.id === backendId)?.displayName} 吗？`,
-      onOk: () => {
-        message.success('开始安装');
-        // TODO: 调用API安装
-      },
-    });
-  };
+  const currentBackend = backends[activeTab];
 
-  const handleUpgrade = async (backendId: string) => {
-    const backend = backends.find(b => b.id === backendId);
-    Modal.confirm({
-      title: '确认升级',
-      content: `确定要将 ${backend?.displayName} 从 ${backend?.version} 升级到 ${backend?.updateAvailable} 吗？`,
-      onOk: () => {
-        message.success('开始升级');
-        // TODO: 调用API升级
-      },
-    });
-  };
-
-  const handleConfigure = (backendId: string) => {
-    const backend = backends.find(b => b.id === backendId);
-    setSelectedBackend(backend || null);
-    form.setFieldsValue(backend?.config);
-    setConfigModalVisible(true);
-  };
-
-  const handleUninstall = async (backendId: string) => {
-    Modal.confirm({
-      title: '确认卸载',
-      content: '确定要卸载此后端吗？这将影响所有使用该后端的部署。',
-      okText: '确认',
-      okType: 'danger',
-      onOk: () => {
-        message.success('卸载成功');
-        // TODO: 调用API卸载
-      },
-    });
-  };
-
-  const handleViewLogs = (backendId: string) => {
-    setSelectedBackend(backends.find(b => b.id === backendId) || null);
-    setLogsModalVisible(true);
-  };
-
-  const handleSaveConfig = async () => {
-    try {
-      const values = await form.validateFields();
-      message.success('配置已保存');
-      setConfigModalVisible(false);
-      // TODO: 调用API保存配置
-    } catch (error) {
-      console.error('Validation failed:', error);
-    }
-  };
-
-  const stats = useMemo(() => {
-    return {
-      total: backends.length,
-      installed: backends.filter(b => b.status === 'installed').length,
-      outdated: backends.filter(b => b.status === 'outdated').length,
-      error: backends.filter(b => b.status === 'error').length,
+  const getStatusConfig = (status: BackendVersion['status']) => {
+    const configs = {
+      installed: { color: 'success', icon: <CheckCircleOutlined />, text: '已安装' },
+      installing: { color: 'processing', icon: <LoadingOutlined />, text: '安装中' },
+      failed: { color: 'error', icon: <WarningOutlined />, text: '安装失败' },
     };
-  }, [backends]);
+    return configs[status];
+  };
+
+  const handleDelete = (backendType: string, version: BackendVersion) => {
+    if (version.runningInstances > 0) {
+      message.error(`该版本有 ${version.runningInstances} 个正在运行的实例，请先停止实例后再删除`);
+      return;
+    }
+
+    setBackends(prev => ({
+      ...prev,
+      [backendType]: {
+        ...prev[backendType],
+        versions: prev[backendType].versions.filter(v => v.id !== version.id),
+      },
+    }));
+    message.success(`版本 ${version.version} 删除成功`);
+  };
+
+  const handleInstall = async (values: any) => {
+    // 检查版本是否已存在
+    const exists = backends[activeTab].versions.some(
+      v => v.version === values.version && v.status !== 'failed'
+    );
+
+    if (exists) {
+      message.error(`版本 ${values.version} 已安装`);
+      return;
+    }
+
+    setInstalling(true);
+    setInstallProgress(0);
+    setCurrentInstallingVersion(values.version);
+
+    // 模拟安装进度
+    const progressInterval = setInterval(() => {
+      setInstallProgress(prev => {
+        if (prev >= 95) {
+          clearInterval(progressInterval);
+          return prev;
+        }
+        return prev + Math.random() * 15;
+      });
+    }, 500);
+
+    // 模拟安装完成
+    setTimeout(() => {
+      clearInterval(progressInterval);
+      setInstallProgress(100);
+
+      const newVersion: BackendVersion = {
+        id: `${activeTab}-${values.version}`,
+        version: values.version,
+        status: 'installed',
+        imageName: values.imageName || `${activeTab}/${activeTab}:${values.version}`,
+        installPath: values.installPath || `/opt/${activeTab}/v${values.version}`,
+        installedAt: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+        size: '2.0 GB',
+        runningInstances: 0,
+      };
+
+      setBackends(prev => ({
+        ...prev,
+        [activeTab]: {
+          ...prev[activeTab],
+          versions: [...prev[activeTab].versions, newVersion],
+        },
+      }));
+
+      setInstalling(false);
+      setIsInstallModalOpen(false);
+      setCurrentInstallingVersion('');
+      form.resetFields();
+      message.success(`${currentBackend.displayName} ${values.version} 安装成功`);
+    }, 4000);
+  };
+
+  const columns = [
+    {
+      title: '版本号',
+      dataIndex: 'version',
+      key: 'version',
+      render: (version: string) => (
+        <Text strong style={{ fontSize: 15 }}>{version}</Text>
+      ),
+    },
+    {
+      title: '状态',
+      dataIndex: 'status',
+      key: 'status',
+      render: (status: BackendVersion['status']) => {
+        const config = getStatusConfig(status);
+        return (
+          <Tag color={config.color} icon={config.icon} style={{ fontSize: 13 }}>
+            {config.text}
+          </Tag>
+        );
+      },
+    },
+    {
+      title: '镜像名称',
+      dataIndex: 'imageName',
+      key: 'imageName',
+      render: (imageName: string) => <Text code style={{ fontSize: 12 }}>{imageName}</Text>,
+    },
+    {
+      title: '占用空间',
+      dataIndex: 'size',
+      key: 'size',
+      render: (size: string) => <Text>{size}</Text>,
+    },
+    {
+      title: '运行中实例',
+      dataIndex: 'runningInstances',
+      key: 'runningInstances',
+      render: (count: number) => (
+        <Tag color={count > 0 ? 'green' : 'default'}>{count} 个</Tag>
+      ),
+    },
+    {
+      title: '安装时间',
+      dataIndex: 'installedAt',
+      key: 'installedAt',
+      render: (date: string) => dayjs(date).format('YYYY-MM-DD HH:mm'),
+    },
+    {
+      title: '操作',
+      key: 'actions',
+      width: 120,
+      render: (_: any, record: BackendVersion) => (
+        <Space size={4}>
+          {record.status === 'installed' && record.runningInstances === 0 && (
+            <Popconfirm
+              title="确认删除"
+              description={`确定要删除版本 ${record.version} 吗？`}
+              onConfirm={() => handleDelete(activeTab, record)}
+              okText="删除"
+              cancelText="取消"
+              okButtonProps={{ danger: true }}
+            >
+              <Button
+                type="link"
+                size="small"
+                danger
+                icon={<DeleteOutlined />}
+              >
+                删除
+              </Button>
+            </Popconfirm>
+          )}
+          {record.runningInstances > 0 && (
+            <Tooltip title={`有 ${record.runningInstances} 个实例正在运行，请先停止`}>
+              <Button type="link" size="small" disabled>
+                删除
+              </Button>
+            </Tooltip>
+          )}
+        </Space>
+      ),
+    },
+  ];
+
+  // 计算统计数据
+  const totalVersions = Object.values(backends).reduce(
+    (sum, backend) => sum + backend.versions.filter(v => v.status === 'installed').length,
+    0
+  );
+  const totalSize = Object.values(backends)
+    .flatMap(backend => backend.versions)
+    .reduce((sum, v) => {
+      const sizeGB = parseFloat(v.size);
+      return sum + sizeGB;
+    }, 0);
+  const activeInstances = Object.values(backends)
+    .flatMap(backend => backend.versions)
+    .reduce((sum, v) => sum + v.runningInstances, 0);
+
+  const tabItems = [
+    {
+      key: 'vllm',
+      label: (
+        <Space>
+          <RocketOutlined style={{ fontSize: 16 }} />
+          <span style={{ fontWeight: 500 }}>vLLM</span>
+          <Tag color={backends.vllm.versions.length > 0 ? 'blue' : 'default'}>
+            {backends.vllm.versions.length}
+          </Tag>
+        </Space>
+      ),
+      children: null,
+    },
+    {
+      key: 'sglang',
+      label: (
+        <Space>
+          <ThunderboltOutlined style={{ fontSize: 16 }} />
+          <span style={{ fontWeight: 500 }}>SGLang</span>
+          <Tag color={backends.sglang.versions.length > 0 ? 'blue' : 'default'}>
+            {backends.sglang.versions.length}
+          </Tag>
+        </Space>
+      ),
+      children: null,
+    },
+    {
+      key: 'llamacpp',
+      label: (
+        <Space>
+          <DatabaseOutlined style={{ fontSize: 16 }} />
+          <span style={{ fontWeight: 500 }}>llama.cpp</span>
+          <Tag color={backends.llamacpp.versions.length > 0 ? 'blue' : 'default'}>
+            {backends.llamacpp.versions.length}
+          </Tag>
+        </Space>
+      ),
+      children: null,
+    },
+  ];
 
   return (
-    <div>
-      {/* 头部 */}
+    <div style={{ padding: '0 0 24px 0' }}>
+      {/* 页面标题 */}
       <div style={{ marginBottom: 24 }}>
-        <h2 style={{ margin: 0, fontSize: 24, fontWeight: 600 }}>后端管理</h2>
-        <p style={{ margin: '8px 0 0 0', color: '#666' }}>
-          管理推理引擎后端，包括安装、升级、配置和监控
-        </p>
-      </div>
-
-      {/* 统计卡片 */}
-      <Row gutter={16} style={{ marginBottom: 16 }}>
-        <Col span={6}>
-          <div
-            style={{
-              padding: 16,
-              background: '#f0f2f5',
-              borderRadius: 8,
-              textAlign: 'center',
-            }}
-          >
-            <div style={{ fontSize: 24, fontWeight: 600, color: '#1890ff' }}>
-              {stats.total}
-            </div>
-            <div style={{ fontSize: 12, color: '#666' }}>总后端数</div>
+        <Space style={{ justifyContent: 'space-between', width: '100%' }}>
+          <div>
+            <Title level={3} style={{ margin: 0 }}>
+              引擎管理
+            </Title>
+            <Text type="secondary" style={{ fontSize: 14 }}>
+              管理 vLLM、SGLang 和 llama.cpp 推理引擎的多个版本
+            </Text>
           </div>
-        </Col>
-        <Col span={6}>
-          <div
-            style={{
-              padding: 16,
-              background: '#f0f2f5',
-              borderRadius: 8,
-              textAlign: 'center',
-            }}
+          <Button
+            type="primary"
+            icon={<DownloadOutlined />}
+            size="large"
+            onClick={() => setIsInstallModalOpen(true)}
           >
-            <div style={{ fontSize: 24, fontWeight: 600, color: '#52c41a' }}>
-              {stats.installed}
-            </div>
-            <div style={{ fontSize: 12, color: '#666' }}>已安装</div>
-          </div>
-        </Col>
-        <Col span={6}>
-          <div
-            style={{
-              padding: 16,
-              background: '#f0f2f5',
-              borderRadius: 8,
-              textAlign: 'center',
-            }}
-          >
-            <div style={{ fontSize: 24, fontWeight: 600, color: '#faad14' }}>
-              {stats.outdated}
-            </div>
-            <div style={{ fontSize: 12, color: '#666' }}>待更新</div>
-          </div>
-        </Col>
-        <Col span={6}>
-          <div
-            style={{
-              padding: 16,
-              background: '#f0f2f5',
-              borderRadius: 8,
-              textAlign: 'center',
-            }}
-          >
-            <div style={{ fontSize: 24, fontWeight: 600, color: '#f5222d' }}>
-              {stats.error}
-            </div>
-            <div style={{ fontSize: 12, color: '#666' }}>错误</div>
-          </div>
-        </Col>
-      </Row>
-
-      {/* 操作栏 */}
-      <div
-        style={{
-          marginBottom: 16,
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}
-      >
-        <Space>
-          <Select
-            value={statusFilter}
-            onChange={setStatusFilter}
-            style={{ width: 150 }}
-            suffixIcon={<FilterOutlined />}
-          >
-            <Select.Option value="all">全部状态</Select.Option>
-            <Select.Option value="installed">已安装</Select.Option>
-            <Select.Option value="not_installed">未安装</Select.Option>
-            <Select.Option value="outdated">待更新</Select.Option>
-            <Select.Option value="error">错误</Select.Option>
-          </Select>
-        </Space>
-        <Space>
-          <Button icon={<ReloadOutlined />} onClick={handleRefresh} loading={loading}>
-            刷新
+            安装新版本
           </Button>
         </Space>
       </div>
 
-      {/* 后端卡片网格 */}
-      {filteredBackends.length === 0 ? (
-        <Empty description="没有找到匹配的后端" style={{ marginTop: 64 }} />
-      ) : (
-        <Row gutter={[16, 16]}>
-          {filteredBackends.map((backend) => (
-            <Col key={backend.id} xs={24} sm={12} lg={8} xl={6}>
-              <BackendCard
-                backend={backend}
-                onInstall={handleInstall}
-                onUpgrade={handleUpgrade}
-                onConfigure={handleConfigure}
-                onViewLogs={handleViewLogs}
-              />
-            </Col>
-          ))}
-        </Row>
-      )}
+      {/* 统计卡片 */}
+      <Row gutter={16} style={{ marginBottom: 24 }}>
+        <Col span={6}>
+          <Card>
+            <Statistic
+              title="已安装版本"
+              value={totalVersions}
+              prefix={<CheckCircleOutlined />}
+              valueStyle={{ color: '#52c41a', fontSize: 28 }}
+              suffix="个"
+            />
+          </Card>
+        </Col>
+        <Col span={6}>
+          <Card>
+            <Statistic
+              title="占用空间"
+              value={totalSize.toFixed(1)}
+              prefix={<DatabaseOutlined />}
+              valueStyle={{ color: '#1890ff', fontSize: 28 }}
+              suffix="GB"
+            />
+          </Card>
+        </Col>
+        <Col span={6}>
+          <Card>
+            <Statistic
+              title="运行中实例"
+              value={activeInstances}
+              prefix={<RocketOutlined />}
+              valueStyle={{ color: '#722ed1', fontSize: 28 }}
+              suffix="个"
+            />
+          </Card>
+        </Col>
+        <Col span={6}>
+          <Card>
+            <Statistic
+              title="引擎类型"
+              value={3}
+              valueStyle={{ color: '#fa8c16', fontSize: 28 }}
+              suffix="种"
+            />
+          </Card>
+        </Col>
+      </Row>
 
-      {/* 配置模态框 */}
-      <Modal
-        title={`配置 ${selectedBackend?.displayName}`}
-        open={configModalVisible}
-        onCancel={() => {
-          setConfigModalVisible(false);
-          setSelectedBackend(null);
-        }}
-        onOk={handleSaveConfig}
-        width={600}
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item label="安装路径" name="installedPath">
-            <Input />
-          </Form.Item>
-          <Form.Item label="配置文件路径" name="configPath">
-            <Input />
-          </Form.Item>
-          <Form.Item label="服务端口" name="port">
-            <Input type="number" />
-          </Form.Item>
-          <Form.Item label="环境变量" name="envVars">
-            <Input.TextArea rows={4} placeholder="KEY=VALUE，每行一个" />
-          </Form.Item>
-        </Form>
-      </Modal>
+      <Card>
+        {/* Tab 切换 */}
+        <Tabs
+          activeKey={activeTab}
+          onChange={(key) => setActiveTab(key as 'vllm' | 'sglang' | 'llamacpp')}
+          items={tabItems}
+          size="large"
+        />
 
-      {/* 日志模态框 */}
+        <Divider />
+
+        {/* 引擎信息 */}
+        <div style={{ marginBottom: 24 }}>
+          <Space direction="vertical" size={8}>
+            <Space>
+              <span style={{ fontSize: 20, fontWeight: 500 }}>
+                {currentBackend.icon} {currentBackend.displayName}
+              </span>
+              <a href={currentBackend.homepage} target="_blank" rel="noopener noreferrer">
+                <InfoCircleOutlined /> 文档
+              </a>
+            </Space>
+            <Text type="secondary" style={{ fontSize: 14 }}>
+              {currentBackend.description}
+            </Text>
+          </Space>
+        </div>
+
+        {/* 版本列表 */}
+        <Table
+          columns={columns}
+          dataSource={currentBackend.versions}
+          rowKey="id"
+          pagination={false}
+          size="middle"
+        />
+      </Card>
+
+      {/* 安装对话框 */}
       <Modal
-        title={`${selectedBackend?.displayName} 日志`}
-        open={logsModalVisible}
+        title={
+          <Space>
+            <DownloadOutlined />
+            <span>安装 {currentBackend.displayName}</span>
+          </Space>
+        }
+        open={isInstallModalOpen}
         onCancel={() => {
-          setLogsModalVisible(false);
-          setSelectedBackend(null);
+          if (!installing) {
+            setIsInstallModalOpen(false);
+            form.resetFields();
+            setInstallProgress(0);
+            setCurrentInstallingVersion('');
+          }
         }}
-        footer={[
-          <Button key="close" onClick={() => setLogsModalVisible(false)}>
-            关闭
+        footer={installing ? null : [
+          <Button key="cancel" onClick={() => setIsInstallModalOpen(false)}>
+            取消
+          </Button>,
+          <Button
+            key="install"
+            type="primary"
+            loading={installing}
+            onClick={() => form.submit()}
+            size="large"
+          >
+            开始安装
           </Button>,
         ]}
-        width={800}
+        width={600}
       >
-        <div
-          style={{
-            background: '#1e1e1e',
-            color: '#d4d4d4',
-            padding: 16,
-            borderRadius: 4,
-            fontFamily: 'monospace',
-            fontSize: 12,
-            maxHeight: 400,
-            overflow: 'auto',
-          }}
-        >
-          <div>2024-01-20 10:30:15 [INFO] 服务启动成功，监听端口 {selectedBackend?.config?.port}</div>
-          <div>2024-01-20 10:30:16 [INFO] 加载模型配置</div>
-          <div>2024-01-20 10:30:18 [INFO] 初始化GPU资源</div>
-          <div>2024-01-20 10:30:20 [INFO] 模型加载完成，ready to serve</div>
-          <div style={{ color: '#52c41a' }}>2024-01-20 10:35:22 [INFO] 健康检查通过</div>
-          <div style={{ color: '#faad14' }}>2024-01-20 10:45:30 [WARN] GPU内存使用率达到85%</div>
-          <div style={{ color: '#52c41a' }}>2024-01-20 10:50:45 [INFO] 请求处理成功，耗时125ms</div>
-        </div>
+        {installing ? (
+          <div style={{ padding: '24px 0' }}>
+            <Space direction="vertical" size={16} style={{ width: '100%' }}>
+              <Text strong style={{ fontSize: 15 }}>
+                正在安装 {currentBackend.displayName} {currentInstallingVersion}...
+              </Text>
+              <Progress
+                percent={Math.round(installProgress)}
+                status="active"
+                strokeColor={{ '0%': '#108ee9', '100%': '#87d068' }}
+                size="large"
+              />
+              <Text type="secondary">
+                安装过程可能需要几分钟，请耐心等待...
+              </Text>
+            </Space>
+          </div>
+        ) : (
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={handleInstall}
+            size="large"
+          >
+            <Form.Item label="引擎类型">
+              <Input
+                value={`${currentBackend.icon} ${currentBackend.displayName}`}
+                disabled
+                style={{ fontSize: 15 }}
+              />
+            </Form.Item>
+
+            <Form.Item
+              label="选择版本"
+              name="version"
+              rules={[{ required: true, message: '请选择版本' }]}
+            >
+              <Select
+                placeholder="选择要安装的版本"
+                size="large"
+                showSearch
+              >
+                {availableVersions[activeTab].map(ver => (
+                  <Select.Option key={ver} value={ver}>
+                    <Space>
+                      <Text strong>v{ver}</Text>
+                      {ver === availableVersions[activeTab][0] && (
+                        <Tag color="green">最新</Tag>
+                      )}
+                    </Space>
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+
+            <Form.Item
+              label="镜像名称"
+              name="imageName"
+              initialValue={`${activeTab}/${activeTab}:latest`}
+              rules={[{ required: true, message: '请输入镜像名称' }]}
+            >
+              <Input
+                placeholder="vllm/vllm-openapi:latest"
+                size="large"
+              />
+            </Form.Item>
+
+            <Form.Item
+              label="安装路径"
+              name="installPath"
+              initialValue={`/opt/${activeTab}`}
+              rules={[{ required: true, message: '请输入安装路径' }]}
+            >
+              <Input
+                placeholder="/opt/vllm"
+                size="large"
+                prefix={<InfoCircleOutlined />}
+              />
+            </Form.Item>
+
+            <Divider />
+
+            <Space direction="vertical" size={8}>
+              <Text strong style={{ fontSize: 14 }}>安装说明：</Text>
+              <ul style={{ margin: 0, paddingLeft: 20 }}>
+                <li><Text type="secondary">安装过程可能需要几分钟时间</Text></li>
+                <li><Text type="secondary">安装过程中请勿关闭页面或刷新浏览器</Text></li>
+                <li><Text type="secondary">有运行实例的版本无法删除</Text></li>
+              </ul>
+            </Space>
+          </Form>
+        )}
       </Modal>
     </div>
   );

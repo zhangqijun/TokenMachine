@@ -1,4 +1,4 @@
-import { Tabs } from 'antd';
+import { Tabs, Typography } from 'antd';
 import {
   CloudServerOutlined,
   ApiOutlined,
@@ -6,14 +6,15 @@ import {
 import NodeManagement from './nodes/NodeManagement';
 import BackendManagement from './backends/BackendManagement';
 
+const { Title } = Typography;
+
 const NodesDeployments = () => {
   const tabItems = [
     {
       key: 'nodes',
       label: (
         <span>
-          <CloudServerOutlined />
-          节点管理
+          <CloudServerOutlined /> 节点管理
         </span>
       ),
       children: <NodeManagement />,
@@ -22,8 +23,7 @@ const NodesDeployments = () => {
       key: 'backends',
       label: (
         <span>
-          <ApiOutlined />
-          后端管理
+          <ApiOutlined /> 引擎管理
         </span>
       ),
       children: <BackendManagement />,
@@ -32,11 +32,13 @@ const NodesDeployments = () => {
 
   return (
     <div>
+      <Title level={3} style={{ marginBottom: 24 }}>
+        节点与引擎
+      </Title>
       <Tabs
         defaultActiveKey="nodes"
         items={tabItems}
         size="large"
-        style={{ marginTop: 16 }}
       />
     </div>
   );

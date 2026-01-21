@@ -370,3 +370,179 @@ class MonitoringStats(BaseModel):
     api_requests_error: int
     tokens_generated_total: int
     avg_latency_ms: float
+
+
+# ============================================================================
+# Worker Schemas (GPU Worker Management)
+# ============================================================================
+
+class WorkerStatus(str, Enum):
+    """Worker status enumeration."""
+    CREATING = "creating"
+    REGISTERING = "registering"
+    READY = "ready"
+    DEGRADED = "degraded"
+    OFFLINE = "offline"
+    MAINTENANCE = "maintenance"
+
+
+class WorkerCreate(BaseModel):
+    """Worker creation schema."""
+    name: str = Field(..., min_length=1, max_length=255, description="Worker name")
+    cluster_id: Optional[int] = Field(None, description="Cluster ID (default to default cluster)")
+    labels: Optional[Dict[str, str]] = Field(None, description="Worker labels (e.g., gpu-type, zone)")
+    expected_gpu_count: Optional[int] = Field(0, ge=0, description="Expected GPU count")
+
+
+class WorkerUpdate(BaseModel):
+    """Worker update schema."""
+    labels: Optional[Dict[str, str]] = None
+    status: Optional[WorkerStatus] = None
+    expected_gpu_count: Optional[int] = Field(None, ge=0)
+
+
+class GPUDeviceResponse(BaseModel):
+    """GPU device response schema."""
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    uuid: str
+    name: str
+    vendor: Optional[str]
+    index: int
+    ip: str
+    port: int
+    hostname: Optional[str]
+    pci_bus: Optional[str]
+    core_total: Optional[int]
+    core_utilization_rate: Optional[float]
+    memory_total: int
+    memory_used: int
+    memory_allocated: int
+    memory_utilization_rate: Optional[float]
+    temperature: Optional[float]
+    state: str
+    status_json: Optional[Dict[str, Any]]
+    created_at: datetime
+    updated_at: datetime
+
+
+class WorkerResponse(BaseModel):
+    """Worker response schema."""
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    name: str
+    cluster_id: int
+    status: WorkerStatus
+    labels: Optional[Dict[str, str]]
+    expected_gpu_count: int
+    gpu_count: int
+    last_heartbeat_at: Optional[datetime]
+    created_at: datetime
+    updated_at: datetime
+    gpus: Optional[List[GPUDeviceResponse]] = None
+
+
+class WorkerCreateResponse(BaseModel):
+    """Worker creation response schema."""
+    id: int
+    name: str
+    status: WorkerStatus
+    register_token: str  # Only returned once
+    install_command: str
+    expected_gpu_count: int
+    current_gpu_count: int
+    created_at: datetime
+
+
+class WorkerListResponse(BaseModel):
+    """Worker list response schema."""
+    items: List[WorkerResponse]
+    total: int
+    page: int
+    page_size: int
+
+
+# ============================================================================
+# GPU Registration Schemas
+# ============================================================================
+
+class GPUDeviceInfo(BaseModel):
+    """GPU device info from agent."""
+    gpu_uuid: str = Field(..., description="GPU UUID")
+    gpu_index: int = Field(..., ge=0, description="GPU index on the machine")
+    ip: str = Field(..., description="Physical machine IP")
+    port: int = Field(..., ge=1024, le=65535, description="Agent port")
+    memory_total: int = Field(..., gt=0, description="Total memory in bytes")
+    memory_allocated: int = Field(..., ge=0, description="Allocated memory in bytes")
+    memory_utilization_rate: float = Field(0.0, ge=0.0, le=1.0, description="Memory utilization rate")
+    temperature: float = Field(..., ge=0.0, le=150.0, description="GPU temperature in Celsius")
+    agent_pid: int = Field(..., gt=0, description="Agent process ID")
+    vllm_pid: Optional[int] = Field(None, description="vLLM process ID (if running)")
+    timestamp: str = Field(..., description="ISO format timestamp")
+    state: str = Field("in_use", description="GPU state")
+    extra: Optional[Dict[str, Any]] = Field(None, description="Additional GPU info (name, hostname, pci_bus)")
+
+
+class GPURegisterRequest(BaseModel):
+    """GPU registration request schema (from agent)."""
+    gpu: GPUDeviceInfo
+
+
+class GPURegisterResponse(BaseModel):
+    """GPU registration response schema."""
+    success: bool
+    gpu_device_id: int
+    worker_id: int
+    worker_name: str
+    current_gpu_count: int
+    expected_gpu_count: int
+    worker_status: WorkerStatus
+
+
+class WorkerAddGPUResponse(BaseModel):
+    """Response for getting token to add GPU to existing worker."""
+    register_token: str
+    install_command: str
+    message: str
+
+
+# ============================================================================
+# GPU Heartbeat Schemas
+# ============================================================================
+
+class GPUHeartbeatRequest(BaseModel):
+    """GPU heartbeat request schema (from agent)."""
+    gpu_uuid: str
+    gpu_index: int
+    ip: str
+    port: int
+    memory_total: int
+    memory_used: int
+    memory_allocated: int
+    memory_utilization_rate: float
+    core_utilization_rate: float
+    temperature: float
+    agent_pid: int
+    vllm_pid: Optional[int] = None
+    timestamp: str
+    state: str
+    extra: Optional[Dict[str, Any]] = None
+
+
+class GPUHeartbeatResponse(BaseModel):
+    """GPU heartbeat response schema."""
+    success: bool
+    message: str
+
+
+class BatchHeartbeatRequest(BaseModel):
+    """Batch GPU heartbeat request schema (from agent)."""
+    heartbeats: List[GPUHeartbeatRequest] = Field(..., min_length=1, max_length=100)
+
+
+class BatchHeartbeatResponse(BaseModel):
+    """Batch GPU heartbeat response schema."""
+    success: bool
+    updated_count: int

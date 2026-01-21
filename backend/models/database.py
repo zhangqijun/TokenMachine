@@ -341,15 +341,16 @@ class Worker(Base):
     cluster_id = Column(Integer, ForeignKey("clusters.id", ondelete="CASCADE"), nullable=False, index=True)
     pool_id = Column(Integer, ForeignKey("worker_pools.id", ondelete="SET NULL"), nullable=True, index=True)
     name = Column(String(255), nullable=False, index=True)
-    ip = Column(String(45), nullable=True)  # IPv4 or IPv6
-    port = Column(Integer, default=8080, nullable=False)
-    ifname = Column(String(50))  # Network interface name
-    hostname = Column(String(255))
+    ip = Column(String(45), nullable=True)  # IPv4 or IPv6 (deprecated: kept for compatibility)
+    port = Column(Integer, default=8080, nullable=False)  # (deprecated: kept for compatibility)
+    ifname = Column(String(50))  # Network interface name (deprecated: kept for compatibility)
+    hostname = Column(String(255))  # (deprecated: kept for compatibility)
     status = Column(SQLEnum(WorkerStatus), default=WorkerStatus.REGISTERING, nullable=False, index=True)
     labels = Column(JSON)  # {"gpu": "nvidia", "zone": "us-west-1"}
     status_json = Column(JSON)  # {cpu: {...}, memory: {...}, gpu_devices: [...], filesystem: [...]}
     token_hash = Column(String(255), unique=True, nullable=True, index=True)
     gpu_count = Column(Integer, default=0, nullable=False)
+    expected_gpu_count = Column(Integer, default=0, nullable=False)  # Expected GPU count for the worker
     last_heartbeat_at = Column(TIMESTAMP, nullable=True)
     last_status_update_at = Column(TIMESTAMP, nullable=True)
     created_at = Column(TIMESTAMP, default=func.now(), nullable=False)
@@ -431,6 +432,10 @@ class GPUDevice(Base):
     name = Column(String(255), nullable=False)
     vendor = Column(SQLEnum(GPUVendor), nullable=True)
     index = Column(Integer, nullable=False)
+    ip = Column(String(45), nullable=False)  # Physical machine IP where this GPU is located
+    port = Column(Integer, nullable=False)  # Agent port for this GPU
+    hostname = Column(String(255))  # Hostname of the physical machine
+    pci_bus = Column(String(100))  # PCI bus ID (e.g., "0000:07:00.0")
     core_total = Column(Integer)
     core_utilization_rate = Column(DECIMAL(5, 2))
     memory_total = Column(BigInteger)
@@ -439,6 +444,7 @@ class GPUDevice(Base):
     memory_utilization_rate = Column(DECIMAL(5, 2))
     temperature = Column(DECIMAL(5, 2))
     state = Column(SQLEnum(GPUDeviceState), default=GPUDeviceState.AVAILABLE, nullable=False, index=True)
+    status_json = Column(JSON)  # Additional status info (agent_pid, vllm_pid, etc.)
     created_at = Column(TIMESTAMP, default=func.now(), nullable=False)
     updated_at = Column(TIMESTAMP, default=func.now(), onupdate=func.now(), nullable=False)
 

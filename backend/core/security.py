@@ -80,3 +80,51 @@ def sanitize_filename(filename: str) -> str:
     # Replace special characters with underscores
     filename = re.sub(r'[^\w\-_\.]', '_', filename)
     return filename
+
+
+# ============================================================================
+# Worker Registration Token Management
+# ============================================================================
+
+def generate_worker_token() -> str:
+    """
+    Generate a unique worker registration token.
+
+    Returns:
+        str: Token in format "tm_worker_<random>"
+
+    Example:
+        >>> token = generate_worker_token()
+        >>> print(token)
+        tm_worker_abc123xyz789def456
+    """
+    random_part = secrets.token_urlsafe(24)
+    token = f"tm_worker_{random_part}"
+    return token
+
+
+def hash_worker_token(token: str) -> str:
+    """
+    Hash a worker token for storage in database.
+
+    Args:
+        token: Worker registration token
+
+    Returns:
+        str: SHA256 hash of the token
+    """
+    return hashlib.sha256(token.encode()).hexdigest()
+
+
+def verify_worker_token(token: str, token_hash: str) -> bool:
+    """
+    Verify a worker token against its hash.
+
+    Args:
+        token: Worker registration token to verify
+        token_hash: Stored hash of the token
+
+    Returns:
+        bool: True if token matches hash
+    """
+    return hash_worker_token(token) == token_hash

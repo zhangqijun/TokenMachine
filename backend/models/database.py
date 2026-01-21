@@ -136,7 +136,7 @@ class Model(Base):
     storage_type = Column(String(50), default="nfs")  # nfs, local, s3
 
     # Download task association
-    download_task_id = Column(BigInteger, ForeignKey("model_download_tasks.id", ondelete="SET NULL"), nullable=True, index=True)
+    download_task_id = Column(Integer, ForeignKey("model_download_tasks.id", ondelete="SET NULL"), nullable=True, index=True)  # Changed to Integer for SQLite compatibility
 
     # Unique constraint on name + version + quantization
     __table_args__ = (
@@ -565,8 +565,8 @@ class ModelDownloadTask(Base):
     """Model download task model - tracks ModelScope model downloads."""
     __tablename__ = "model_download_tasks"
 
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
-    model_id = Column(BigInteger, ForeignKey("models.id", ondelete="CASCADE"), nullable=False, index=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)  # Changed to Integer for SQLite compatibility
+    model_id = Column(Integer, ForeignKey("models.id", ondelete="CASCADE"), nullable=False, index=True)
 
     # ModelScope configuration
     modelscope_repo_id = Column(String(255), nullable=False)
@@ -612,9 +612,9 @@ class WorkerModelCache(Base):
     """Worker model cache - tracks which models are available on each worker."""
     __tablename__ = "worker_model_cache"
 
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)  # Changed to Integer for SQLite compatibility
     worker_id = Column(Integer, ForeignKey("workers.id", ondelete="CASCADE"), nullable=False, index=True)
-    model_id = Column(BigInteger, ForeignKey("models.id", ondelete="CASCADE"), nullable=False, index=True)
+    model_id = Column(Integer, ForeignKey("models.id", ondelete="CASCADE"), nullable=False, index=True)
 
     # Cache status
     is_cached = Column(Boolean, default=False, nullable=False, index=True)  # Model is available on worker

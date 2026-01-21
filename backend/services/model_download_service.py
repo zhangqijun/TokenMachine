@@ -21,7 +21,7 @@ from backend.models.database import (
     ModelDownloadTaskStatus,
     ModelStatus,
 )
-from backend.core.config import settings
+from backend.core.config import get_settings
 
 
 class ModelDownloadService:
@@ -35,9 +35,10 @@ class ModelDownloadService:
             db: Database session
         """
         self.db = db
-        self.storage_base = settings.MODEL_STORAGE_PATH
-        self.modelscope_cache = settings.MODELSCOPE_CACHE_DIR
-        self.log_path = settings.LOG_PATH
+        settings = get_settings()
+        self.storage_base = settings.model_storage_path
+        self.modelscope_cache = settings.modelscope_cache_dir
+        self.log_path = settings.log_path
 
         # Ensure directories exist
         os.makedirs(self.storage_base, exist_ok=True)
@@ -140,22 +141,19 @@ class ModelDownloadService:
             from modelscope.hub.api import HubApi
 
             api = HubApi()
-            model_info = api.get_model_info(
-                model_id=repo_id,
-                revision=revision
-            )
+            model_info = api.get_model(repo_id)
 
-            # Calculate total size
-            siblings = model_info.get("siblings", [])
+            # 计算总大小
+            siblings = model_info.get('siblings', [])
             total_size = sum(
-                f.get("size", 0)
+                f.get('size', 0)
                 for f in siblings
-                if f.get("rfilename") and not f.get("rfilename", "").endswith("/")
+                if f.get('type') == 'file'  # 只计算文件，不包括目录
             )
 
             file_count = len([
                 f for f in siblings
-                if f.get("rfilename") and not f.get("rfilename", "").endswith("/")
+                if f.get('type') == 'file'
             ])
 
             logger.info(f"ModelScope repo info: {repo_id} - {file_count} files, {total_size} bytes")
@@ -198,40 +196,57 @@ class ModelDownloadService:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             log_file = f"{log_dir}/{task.modelscope_repo_id.replace('/', '_')}_{timestamp}.log"
 
-            # Build download command
+            # Get storage path
             storage_path = task.model.storage_path
-
-            cmd = [
-                "python", "-m", "modelscope.hub.cli", "download",
-                "--model", task.modelscope_repo_id,
-                "--revision", task.modelscope_revision,
-                "--local_dir", storage_path,
-                "--cache_dir", self.modelscope_cache
-            ]
 
             # Log start
             with open(log_file, "w") as log:
                 log.write(f"[{datetime.now()}] Starting download: {task.modelscope_repo_id}\n")
-                log.write(f"[{datetime.now()}] Command: {' '.join(cmd)}\n")
                 log.write(f"[{datetime.now()}] Storage path: {storage_path}\n")
+                log.write(f"[{datetime.now()}] Revision: {task.modelscope_revision}\n")
                 log.flush()
 
-                # Execute download
-                process = await asyncio.create_subprocess_exec(
-                    *cmd,
-                    stdout=asyncio.subprocess.PIPE,
-                    stderr=asyncio.subprocess.PIPE,
-                    cwd=self.storage_base
-                )
+                # Import ModelScope download function
+                from modelscope.hub.snapshot_download import snapshot_download
 
-                # Monitor progress
-                await self._monitor_download_progress(task, process, log)
+                # Custom progress callback
+                class ProgressCallback:
+                    def __init__(self, task_obj, log_file_obj):
+                        self.task = task_obj
+                        self.log = log_file_obj
 
-                # Wait for completion
-                returncode = await process.wait()
+                    def __call__(self, progress_info):
+                        # Update progress in database
+                        if 'downloaded_bytes' in progress_info:
+                            self.task.downloaded_bytes = progress_info['downloaded_bytes']
+                        if 'total_bytes' in progress_info:
+                            self.task.total_bytes = progress_info['total_bytes']
+                        if progress_info.get('total_bytes', 0) > 0:
+                            progress = int(progress_info.get('downloaded_bytes', 0) / progress_info['total_bytes'] * 100)
+                            self.task.progress = progress
 
-                if returncode == 0:
+                        self.db.commit()
+
+                        # Log progress
+                        self.log.write(f"[{datetime.now()}] Progress: {self.task.progress}%\n")
+                        self.log.flush()
+
+                # Execute download in thread pool to avoid blocking
+                loop = asyncio.get_event_loop()
+
+                try:
+                    downloaded_path = await loop.run_in_executor(
+                        None,
+                        lambda: snapshot_download(
+                            task.modelscope_repo_id,
+                            revision=task.modelscope_revision,
+                            cache_dir=self.modelscope_cache,
+                            local_dir=storage_path
+                        )
+                    )
+
                     log.write(f"[{datetime.now()}] Download completed successfully\n")
+                    log.write(f"[{datetime.now()}] Downloaded to: {downloaded_path}\n")
                     logger.info(f"Download task {task_id} completed successfully")
 
                     # Update task and model
@@ -258,9 +273,8 @@ class ModelDownloadService:
 
                     logger.info(f"Model {model.id} is ready, workers notified")
 
-                else:
-                    stderr = await process.stderr.read()
-                    error_msg = stderr.decode()
+                except Exception as download_error:
+                    error_msg = str(download_error)
                     log.write(f"[{datetime.now()}] Download failed: {error_msg}\n")
                     logger.error(f"Download task {task_id} failed: {error_msg}")
 

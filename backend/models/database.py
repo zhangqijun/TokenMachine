@@ -706,3 +706,147 @@ class BackendEngine(Base):
     __table_args__ = (
         Index('ix_backend_engine_type_version', 'engine_type', 'version', unique=True),
     )
+
+
+# ============================================================================
+# Gateway Management Models
+# ============================================================================
+
+class RoutingMode(str, Enum):
+    """路由模式枚举"""
+    SEMANTIC = "semantic"
+    WEIGHT = "weight"
+    ROUND_ROBIN = "round_robin"
+    LEAST_CONN = "least_conn"
+
+
+class InstanceHealthStatus(str, Enum):
+    """实例健康状态枚举"""
+    HEALTHY = "healthy"
+    WARNING = "warning"
+    FAILED = "failed"
+
+
+class RoutingStrategy(Base):
+    """路由策略表"""
+    __tablename__ = "routing_strategies"
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    name = Column(String(255), nullable=False, unique=True, index=True)
+    description = Column(Text)
+    mode = Column(SQLEnum(RoutingMode), nullable=False, default=RoutingMode.SEMANTIC, index=True)
+    rules = Column(JSON, nullable=False, default=list)  # 路由规则列表
+    is_enabled = Column(Boolean, default=True, nullable=False, index=True)
+
+    # API 聚合配置
+    enable_aggregation = Column(Boolean, default=False)
+    unified_endpoint = Column(String(255))  # /v1/models/unified
+    response_mode = Column(String(50))  # best/all/custom
+
+    # 统计信息
+    bound_keys_count = Column(Integer, default=0, nullable=False)
+    today_requests = Column(BigInteger, default=0, nullable=False)
+    p95_latency_ms = Column(Integer, default=0, nullable=False)
+
+    created_at = Column(TIMESTAMP, default=func.now(), nullable=False)
+    updated_at = Column(TIMESTAMP, default=func.now(), onupdate=func.now(), nullable=False)
+
+    # Relationships
+    api_key_bindings = relationship("ApiKeyRouteBinding", back_populates="routing_strategy", cascade="all, delete-orphan")
+
+
+class ApiKeyRouteBinding(Base):
+    """API密钥与路由策略绑定表"""
+    __tablename__ = "api_key_route_bindings"
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    api_key_id = Column(BigInteger, ForeignKey("api_keys.id", ondelete="CASCADE"), nullable=False, index=True)
+    routing_strategy_id = Column(BigInteger, ForeignKey("routing_strategies.id", ondelete="CASCADE"), nullable=False, index=True)
+    traffic_weight = Column(Integer, default=100, nullable=False)  # 流量权重 0-100
+    created_at = Column(TIMESTAMP, default=func.now(), nullable=False)
+
+    # Relationships
+    api_key = relationship("ApiKey")
+    routing_strategy = relationship("RoutingStrategy", back_populates="api_key_bindings")
+
+    __table_args__ = (
+        Index('ix_apikey_routing_binding', 'api_key_id', 'routing_strategy_id', unique=True),
+    )
+
+
+class GatewayConfig(Base):
+    """网关全局配置表"""
+    __tablename__ = "gateway_configs"
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+
+    # 负载均衡配置
+    enable_dynamic_lb = Column(Boolean, default=True, nullable=False)
+    schedule_strategy = Column(String(50), default="queue", nullable=False)  # queue/response/resource/combined
+    queue_threshold = Column(Integer, default=50, nullable=False)
+    response_threshold = Column(Integer, default=5000, nullable=False)
+    gpu_threshold = Column(Integer, default=95, nullable=False)
+
+    # 健康检查配置
+    enable_failover = Column(Boolean, default=True, nullable=False)
+    check_method = Column(String(50), default="active", nullable=False)  # active/passive
+    check_interval = Column(Integer, default=10, nullable=False)  # 秒
+    timeout = Column(Integer, default=5, nullable=False)  # 秒
+    fail_threshold = Column(Integer, default=3, nullable=False)
+    response_time_threshold = Column(Integer, default=5000, nullable=False)
+    error_rate_threshold = Column(Integer, default=10, nullable=False)
+    queue_depth_threshold = Column(Integer, default=100, nullable=False)
+    auto_recover = Column(Boolean, default=True, nullable=False)
+    recover_threshold = Column(Integer, default=3, nullable=False)
+
+    updated_at = Column(TIMESTAMP, default=func.now(), onupdate=func.now(), nullable=False)
+
+
+class InstanceHealth(Base):
+    """实例健康状态表"""
+    __tablename__ = "instance_health"
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    model_instance_id = Column(BigInteger, ForeignKey("model_instances.id", ondelete="CASCADE"), nullable=False, unique=True, index=True)
+    status = Column(SQLEnum(InstanceHealthStatus), default=InstanceHealthStatus.HEALTHY, nullable=False, index=True)
+    last_check_at = Column(TIMESTAMP, default=func.now(), nullable=False)
+    fail_count = Column(Integer, default=0, nullable=False)
+    consecutive_success_count = Column(Integer, default=0, nullable=False)
+
+    # 实时指标
+    queue_depth = Column(Integer, default=0, nullable=False)
+    response_time_ms = Column(Integer, default=0, nullable=False)
+    gpu_utilization = Column(DECIMAL(5, 2), default=0, nullable=False)
+    error_rate = Column(DECIMAL(5, 2), default=0, nullable=False)
+
+    created_at = Column(TIMESTAMP, default=func.now(), nullable=False)
+    updated_at = Column(TIMESTAMP, default=func.now(), onupdate=func.now(), nullable=False)
+
+    # Relationships
+    model_instance = relationship("ModelInstance")
+
+
+class FailoverEventType(str, Enum):
+    """故障转移事件类型"""
+    TIMEOUT = "timeout"
+    ERROR = "error"
+    OVERLOAD = "overload"
+    MANUAL = "manual"
+    HEALTH_CHECK_FAILED = "health_check_failed"
+
+
+class FailoverEvent(Base):
+    """故障转移事件记录表"""
+    __tablename__ = "failover_events"
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    source_instance_id = Column(BigInteger, ForeignKey("model_instances.id", ondelete="SET NULL"), nullable=True)
+    target_instance_id = Column(BigInteger, ForeignKey("model_instances.id", ondelete="SET NULL"), nullable=True)
+    event_type = Column(SQLEnum(FailoverEventType), nullable=False, index=True)
+    reason = Column(Text)
+    triggered_by = Column(String(50))  # auto/manual
+    created_at = Column(TIMESTAMP, default=func.now(), nullable=False, index=True)
+
+    # Relationships
+    source_instance = relationship("ModelInstance", foreign_keys=[source_instance_id])
+    target_instance = relationship("ModelInstance", foreign_keys=[target_instance_id])

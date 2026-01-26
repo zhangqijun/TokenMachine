@@ -8,24 +8,31 @@ import hashlib
 from datetime import datetime, timedelta
 from typing import Optional
 from jose import JWTError, jwt
-from passlib.context import CryptContext
+import bcrypt
+from loguru import logger
 
 from backend.core.config import get_settings
 
 settings = get_settings()
 
-# Password hashing context
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 
 def hash_password(password: str) -> str:
-    """Hash a password."""
-    return pwd_context.hash(password)
+    """Hash a password using bcrypt."""
+    password_bytes = password.encode('utf-8')[:72]  # Truncate to 72 bytes max
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(password_bytes, salt)
+    return hashed.decode('utf-8')
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verify a password against a hash."""
-    return pwd_context.verify(plain_password, hashed_password)
+    """Verify a password against a hash using bcrypt."""
+    try:
+        password_bytes = plain_password.encode('utf-8')[:72]  # Truncate to 72 bytes max
+        hash_bytes = hashed_password.encode('utf-8')
+        return bcrypt.checkpw(password_bytes, hash_bytes)
+    except Exception as e:
+        logger.warning(f"Password verification failed: {e}")
+        return False
 
 
 def generate_api_key(user_id: int) -> str:

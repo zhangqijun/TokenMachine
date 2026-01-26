@@ -7,7 +7,7 @@ from sqlalchemy import and_, func, case
 from datetime import datetime, date, timedelta
 from decimal import Decimal
 
-from models.database import (
+from backend.models.database import (
     APIKey, UsageLog, Invoice, Organization,
     UsageLogStatus, InvoiceStatus
 )

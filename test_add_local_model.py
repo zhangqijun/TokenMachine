@@ -1,180 +1,129 @@
 #!/usr/bin/env python3
 """
-测试添加本地模型接口
+Test script for adding local model via API.
 """
-import sys
-import os
-from pathlib import Path
+import requests
+import json
 
-# 添加项目路径
-sys.path.insert(0, str(Path(__file__).parent))
+# API 配置
+BASE_URL = "http://localhost:8000"
+API_PREFIX = "/api/v1"
+ADMIN_ENDPOINT = f"{API_PREFIX}/admin"
 
-# 配置测试环境
-os.environ['DATABASE_URL'] = 'sqlite:////tmp/tokenmachine_test/tokenmachine.db'
-os.environ['MODEL_STORAGE_PATH'] = '/tmp/tokenmachine_test/models'
-os.environ['MODELSCOPE_CACHE_DIR'] = '/tmp/tokenmachine_test/cache'
-os.environ['LOG_PATH'] = '/tmp/tokenmachine_test/logs'
-os.environ['NFS_MOUNT_POINT'] = '/tmp/tokenmachine_test/models'
-os.environ['ENVIRONMENT'] = 'development'
-os.environ['DEBUG'] = 'true'
+# 模型信息
+MODEL_DATA = {
+    "name": "Qwen3-Coder-30B",
+    "version": "v1.0.0",
+    "local_path": "/home/ht706/Qwen3-Coder-30B-A3B-Instruct-Int4-W4A16",
+    "category": "llm",
+    "quantization": "Int4-W4A16"
+}
 
-# 确保目录存在
-for path in ['/tmp/tokenmachine_test/models', '/tmp/tokenmachine_test/cache', '/tmp/tokenmachine_test/logs']:
-    Path(path).mkdir(parents=True, exist_ok=True)
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
-from backend.models.database import Base, Model, User, Organization, ModelSource, ModelCategory, UserRole
-from backend.services.model_service import ModelService
-from backend.core.security import hash_password
-from datetime import datetime, timedelta
+def get_admin_token():
+    """获取管理员 token（这里假设使用测试用户）"""
+    # 首先尝试创建一个测试用户并获取 token
+    # 实际使用中需要替换为真实的管理员 token
+    login_url = f"{BASE_URL}{API_PREFIX}/auth/login"
+    login_data = {
+        "username": "admin",
+        "password": "admin123"
+    }
 
-print("=" * 70)
-print("测试添加本地模型接口")
-print("=" * 70)
-print()
+    try:
+        response = requests.post(login_url, json=login_data)
+        if response.status_code == 200:
+            return response.json()["access_token"]
+        else:
+            print(f"登录失败: {response.status_code}")
+            print(f"响应: {response.text}")
+            return None
+    except Exception as e:
+        print(f"登录请求失败: {e}")
+        return None
 
-# 1. 初始化数据库
-print("[1/5] 初始化数据库...")
-db_url = "sqlite:////tmp/tokenmachine_test/tokenmachine.db"
-engine = create_engine(db_url, echo=False)
-SessionLocal = sessionmaker(bind=engine)
-Base.metadata.drop_all(bind=engine)
-Base.metadata.create_all(bind=engine)
-print("  ✅ 数据库初始化完成")
-print()
 
-# 2. 创建测试数据
-print("[2/5] 创建测试组织和用户...")
-db: Session = SessionLocal()
+def add_local_model(token):
+    """添加本地模型"""
+    url = f"{BASE_URL}{ADMIN_ENDPOINT}/models/local"
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
 
-org = Organization(
-    id=1,
-    name='test_org',
-    plan='ENTERPRISE',
-    quota_tokens=1000000000,
-    quota_models=100,
-    quota_gpus=10,
-    max_workers=5
-)
-db.add(org)
-db.flush()
+    print(f"\n正在添加本地模型...")
+    print(f"URL: {url}")
+    print(f"数据: {json.dumps(MODEL_DATA, indent=2, ensure_ascii=False)}")
 
-admin = User(
-    id=1,
-    username='admin',
-    email='admin@test.com',
-    password_hash=hash_password('test'),
-    organization_id=org.id,
-    role='ADMIN',
-    is_active=True
-)
-db.add(admin)
-db.flush()
-print("  ✅ 测试用户创建完成")
-print()
+    try:
+        response = requests.post(url, json=MODEL_DATA, headers=headers)
 
-# 3. 测试添加本地模型
-print("[3/5] 测试添加本地模型...")
-print(f"  本地路径: /home/ht706/Qwen3-Coder-30B-A3B-Instruct-Int4-W4A16")
+        print(f"\n状态码: {response.status_code}")
 
-service = ModelService(db)
+        if response.status_code == 201:
+            print("✅ 模型添加成功！")
+            print(f"响应: {json.dumps(response.json(), indent=2, ensure_ascii=False)}")
+            return response.json()
+        else:
+            print("❌ 添加失败")
+            print(f"错误信息: {response.text}")
+            return None
 
-try:
-    # 验证路径是否存在
-    test_path = "/home/ht706/Qwen3-Coder-30B-A3B-Instruct-Int4-W4A16"
-    if not os.path.exists(test_path):
-        print(f"  ⚠️  警告: 本地路径不存在: {test_path}")
-        print(f"  使用模拟路径进行测试...")
+    except Exception as e:
+        print(f"❌ 请求失败: {e}")
+        return None
 
-        # 创建一个模拟的模型目录
-        mock_path = "/tmp/tokenmachine_test/mock_model"
-        os.makedirs(mock_path, exist_ok=True)
 
-        # 创建模拟的 config.json
-        config_content = {
-            "model_type": "qwen",
-            "hidden_size": 5120,
-            "num_attention_heads": 40
-        }
-        import json
-        with open(os.path.join(mock_path, "config.json"), "w") as f:
-            json.dump(config_content, f)
+def list_models(token):
+    """列出所有模型"""
+    url = f"{BASE_URL}{ADMIN_ENDPOINT}/models"
+    headers = {
+        "Authorization": f"Bearer {token}"
+    }
 
-        # 创建模拟的模型权重文件
-        with open(os.path.join(mock_path, "model.safetensors"), "wb") as f:
-            f.write(b"0" * (100 * 1024 * 1024))  # 100 MB
+    print(f"\n正在查询模型列表...")
 
-        print(f"  ✅ 创建模拟模型目录: {mock_path}")
-        test_path = mock_path
+    try:
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            models = response.json()
+            print(f"\n共有 {len(models)} 个模型:")
+            for model in models:
+                print(f"  - [{model['id']}] {model['name']}:{model['version']} ({model['status']})")
+        else:
+            print(f"查询失败: {response.status_code}")
+
+    except Exception as e:
+        print(f"查询请求失败: {e}")
+
+
+def main():
+    """主函数"""
+    print("=" * 60)
+    print("测试添加本地模型 API")
+    print("=" * 60)
+
+    # 获取管理员 token
+    print("\n步骤 1: 获取管理员 token...")
+    token = get_admin_token()
+
+    if not token:
+        print("\n❌ 无法获取管理员 token，退出...")
+        return
+
+    print(f"✅ Token 获取成功: {token[:20]}...")
 
     # 添加本地模型
-    model = service.add_local_model(
-        name="Qwen3-Coder-30B-Test",
-        version="v1.0.0",
-        local_path=test_path,
-        category=ModelCategory.LLM,
-        quantization="int8"
-    )
+    print("\n步骤 2: 添加本地模型...")
+    result = add_local_model(token)
 
-    print()
-    print("[4/5] 验证模型创建结果...")
-    print(f"  ✅ 模型创建成功!")
-    print(f"     ID: {model.id}")
-    print(f"     名称: {model.name}")
-    print(f"     版本: {model.version}")
-    print(f"     来源: {model.source.value}")
-    print(f"     类别: {model.category.value}")
-    print(f"     量化: {model.quantization}")
-    print(f"     状态: {model.status.value}")
-    print(f"     路径: {model.path}")
-    print(f"     大小: {model.size_gb} GB")
-    print(f"     下载进度: {model.download_progress}%")
-    print()
+    if result:
+        print("\n步骤 3: 验证模型是否添加成功...")
+        list_models(token)
+    else:
+        print("\n步骤 3: 查看现有模型...")
+        list_models(token)
 
-    # 5. 验证数据库记录
-    print("[5/5] 验证数据库记录...")
-    db.refresh(model)
 
-    # 查询模型
-    found_model = service.get_model(model.id)
-    assert found_model is not None, "模型未找到"
-    assert found_model.name == "Qwen3-Coder-30B-Test", "模型名称不匹配"
-    assert found_model.source == ModelSource.LOCAL, "模型来源不匹配"
-    assert found_model.status.value == "ready", "模型状态不匹配"
-
-    print("  ✅ 数据库记录验证通过")
-    print()
-
-    # 6. 列出所有模型
-    print("所有模型列表:")
-    all_models = service.list_models()
-    for m in all_models:
-        print(f"  - {m.name}:{m.version} ({m.source.value}, {m.status.value})")
-
-    print()
-    print("=" * 70)
-    print("✅ 测试通过!")
-    print("=" * 70)
-    print()
-    print("API 接口示例:")
-    print(f"  POST /api/v1/admin/models/local")
-    print(f"  {{")
-    print(f"    \"name\": \"Qwen3-Coder-30B\",")
-    print(f"    \"version\": \"v1.0.0\",")
-    print(f"    \"local_path\": \"{test_path}\",")
-    print(f"    \"category\": \"llm\",")
-    print(f"    \"quantization\": \"int8\"")
-    print(f"  }}")
-
-except Exception as e:
-    print()
-    print("=" * 70)
-    print("❌ 测试失败!")
-    print("=" * 70)
-    print(f"错误: {e}")
-    import traceback
-    traceback.print_exc()
-
-finally:
-    db.close()
+if __name__ == "__main__":
+    main()

@@ -7,7 +7,7 @@ from sqlalchemy import func, and_, case
 from datetime import datetime, timedelta
 from decimal import Decimal
 
-from models.database import (
+from backend.models.database import (
     Organization, APIKey, User, Deployment, Worker,
     OrganizationPlan, UserRole
 )
@@ -97,7 +97,7 @@ class QuotaManager:
         Returns:
             Tuple of (allowed: bool, message: str)
         """
-        from models.database import UsageLog
+        from backend.models.database import UsageLog
 
         cutoff = datetime.utcnow() - timedelta(seconds=window_seconds)
 

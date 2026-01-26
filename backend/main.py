@@ -144,7 +144,7 @@ async def metrics():
 # Include Routers
 # ============================================================================
 
-from backend.api.v1 import chat, models, admin, playground, benchmark, backends, monitoring
+from backend.api.v1 import chat, models, admin, playground, benchmark, backends, monitoring, auth
 
 app.include_router(chat.router)
 app.include_router(models.router)
@@ -153,6 +153,7 @@ app.include_router(playground.router, prefix="/api/v1/playground", tags=["playgr
 app.include_router(benchmark.router, prefix="/api/v1/benchmark", tags=["benchmark"])
 app.include_router(backends.router, prefix="/api/v1", tags=["backends"])
 app.include_router(monitoring.router, prefix="/api/v1/monitoring", tags=["monitoring"])
+app.include_router(auth.router)
 
 
 # ============================================================================
@@ -162,7 +163,7 @@ app.include_router(monitoring.router, prefix="/api/v1/monitoring", tags=["monito
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     """Global exception handler."""
-    logger.error(f"Unhandled exception: {exc}", exc_info=True)
+    logger.opt(exception=exc).error(f"Unhandled exception: {type(exc).__name__}: {exc}")
 
     return JSONResponse(
         status_code=500,

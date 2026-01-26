@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func, and_, desc
 from loguru import logger
 
-from models.database import (
+from backend.models.database import (
     UsageLog, Deployment, Model, GPUDevice, Worker,
     DeploymentStatus, GPUDeviceState
 )

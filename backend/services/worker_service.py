@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, func
 from datetime import datetime, timedelta
 
-from models.database import (
+from backend.models.database import (
     Worker, Cluster, WorkerPool, GPUDevice, ModelInstance,
     WorkerStatus
 )

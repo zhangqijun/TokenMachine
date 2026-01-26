@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func, and_, case
 from datetime import datetime, date, timedelta
 
-from models.database import (
+from backend.models.database import (
     Worker, Model, Deployment, ModelInstance, GPUDevice,
     UsageLog, Cluster, Organization, APIKey,
     WorkerStatus, DeploymentStatus, ModelInstanceStatus, GPUDeviceState

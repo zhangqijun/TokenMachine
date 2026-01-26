@@ -1,11 +1,16 @@
 # Multi-stage build for React frontend
 FROM node:20-alpine AS builder
 
+# Accept proxy arguments from docker-compose
+ARG HTTP_PROXY
+ARG HTTPS_PROXY
+ARG NO_PROXY
+
 # Set proxy for build
-ENV http_proxy=http://10.157.59.75:7890
-ENV https_proxy=http://10.157.59.75:7890
-ENV HTTP_PROXY=http://10.157.59.75:7890
-ENV HTTPS_PROXY=http://10.157.59.75:7890
+ENV http_proxy=${HTTP_PROXY} \
+    https_proxy=${HTTPS_PROXY} \
+    HTTP_PROXY=${HTTP_PROXY} \
+    HTTPS_PROXY=${HTTPS_PROXY}
 
 WORKDIR /app
 

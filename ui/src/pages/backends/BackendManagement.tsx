@@ -544,7 +544,7 @@ const BackendManagement = () => {
                 percent={Math.round(installProgress)}
                 status="active"
                 strokeColor={{ '0%': '#108ee9', '100%': '#87d068' }}
-                size="large"
+                strokeWidth={10}
               />
               <Text type="secondary">
                 安装过程可能需要几分钟，请耐心等待...

@@ -1,7 +1,7 @@
 """add gateway management
 
-Revision ID: 004_add_gateway_management
-Revises: 003_add_playground_tables
+Revision ID: 005_add_gateway_management
+Revises: 004_add_backend_engines_table
 Create Date: 2026-01-21
 
 """
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = '004_add_gateway_management'
-down_revision = '003_add_playground_tables'
+revision = '005_add_gateway_management'
+down_revision = '004_add_backend_engines_table'
 branch_labels = None
 depends_on = None
 

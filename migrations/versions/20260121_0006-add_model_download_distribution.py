@@ -1,7 +1,7 @@
 """add model download distribution
 
-Revision ID: 0003
-Revises: 0002
+Revision ID: 006_add_model_download_distribution
+Revises: 005_add_gateway_management
 Create Date: 2025-01-21
 
 """
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = '0003'
-down_revision = '0002'
+revision = '006_add_model_download_distribution'
+down_revision = '005_add_gateway_management'
 branch_labels = None
 depends_on = None
 

@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_
 from datetime import datetime
 
-from models.database import (
+from backend.models.database import (
     Cluster, WorkerPool, Worker, ModelInstance,
     ClusterType, ClusterStatus, WorkerPoolStatus
 )

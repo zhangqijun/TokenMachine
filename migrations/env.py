@@ -54,7 +54,14 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+        # Configure with longer version_num column
+        context.configure(
+            connection=connection,
+            target_metadata=target_metadata,
+            version_table='alembic_version',
+            version_table_pk='pk_alembic_version',
+            version_path_separator='os',
+        )
 
         with context.begin_transaction():
             context.run_migrations()

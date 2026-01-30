@@ -11,8 +11,9 @@ export default defineConfig({
     },
   },
   server: {
-    port: 5174,
+    port: 1579,
     host: true,
+    allowedHosts: ['zhangqijun.cn', '.zhangqijun.cn'],
     proxy: {
       '/api': {
         target: 'http://localhost:8000',

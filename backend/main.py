@@ -144,7 +144,7 @@ async def metrics():
 # Include Routers
 # ============================================================================
 
-from backend.api.v1 import chat, models, admin, playground, benchmark, backends, monitoring, auth
+from backend.api.v1 import chat, models, admin, playground, benchmark, backends, monitoring, auth, workers, metrics
 
 app.include_router(chat.router)
 app.include_router(models.router)
@@ -154,6 +154,8 @@ app.include_router(benchmark.router, prefix="/api/v1/benchmark", tags=["benchmar
 app.include_router(backends.router, prefix="/api/v1", tags=["backends"])
 app.include_router(monitoring.router, prefix="/api/v1/monitoring", tags=["monitoring"])
 app.include_router(auth.router)
+app.include_router(workers.router)
+app.include_router(metrics.router)
 
 
 # ============================================================================

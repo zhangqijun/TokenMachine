@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Table, Tag, Space, Button, Badge, Tooltip, Progress, message, Modal } from 'antd';
 import {
   ReloadOutlined,
@@ -13,324 +13,131 @@ import {
   DesktopOutlined,
   DownOutlined,
   RightOutlined,
+  LoadingOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import AddWorkerModal from '../../components/cluster/AddWorkerModal';
-
-interface PhysicalMachine {
-  id: string;
-  ip: string;
-  hostname: string;
-  status: 'online' | 'offline' | 'warning';
-  gpuVendor: 'NVIDIA' | 'AMD' | '华为昇腾' | '沐曦' | '海光';
-  gpuModel: string;
-  gpuCount: number;
-  gpuMemory: number; // 每块GPU的显存（GB）
-  gpuMemoryUsed: number; // 已使用显存（GB）
-  cpuUsage: number; // CPU使用率（%）
-  memoryUsage: number; // 内存使用率（%）
-  uptime: number; // 运行时间（秒）
-  lastHeartbeat: string;
-}
-
-interface WorkerInfo {
-  id: string;
-  name: string;
-  registerToken: string;
-  status: 'online' | 'offline' | 'warning' | 'maintenance';
-  machines: PhysicalMachine[]; // 该Worker下的物理机器列表
-  totalGpuCount: number; // 总GPU数（所有机器加总）
-  totalGpuMemory: number; // 总显存（GB）
-  usedGpuMemory: number; // 已使用显存（GB）
-  avgCpuUsage: number; // 平均CPU使用率
-  avgMemoryUsage: number; // 平均内存使用率
-  activeDeployments: number;
-  totalRequests: number;
-  createdAt: string;
-  location?: string;
-  labels: string[];
-}
+import type { Worker, GPU } from '../../api';
 
 const NodeManagement = () => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [selectedWorker, setSelectedWorker] = useState<WorkerInfo | null>(null);
+  const [selectedWorker, setSelectedWorker] = useState<Worker | null>(null);
   const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [addNodeModalVisible, setAddNodeModalVisible] = useState(false);
   const [expandedRowKeys, setExpandedRowKeys] = useState<React.Key[]>([]);
+  const [workers, setWorkers] = useState<Worker[]>([]);
 
-  // Mock data - Worker列表（每个Worker包含多台物理机器）
-  const [workers, setWorkers] = useState<WorkerInfo[]>([
-    {
-      id: 'worker-1',
-      name: 'worker-1',
-      registerToken: 'tm_worker_abc123def456',
-      status: 'online',
-      machines: [
-        {
-          id: 'machine-1-1',
-          ip: '192.168.1.101',
-          hostname: 'gpu-server-01',
-          status: 'online',
-          gpuVendor: 'NVIDIA',
-          gpuModel: 'A100-SXM4-80GB',
-          gpuCount: 8,
-          gpuMemory: 80,
-          gpuMemoryUsed: 65,
-          cpuUsage: 45,
-          memoryUsage: 72,
-          uptime: 86400 * 15,
-          lastHeartbeat: new Date(Date.now() - 5000).toISOString(),
-        },
-        {
-          id: 'machine-1-2',
-          ip: '192.168.1.102',
-          hostname: 'gpu-server-02',
-          status: 'online',
-          gpuVendor: 'NVIDIA',
-          gpuModel: 'A100-SXM4-80GB',
-          gpuCount: 8,
-          gpuMemory: 80,
-          gpuMemoryUsed: 58,
-          cpuUsage: 38,
-          memoryUsage: 65,
-          uptime: 86400 * 12,
-          lastHeartbeat: new Date(Date.now() - 3000).toISOString(),
-        },
-      ],
-      totalGpuCount: 16,
-      totalGpuMemory: 1280,
-      usedGpuMemory: 984,
-      avgCpuUsage: 42,
-      avgMemoryUsage: 69,
-      activeDeployments: 5,
-      totalRequests: 52340,
-      createdAt: '2024-01-05T10:00:00Z',
-      location: '机房A-机柜01-02',
-      labels: ['gpu-high', 'production'],
-    },
-    {
-      id: 'worker-2',
-      name: 'worker-2',
-      registerToken: 'tm_worker_xyz789abc456',
-      status: 'online',
-      machines: [
-        {
-          id: 'machine-2-1',
-          ip: '192.168.1.103',
-          hostname: 'rtx-server-01',
-          status: 'warning',
-          gpuVendor: 'NVIDIA',
-          gpuModel: 'RTX 4090',
-          gpuCount: 2,
-          gpuMemory: 24,
-          gpuMemoryUsed: 22,
-          cpuUsage: 78,
-          memoryUsage: 89,
-          uptime: 86400 * 8,
-          lastHeartbeat: new Date(Date.now() - 10000).toISOString(),
-        },
-      ],
-      totalGpuCount: 2,
-      totalGpuMemory: 48,
-      usedGpuMemory: 44,
-      avgCpuUsage: 78,
-      avgMemoryUsage: 89,
-      activeDeployments: 2,
-      totalRequests: 15230,
-      createdAt: '2024-01-08T14:00:00Z',
-      location: '机房B-机柜01',
-      labels: ['gpu-mid', 'development'],
-    },
-    {
-      id: 'worker-3',
-      name: 'ascend-worker-1',
-      registerToken: 'tm_worker_asc123def456',
-      status: 'online',
-      machines: [
-        {
-          id: 'machine-3-1',
-          ip: '192.168.1.201',
-          hostname: 'ascend-server-01',
-          status: 'online',
-          gpuVendor: '华为昇腾',
-          gpuModel: 'Ascend 910B',
-          gpuCount: 8,
-          gpuMemory: 64,
-          gpuMemoryUsed: 48,
-          cpuUsage: 52,
-          memoryUsage: 68,
-          uptime: 86400 * 10,
-          lastHeartbeat: new Date(Date.now() - 4000).toISOString(),
-        },
-        {
-          id: 'machine-3-2',
-          ip: '192.168.1.202',
-          hostname: 'ascend-server-02',
-          status: 'online',
-          gpuVendor: '华为昇腾',
-          gpuModel: 'Ascend 910B',
-          gpuCount: 8,
-          gpuMemory: 64,
-          gpuMemoryUsed: 52,
-          cpuUsage: 48,
-          memoryUsage: 70,
-          uptime: 86400 * 9,
-          lastHeartbeat: new Date(Date.now() - 5000).toISOString(),
-        },
-      ],
-      totalGpuCount: 16,
-      totalGpuMemory: 1024,
-      usedGpuMemory: 800,
-      avgCpuUsage: 50,
-      avgMemoryUsage: 69,
-      activeDeployments: 4,
-      totalRequests: 28560,
-      createdAt: '2024-01-10T09:00:00Z',
-      location: '机房C-机柜01',
-      labels: ['ascend', 'production'],
-    },
-    {
-      id: 'worker-4',
-      name: 'mx-worker-1',
-      registerToken: 'tm_worker_mx123abc456',
-      status: 'offline',
-      machines: [],
-      totalGpuCount: 0,
-      totalGpuMemory: 0,
-      usedGpuMemory: 0,
-      avgCpuUsage: 0,
-      avgMemoryUsage: 5,
-      activeDeployments: 0,
-      totalRequests: 0,
-      createdAt: '2024-01-12T11:00:00Z',
-      location: '机房C-机柜02',
-      labels: ['muxi', 'staging'],
-    },
-    {
-      id: 'worker-5',
-      name: 'worker-h100',
-      registerToken: 'tm_worker_h100xyz789',
-      status: 'maintenance',
-      machines: [
-        {
-          id: 'machine-5-1',
-          ip: '192.168.1.105',
-          hostname: 'h100-server-01',
-          status: 'offline',
-          gpuVendor: 'NVIDIA',
-          gpuModel: 'H100-SXM4-80GB',
-          gpuCount: 8,
-          gpuMemory: 80,
-          gpuMemoryUsed: 0,
-          cpuUsage: 5,
-          memoryUsage: 15,
-          uptime: 86400 * 5,
-          lastHeartbeat: new Date(Date.now() - 3600000).toISOString(),
-        },
-      ],
-      totalGpuCount: 8,
-      totalGpuMemory: 640,
-      usedGpuMemory: 0,
-      avgCpuUsage: 5,
-      avgMemoryUsage: 15,
-      activeDeployments: 0,
-      totalRequests: 12560,
-      createdAt: '2024-01-15T16:00:00Z',
-      location: '机房A-机柜03',
-      labels: ['gpu-high', 'maintenance'],
-    },
-  ]);
+  // Fetch workers from backend
+  const fetchWorkers = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get('/workers');
+      // Handle both array and paginated response
+      const workersData = Array.isArray(response.data)
+        ? response.data
+        : (response.data?.items || []);
+      setWorkers(workersData);
+    } catch (error: any) {
+      message.error(`Failed to load workers: ${error.response?.data?.detail || error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchWorkers();
+  }, []);
 
   const stats = useMemo(() => {
     return {
       totalWorkers: workers.length,
-      online: workers.filter(w => w.status === 'online').length,
-      warning: workers.filter(w => w.status === 'warning').length,
-      offline: workers.filter(w => w.status === 'offline').length,
-      maintenance: workers.filter(w => w.status === 'maintenance').length,
-      totalMachines: workers.reduce((sum, w) => sum + w.machines.length, 0),
-      onlineMachines: workers.reduce((sum, w) => sum + w.machines.filter(m => m.status === 'online').length, 0),
-      totalGpus: workers.reduce((sum, w) => sum + w.totalGpuCount, 0),
+      online: workers.filter(w => w.status === 'READY' || w.status === 'BUSY').length,
+      warning: workers.filter(w => w.status === 'UNHEALTHY').length,
+      offline: workers.filter(w => w.status === 'OFFLINE').length,
+      maintenance: workers.filter(w => w.status === 'DRAINING').length,
+      totalMachines: workers.length, // Each worker is treated as one machine
+      onlineMachines: workers.filter(w => w.status === 'READY' || w.status === 'BUSY').length,
+      totalGpus: workers.reduce((sum, w) => sum + (w.gpu_count || 0), 0),
       avgGpuUsage: workers.length > 0
         ? Math.round(
-            workers.reduce((sum, w) => sum + (w.usedGpuMemory / w.totalGpuMemory) * 100, 0) /
-              workers.filter(w => w.status !== 'offline' && w.totalGpuCount > 0).length
+            workers.reduce((sum, w) => {
+              if (!w.gpu_devices || w.gpu_devices.length === 0) return sum;
+              const workerAvg = w.gpu_devices.reduce((gpuSum, gpu) =>
+                gpuSum + (gpu.memory_utilization_rate || 0), 0) / w.gpu_devices.length;
+              return sum + workerAvg;
+            }, 0) / workers.filter(w => w.status !== 'OFFLINE' && w.gpu_devices && w.gpu_devices.length > 0).length * 100
           )
         : 0,
     };
   }, [workers]);
 
   const handleRefresh = async () => {
-    setLoading(true);
-    // TODO: 调用API刷新节点状态
-    setTimeout(() => {
-      setLoading(false);
-      message.success('刷新成功');
-    }, 1000);
+    await fetchWorkers();
+    message.success('刷新成功');
   };
 
   const handleAddNode = () => {
     setAddNodeModalVisible(true);
   };
 
-  const handleAddNodeConfirm = (worker: any) => {
-    // TODO: 调用API添加Worker
-    message.success(`Worker "${worker.name}" 创建成功`);
-    // 将新Worker添加到列表
-    const newWorker: WorkerInfo = {
-      id: worker.id || `worker-${Date.now()}`,
-      name: worker.name,
-      registerToken: worker.registerToken || '',
-      status: 'online',
-      machines: [],
-      totalGpuCount: 0,
-      totalGpuMemory: 0,
-      usedGpuMemory: 0,
-      avgCpuUsage: 0,
-      avgMemoryUsage: 0,
-      activeDeployments: 0,
-      totalRequests: 0,
-      createdAt: new Date().toISOString(),
-      labels: Object.values(worker.labels || {}),
-    };
-    setWorkers([...workers, newWorker]);
+  const handleAddNodeConfirm = () => {
+    // Refresh worker list after adding
+    fetchWorkers();
   };
 
   const handleWorkerRegistered = (workerName: string) => {
-    message.success(`Worker "${workerName}" 有机器注册成功！`);
-    // 刷新Worker列表
-    handleRefresh();
+    message.success(`Worker "${workerName}" 注册成功！`);
+    fetchWorkers();
   };
 
-  const handleViewDetail = (worker: WorkerInfo) => {
-    setSelectedWorker(worker);
-    setDetailModalVisible(true);
+  const handleViewDetail = (worker: Worker) => {
+    // Navigate to WorkerDetail page
+    navigate(`/cluster/workers/${worker.id}`);
   };
 
-  const handleMaintenance = (workerId: string) => {
+  const handleMaintenance = async (workerId: number) => {
     Modal.confirm({
       title: '确认维护模式',
       content: '确定要将此Worker设置为维护模式吗？这将停止所有新的部署任务。',
-      onOk: () => {
-        message.success('已设置为维护模式');
-        // TODO: 调用API
+      onOk: async () => {
+        try {
+          await axios.post(`/workers/${workerId}/set-status`, 'DRAINING', {
+            headers: { 'Content-Type': 'application/json' }
+          });
+          message.success('已设置为维护模式');
+          fetchWorkers();
+        } catch (error: any) {
+          message.error(`操作失败: ${error.response?.data?.detail || error.message}`);
+        }
       },
     });
   };
 
-  const handleActivate = (workerId: string) => {
-    message.success('Worker已激活');
-    // TODO: 调用API
+  const handleActivate = async (workerId: number) => {
+    try {
+      await axios.post(`/workers/${workerId}/set-status`, 'READY', {
+        headers: { 'Content-Type': 'application/json' }
+      });
+      message.success('Worker已激活');
+      fetchWorkers();
+    } catch (error: any) {
+      message.error(`操作失败: ${error.response?.data?.detail || error.message}`);
+    }
   };
 
-  const getStatusTag = (status: WorkerInfo['status'] | PhysicalMachine['status']) => {
-    const config = {
-      online: { icon: <CheckCircleOutlined />, color: 'success', text: '在线' },
-      offline: { icon: <CloseCircleOutlined />, color: 'default', text: '离线' },
-      warning: { icon: <WarningOutlined />, color: 'warning', text: '警告' },
-      maintenance: { icon: <PauseCircleOutlined />, color: 'processing', text: '维护中' },
+  const getStatusTag = (status: Worker['status']) => {
+    const config: Record<string, { icon: React.ReactElement; color: string; text: string }> = {
+      'READY': { icon: <CheckCircleOutlined />, color: 'success', text: '在线' },
+      'BUSY': { icon: <CheckCircleOutlined />, color: 'processing', text: '忙碌' },
+      'OFFLINE': { icon: <CloseCircleOutlined />, color: 'default', text: '离线' },
+      'UNHEALTHY': { icon: <WarningOutlined />, color: 'error', text: '异常' },
+      'DRAINING': { icon: <PauseCircleOutlined />, color: 'warning', text: '排空中' },
+      'REGISTERING': { icon: <LoadingOutlined />, color: 'processing', text: '注册中' },
     };
-    const c = config[status];
+    const c = config[status || ''] || { icon: <CloseCircleOutlined />, color: 'default', text: '未知' };
     return (
       <Tag icon={c.icon} color={c.color}>
         {c.text}
@@ -338,15 +145,14 @@ const NodeManagement = () => {
     );
   };
 
-  const formatUptime = (seconds: number) => {
-    if (seconds === 0) return '-';
-    const days = Math.floor(seconds / 86400);
-    const hours = Math.floor((seconds % 86400) / 3600);
-    return `${days}天 ${hours}小时`;
+  // Format memory from bytes to GB
+  const formatMemory = (bytes: number) => {
+    if (!bytes) return 0;
+    return (bytes / (1024 ** 3)).toFixed(0);
   };
 
   // Worker列定义
-  const workerColumns: ColumnsType<WorkerInfo> = [
+  const workerColumns: ColumnsType<Worker> = [
     {
       title: 'Worker名称',
       dataIndex: 'name',
@@ -355,20 +161,20 @@ const NodeManagement = () => {
         <Space>
           <Badge
             status={
-              record.status === 'online'
+              record.status === 'READY' || record.status === 'BUSY'
                 ? 'success'
-                : record.status === 'offline'
+                : record.status === 'OFFLINE'
                 ? 'default'
-                : record.status === 'warning'
-                ? 'warning'
-                : 'processing'
+                : record.status === 'UNHEALTHY'
+                ? 'error'
+                : 'warning'
             }
           />
           <span>
             <strong>{name}</strong>
           </span>
           <Tag color="blue" style={{ fontSize: 11 }}>
-            {record.machines.length} 台机器
+            {record.gpu_count} GPU
           </Tag>
         </Space>
       ),
@@ -379,58 +185,66 @@ const NodeManagement = () => {
       key: 'status',
       render: (status) => getStatusTag(status),
       filters: [
-        { text: '在线', value: 'online' },
-        { text: '离线', value: 'offline' },
-        { text: '警告', value: 'warning' },
-        { text: '维护中', value: 'maintenance' },
+        { text: '在线', value: 'READY' },
+        { text: '忙碌', value: 'BUSY' },
+        { text: '排空中', value: 'DRAINING' },
+        { text: '异常', value: 'UNHEALTHY' },
+        { text: '离线', value: 'OFFLINE' },
       ],
     },
     {
       title: 'GPU资源',
       key: 'gpu',
-      render: (_, record) => (
-        <Space direction="vertical" size={0}>
-          <span style={{ fontSize: 12, color: '#666' }}>
-            总计: {record.totalGpuCount}卡 × {record.totalGpuMemory}GB
-          </span>
-          <Tooltip title={`已用: ${record.usedGpuMemory}GB / ${record.totalGpuMemory}GB`}>
-            <Progress
-              percent={Math.round((record.usedGpuMemory / record.totalGpuMemory) * 100)}
-              size="small"
-              format={(percent) => `${percent}% (${record.usedGpuMemory}GB)`}
-            />
-          </Tooltip>
-        </Space>
-      ),
-      sorter: (a, b) => a.totalGpuCount - b.totalGpuCount,
+      render: (_, record) => {
+        if (!record.gpu_devices || record.gpu_devices.length === 0) {
+          return <span style={{ color: '#999' }}>{record.gpu_count} 卡</span>;
+        }
+        const totalMemory = record.gpu_devices.reduce((sum, gpu) => sum + gpu.memory_total, 0);
+        const usedMemory = record.gpu_devices.reduce((sum, gpu) => sum + (gpu.memory_used || 0), 0);
+        const totalMemoryGB = formatMemory(totalMemory);
+        const avgUtilization = record.gpu_devices.reduce((sum, gpu) =>
+          sum + (gpu.memory_utilization_rate || 0), 0) / record.gpu_devices.length * 100;
+
+        return (
+          <Space direction="vertical" size={0}>
+            <span style={{ fontSize: 12, color: '#666' }}>
+              总计: {record.gpu_count}卡 × {totalMemoryGB}GB
+            </span>
+            <Tooltip title={`平均利用率: ${avgUtilization.toFixed(1)}%`}>
+              <Progress
+                percent={Math.round(avgUtilization)}
+                size="small"
+              />
+            </Tooltip>
+          </Space>
+        );
+      },
+      sorter: (a, b) => a.gpu_count - b.gpu_count,
     },
     {
-      title: '部署数',
-      dataIndex: 'activeDeployments',
-      key: 'activeDeployments',
-      render: (count) => <Badge count={count} showZero style={{ backgroundColor: '#52c41a' }} />,
-      sorter: (a, b) => a.activeDeployments - b.activeDeployments,
-    },
-    {
-      title: '总请求数',
-      dataIndex: 'totalRequests',
-      key: 'totalRequests',
-      render: (count) => count.toLocaleString(),
-      sorter: (a, b) => a.totalRequests - b.totalRequests,
+      title: 'IP地址',
+      dataIndex: 'ip',
+      key: 'ip',
+      render: (ip) => ip || 'N/A',
     },
     {
       title: '标签',
       dataIndex: 'labels',
       key: 'labels',
-      render: (labels: string[]) => (
-        <Space size={4} wrap>
-          {labels.map((label) => (
-            <Tag key={label} color="geekblue" style={{ fontSize: 11 }}>
-              {label}
-            </Tag>
-          ))}
-        </Space>
-      ),
+      render: (labels: Record<string, string> | undefined) => {
+        if (!labels || Object.keys(labels).length === 0) {
+          return <span>-</span>;
+        }
+        return (
+          <Space size={4} wrap>
+            {Object.entries(labels).map(([key, value]) => (
+              <Tag key={key} color="geekblue" style={{ fontSize: 11 }}>
+                {key}={value}
+              </Tag>
+            ))}
+          </Space>
+        );
+      },
     },
     {
       title: '操作',
@@ -447,16 +261,16 @@ const NodeManagement = () => {
           >
             详情
           </Button>
-          {record.status === 'online' || record.status === 'warning' ? (
+          {record.status === 'READY' || record.status === 'BUSY' ? (
             <Button
               type="link"
               size="small"
               icon={<PauseCircleOutlined />}
               onClick={() => handleMaintenance(record.id)}
             >
-              维护
+              排空
             </Button>
-          ) : record.status === 'maintenance' || record.status === 'offline' ? (
+          ) : record.status === 'DRAINING' || record.status === 'OFFLINE' ? (
             <Button
               type="link"
               size="small"
@@ -471,62 +285,63 @@ const NodeManagement = () => {
     },
   ];
 
-  // 物理机器列定义（详情模态框中使用）
-  const machineColumns: ColumnsType<PhysicalMachine> = [
+  // GPU列定义（展开行中使用）
+  const gpuColumns: ColumnsType<GPU> = [
     {
-      title: 'IP地址',
-      dataIndex: 'ip',
-      key: 'ip',
+      title: 'GPU索引',
+      dataIndex: 'index',
+      key: 'index',
+      width: 100,
     },
     {
-      title: '主机名',
-      dataIndex: 'hostname',
-      key: 'hostname',
+      title: '名称',
+      dataIndex: 'name',
+      key: 'name',
     },
     {
       title: '状态',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status) => getStatusTag(status),
+      dataIndex: 'state',
+      key: 'state',
+      render: (state) => {
+        const colorMap: Record<string, string> = {
+          'AVAILABLE': 'success',
+          'IN_USE': 'processing',
+          'ERROR': 'error',
+        };
+        const textMap: Record<string, string> = {
+          'AVAILABLE': '可用',
+          'IN_USE': '使用中',
+          'ERROR': '错误',
+        };
+        const color = colorMap[state] || 'default';
+        const text = textMap[state] || state;
+        return <Tag color={color}>{text}</Tag>;
+      },
     },
     {
-      title: 'GPU信息',
-      key: 'gpu',
-      render: (_, record) => (
-        <Space direction="vertical" size={0}>
-          <span style={{ fontSize: 12 }}>
-            <Tag color="blue">{record.gpuVendor}</Tag>
-            <span>{record.gpuModel}</span>
-          </span>
-          <span style={{ fontSize: 12, color: '#666' }}>
-            {record.gpuCount}卡 × {record.gpuMemory}GB
-          </span>
-        </Space>
-      ),
-    },
-    {
-      title: '显存使用',
-      key: 'gpuMemory',
+      title: '显存',
+      key: 'memory',
       render: (_, record) => {
-        const percent = Math.round((record.gpuMemoryUsed / record.gpuMemory) * 100);
-        const color = percent > 90 ? '#f5222d' : percent > 70 ? '#faad14' : '#52c41a';
+        const totalGB = formatMemory(record.memory_total);
+        const usedGB = formatMemory(record.memory_used || 0);
+        const utilization = record.memory_utilization_rate || 0;
         return (
-          <Tooltip title={`${record.gpuMemoryUsed}GB / ${record.gpuMemory}GB`}>
+          <Space direction="vertical" size={0}>
+            <span style={{ fontSize: 12 }}>{usedGB}GB / {totalGB}GB</span>
             <Progress
-              percent={percent}
+              percent={Math.round(utilization * 100)}
               size="small"
-              strokeColor={color}
-              format={() => `${record.gpuMemoryUsed}/${record.gpuMemory}GB`}
+              strokeColor={utilization > 0.9 ? '#f5222d' : utilization > 0.7 ? '#faad14' : '#52c41a'}
             />
-          </Tooltip>
+          </Space>
         );
       },
     },
     {
-      title: '运行时间',
-      dataIndex: 'uptime',
-      key: 'uptime',
-      render: (uptime) => formatUptime(uptime),
+      title: '温度',
+      dataIndex: 'temperature',
+      key: 'temperature',
+      render: (temp) => temp ? `${temp.toFixed(1)}°C` : 'N/A',
     },
   ];
 
@@ -596,7 +411,7 @@ const NodeManagement = () => {
           }}
         >
           <div style={{ fontSize: 24, fontWeight: 600, color: '#faad14' }}>{stats.warning}</div>
-          <div style={{ fontSize: 12, color: '#666' }}>警告Worker</div>
+          <div style={{ fontSize: 12, color: '#666' }}>异常Worker</div>
         </div>
         <div
           style={{
@@ -610,7 +425,7 @@ const NodeManagement = () => {
           <div style={{ fontSize: 24, fontWeight: 600, color: '#8c8c8c' }}>
             {stats.offline + stats.maintenance}
           </div>
-          <div style={{ fontSize: 12, color: '#666' }}>离线/维护</div>
+          <div style={{ fontSize: 12, color: '#666' }}>离线/排空</div>
         </div>
         <div
           style={{
@@ -634,7 +449,7 @@ const NodeManagement = () => {
           }}
         >
           <div style={{ fontSize: 24, fontWeight: 600, color: '#13c2c2' }}>
-            {stats.avgGpuUsage}%
+            {isNaN(stats.avgGpuUsage) ? 0 : stats.avgGpuUsage}%
           </div>
           <div style={{ fontSize: 12, color: '#666' }}>平均显存使用</div>
         </div>
@@ -663,8 +478,8 @@ const NodeManagement = () => {
         expandable={{
           expandedRowRender: (record) => (
             <div style={{ margin: '16px 48px' }}>
-              <h4 style={{ marginBottom: 12 }}>物理机器列表 ({record.machines.length} 台)</h4>
-              {record.machines.length === 0 ? (
+              <h4 style={{ marginBottom: 12 }}>GPU 列表 ({record.gpu_devices?.length || 0} 个)</h4>
+              {!record.gpu_devices || record.gpu_devices.length === 0 ? (
                 <div
                   style={{
                     padding: 24,
@@ -674,27 +489,23 @@ const NodeManagement = () => {
                   }}
                 >
                   <DesktopOutlined style={{ fontSize: 32, color: '#d9d9d9', marginBottom: 8 }} />
-                  <div style={{ color: '#999' }}>暂无物理机器注册到此Worker</div>
-                  <div style={{ fontSize: 12, color: '#999', marginTop: 8 }}>
-                    使用注册Token在物理机器上运行agent即可自动注册
-                  </div>
+                  <div style={{ color: '#999' }}>暂无GPU注册到此Worker</div>
                 </div>
               ) : (
                 <Table
-                  columns={machineColumns}
-                  dataSource={record.machines}
+                  columns={gpuColumns}
+                  dataSource={record.gpu_devices}
                   rowKey="id"
                   pagination={false}
                   size="small"
-                  showHeader={false}
                 />
               )}
             </div>
           ),
           expandIcon: ({ expanded, onExpand, record }) =>
-            record.machines.length > 0 ? (
+            record.gpu_devices && record.gpu_devices.length > 0 ? (
               <Tooltip
-                title={expanded ? `收起机器 (${record.machines.length}台)` : `查看机器 (${record.machines.length}台)`}
+                title={expanded ? `收起GPU (${record.gpu_devices.length}个)` : `查看GPU (${record.gpu_devices.length}个)`}
               >
                 <Button
                   type="text"
@@ -739,30 +550,25 @@ const NodeManagement = () => {
                 <div>
                   <div style={{ color: '#666', fontSize: 12 }}>创建时间</div>
                   <div style={{ fontSize: 14 }}>
-                    {new Date(selectedWorker.createdAt).toLocaleString()}
+                    {new Date(selectedWorker.created_at).toLocaleString()}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ color: '#666', fontSize: 12 }}>最后心跳</div>
+                  <div style={{ fontSize: 14 }}>
+                    {selectedWorker.last_heartbeat_at
+                      ? new Date(selectedWorker.last_heartbeat_at).toLocaleString()
+                      : '从未'}
                   </div>
                 </div>
               </Space>
             </div>
 
             <div style={{ marginBottom: 16 }}>
-              <div style={{ marginBottom: 8, fontWeight: 500 }}>注册Token</div>
-              <div
-                style={{
-                  padding: 12,
-                  background: '#f5f5f5',
-                  borderRadius: 4,
-                  fontFamily: 'monospace',
-                  fontSize: 12,
-                }}
-              >
-                {selectedWorker.registerToken}
+              <div style={{ marginBottom: 8, fontWeight: 500 }}>
+                GPU 列表 ({selectedWorker.gpu_devices?.length || 0} 个)
               </div>
-            </div>
-
-            <div style={{ marginBottom: 16 }}>
-              <div style={{ marginBottom: 8, fontWeight: 500 }}>物理机器 ({selectedWorker.machines.length} 台)</div>
-              {selectedWorker.machines.length === 0 ? (
+              {!selectedWorker.gpu_devices || selectedWorker.gpu_devices.length === 0 ? (
                 <div
                   style={{
                     padding: 24,
@@ -772,15 +578,12 @@ const NodeManagement = () => {
                   }}
                 >
                   <DesktopOutlined style={{ fontSize: 32, color: '#d9d9d9', marginBottom: 8 }} />
-                  <div style={{ color: '#999' }}>暂无物理机器注册</div>
-                  <div style={{ fontSize: 12, color: '#999', marginTop: 8 }}>
-                    使用注册Token在物理机器上运行agent即可自动注册
-                  </div>
+                  <div style={{ color: '#999' }}>暂无GPU</div>
                 </div>
               ) : (
                 <Table
-                  columns={machineColumns}
-                  dataSource={selectedWorker.machines}
+                  columns={gpuColumns}
+                  dataSource={selectedWorker.gpu_devices}
                   rowKey="id"
                   pagination={false}
                   size="small"
@@ -788,16 +591,18 @@ const NodeManagement = () => {
               )}
             </div>
 
-            <div>
-              <div style={{ marginBottom: 8, fontWeight: 500 }}>Worker标签</div>
-              <Space size={4} wrap>
-                {selectedWorker.labels.map((label: string) => (
-                  <Tag key={label} color="geekblue">
-                    {label}
-                  </Tag>
-                ))}
-              </Space>
-            </div>
+            {selectedWorker.labels && Object.keys(selectedWorker.labels).length > 0 && (
+              <div>
+                <div style={{ marginBottom: 8, fontWeight: 500 }}>Worker标签</div>
+                <Space size={4} wrap>
+                  {Object.entries(selectedWorker.labels).map(([key, value]) => (
+                    <Tag key={key} color="geekblue">
+                      {key}={value}
+                    </Tag>
+                  ))}
+                </Space>
+              </div>
+            )}
           </div>
         )}
       </Modal>

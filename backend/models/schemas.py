@@ -420,21 +420,21 @@ class GPUDeviceResponse(BaseModel):
     id: int
     uuid: str
     name: str
-    vendor: Optional[str]
+    vendor: Optional[str] = None
     index: int
-    ip: str
-    port: int
-    hostname: Optional[str]
-    pci_bus: Optional[str]
-    core_total: Optional[int]
-    core_utilization_rate: Optional[float]
+    ip: Optional[str] = None
+    port: Optional[int] = None
+    hostname: Optional[str] = None
+    pci_bus: Optional[str] = None
+    core_total: Optional[int] = None
+    core_utilization_rate: Optional[float] = None
     memory_total: int
-    memory_used: int
-    memory_allocated: int
-    memory_utilization_rate: Optional[float]
-    temperature: Optional[float]
+    memory_used: Optional[int] = None
+    memory_allocated: Optional[int] = None
+    memory_utilization_rate: Optional[float] = None
+    temperature: Optional[float] = None
     state: str
-    status_json: Optional[Dict[str, Any]]
+    status_json: Optional[Dict[str, Any]] = None
     created_at: datetime
     updated_at: datetime
 
@@ -447,13 +447,18 @@ class WorkerResponse(BaseModel):
     name: str
     cluster_id: int
     status: WorkerStatus
-    labels: Optional[Dict[str, str]]
+    ip: Optional[str] = None
+    hostname: Optional[str] = None
+    labels: Optional[Dict[str, str]] = None
     expected_gpu_count: int
     gpu_count: int
-    last_heartbeat_at: Optional[datetime]
+    capabilities: Optional[List[str]] = None
+    agent_type: Optional[str] = None
+    agent_version: Optional[str] = None
+    last_heartbeat_at: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime
-    gpus: Optional[List[GPUDeviceResponse]] = None
+    gpu_devices: Optional[List[GPUDeviceResponse]] = None
 
 
 class WorkerCreateResponse(BaseModel):
@@ -518,6 +523,12 @@ class WorkerAddGPUResponse(BaseModel):
     register_token: str
     install_command: str
     message: str
+
+
+class WorkerRegisterResponse(BaseModel):
+    """Response for worker registration with IP verification."""
+    worker_id: int
+    worker_secret: str
 
 
 # ============================================================================

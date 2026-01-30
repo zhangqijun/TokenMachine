@@ -5,6 +5,66 @@
  */
 
 /**
+ * Worker interfaces
+ */
+export interface Worker {
+  id: number;
+  name: string;
+  cluster_id: number;
+  status: 'REGISTERING' | 'READY' | 'BUSY' | 'DRAINING' | 'UNHEALTHY' | 'OFFLINE';
+  ip?: string;
+  hostname?: string;
+  gpu_count: number;
+  expected_gpu_count: number;
+  labels?: Record<string, string>;
+  capabilities?: string[];
+  agent_type?: string;
+  agent_version?: string;
+  last_heartbeat_at?: string;
+  created_at: string;
+  updated_at: string;
+  gpu_devices?: GPU[];
+}
+
+export interface WorkerCreate {
+  name: string;
+  cluster_id?: number;
+  expected_gpu_count?: number;
+  labels?: Record<string, string>;
+}
+
+export interface WorkerCreateResponse {
+  id: number;
+  name: string;
+  status: string;
+  register_token: string;
+  install_command: string;
+  expected_gpu_count: number;
+  current_gpu_count: number;
+  created_at: string;
+}
+
+export interface WorkerListResponse {
+  items: Worker[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export interface WorkerStats {
+  worker_id: number;
+  worker_name: string;
+  status: string;
+  total_gpus: number;
+  in_use_gpus: number;
+  error_gpus: number;
+  avg_memory_utilization: number;
+  avg_core_utilization: number;
+  avg_temperature: number;
+  last_heartbeat_at: string;
+}
+
+/**
  * Model interfaces
  */
 export interface Model {
@@ -48,15 +108,24 @@ export interface Deployment {
  */
 export interface GPU {
   id: number;
-  gpu_id: string;
+  worker_id?: number;
+  uuid: string;
   name: string;
-  memory_total_mb: number;
-  memory_free_mb?: number;
-  memory_used_mb?: number;
-  utilization_percent?: number;
-  temperature_celsius?: number;
-  status: 'available' | 'in_use' | 'error';
-  deployment_id?: number;
+  vendor?: string;
+  index: number;
+  ip?: string;
+  port?: number;
+  hostname?: string;
+  pci_bus?: string;
+  memory_total: number;
+  memory_used?: number;
+  memory_allocated?: number;
+  memory_utilization_rate?: number;
+  core_utilization_rate?: number;
+  temperature?: number;
+  state: 'AVAILABLE' | 'IN_USE' | 'ERROR';
+  status_json?: Record<string, any>;
+  created_at: string;
   updated_at: string;
 }
 
@@ -110,42 +179,95 @@ export interface DashboardStats {
 }
 
 /**
+ * Worker GPU Metrics interfaces
+ */
+export interface GPUHistoryPoint {
+  timestamp: number;
+  datetime: string;
+  utilization: number;
+}
+
+export interface WorkerGPUMetrics {
+  gpu_index: number;
+  name?: string;
+  memory_total_mb?: number;
+  memory_used_mb?: number;
+  memory_utilization_percent?: number;
+  gpu_utilization_percent?: number;
+  temperature_celsius?: number;
+}
+
+export interface WorkerMetrics {
+  worker_id: number;
+  worker_name: string;
+  worker_ip: string;
+  timestamp: string;
+  gpu_count: number;
+  total_memory_gb: number;
+  used_memory_gb: number;
+  avg_utilization_percent: number;
+  gpus: WorkerGPUMetrics[];
+  history?: GPUHistoryPoint[];
+}
+
+export interface AllWorkersMetrics {
+  timestamp: string;
+  workers: WorkerMetrics[];
+}
+
+/**
  * API endpoints
  */
 export const apiEndpoints = {
+  // Workers
+  listWorkers: '/workers',
+  getWorker: (id: number) => `/workers/${id}`,
+  createWorker: '/workers',
+  updateWorker: (id: number) => `/workers/${id}`,
+  deleteWorker: (id: number) => `/workers/${id}`,
+  getWorkerStats: (id: number) => `/workers/${id}/stats`,
+  setWorkerStatus: (id: number) => `/workers/${id}/set-status`,
+
   // Models
-  listModels: '/api/v1/models',
-  getModel: (id: number) => `/api/v1/models/${id}`,
-  createModel: '/api/v1/models',
-  updateModel: (id: number) => `/api/v1/models/${id}`,
-  deleteModel: (id: number) => `/api/v1/models/${id}`,
+  listModels: '/models',
+  getModel: (id: number) => `/models/${id}`,
+  createModel: '/models',
+  updateModel: (id: number) => `/models/${id}`,
+  deleteModel: (id: number) => `/models/${id}`,
 
   // Deployments
-  listDeployments: '/api/v1/deployments',
-  getDeployment: (id: number) => `/api/v1/deployments/${id}`,
-  createDeployment: '/api/v1/deployments',
-  updateDeployment: (id: number) => `/api/v1/deployments/${id}`,
-  deleteDeployment: (id: number) => `/api/v1/deployments/${id}`,
-  startDeployment: (id: number) => `/api/v1/deployments/${id}/start`,
-  stopDeployment: (id: number) => `/api/v1/deployments/${id}/stop`,
+  listDeployments: '/deployments',
+  getDeployment: (id: number) => `/deployments/${id}`,
+  createDeployment: '/deployments',
+  updateDeployment: (id: number) => `/deployments/${id}`,
+  deleteDeployment: (id: number) => `/deployments/${id}`,
+  startDeployment: (id: number) => `/deployments/${id}/start`,
+  stopDeployment: (id: number) => `/deployments/${id}/stop`,
 
   // GPUs
-  listGpus: '/api/v1/gpus',
-  getGpu: (id: number) => `/api/v1/gpus/${id}`,
+  listGpus: '/gpus',
+  getGpu: (id: number) => `/gpus/${id}`,
 
   // API Keys
-  listApiKeys: '/api/v1/api-keys',
-  createApiKey: '/api/v1/api-keys',
-  deleteApiKey: (id: number) => `/api/v1/api-keys/${id}`,
-  toggleApiKey: (id: number) => `/api/v1/api-keys/${id}/toggle`,
+  listApiKeys: '/api-keys',
+  createApiKey: '/api-keys',
+  deleteApiKey: (id: number) => `/api-keys/${id}`,
+  toggleApiKey: (id: number) => `/api-keys/${id}/toggle`,
 
   // Usage
-  listUsageLogs: '/api/v1/usage/logs',
-  getStats: '/api/v1/stats/dashboard',
+  listUsageLogs: '/usage/logs',
+  getStats: '/stats/dashboard',
 
   // Health
   health: '/health',
   metrics: '/metrics',
+
+  // Worker GPU Metrics
+  getWorkerMetrics: (id: number) => `/metrics/workers/${id}`,
+  getWorkerMetricsHistory: (id: number, gpuIndex?: number) =>
+    `/metrics/workers/${id}/history${gpuIndex !== undefined ? `?gpu_index=${gpuIndex}` : ''}`,
+  getAllWorkersMetrics: '/metrics/workers',
+  metricsHealth: '/metrics/health',
 };
 
 export default apiEndpoints;

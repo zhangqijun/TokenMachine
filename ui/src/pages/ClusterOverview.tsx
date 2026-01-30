@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   Table,
   Button,
@@ -23,32 +23,11 @@ import {
   FilterOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import AddWorkerModal from '../components/cluster/AddWorkerModal';
+import type { Worker, WorkerMetrics } from '../api';
 
 const { Title } = Typography;
-
-interface Worker {
-  id: string;
-  name: string;
-  ip: string;
-  status: 'Ready' | 'Busy' | 'Draining' | 'Unhealthy';
-  gpu_count: number;
-  gpu_utilization: number;
-  gpu_memory_used: number;
-  gpu_memory_total: number;
-  labels: Record<string, string>;
-  created_at: string;
-  last_heartbeat: string;
-}
-
-interface GPUInfo {
-  id: number;
-  utilization: number;
-  memory_used: number;
-  memory_total: number;
-  temperature: number;
-  status: 'Running' | 'Idle' | 'Error';
-}
 
 const ClusterOverview = () => {
   const navigate = useNavigate();
@@ -56,55 +35,63 @@ const ClusterOverview = () => {
   const [loading, setLoading] = useState(false);
   const [filterKey, setFilterKey] = useState<string>('');
   const [filterValues, setFilterValues] = useState<string[]>([]);
+  const [workers, setWorkers] = useState<Worker[]>([]);
+  const [workerMetrics, setWorkerMetrics] = useState<Record<number, WorkerMetrics>>({});
 
-  // Mock data
-  const [workers, setWorkers] = useState<Worker[]>([
-    {
-      id: '1',
-      name: 'worker-01',
-      ip: '192.168.1.101',
-      status: 'Ready',
-      gpu_count: 4,
-      gpu_utilization: 85,
-      gpu_memory_used: 128,
-      gpu_memory_total: 160,
-      labels: { 'gpu-type': 'a100', 'zone': 'prod' },
-      created_at: '2025-01-15 10:30:00',
-      last_heartbeat: '5 秒前',
-    },
-    {
-      id: '2',
-      name: 'worker-02',
-      ip: '192.168.1.102',
-      status: 'Ready',
-      gpu_count: 4,
-      gpu_utilization: 72,
-      gpu_memory_used: 115,
-      gpu_memory_total: 160,
-      labels: { 'gpu-type': 'a100', 'zone': 'prod' },
-      created_at: '2025-01-15 10:35:00',
-      last_heartbeat: '3 秒前',
-    },
-    {
-      id: '3',
-      name: 'worker-03',
-      ip: '192.168.1.103',
-      status: 'Busy',
-      gpu_count: 4,
-      gpu_utilization: 95,
-      gpu_memory_used: 152,
-      gpu_memory_total: 160,
-      labels: { 'gpu-type': 'a100', 'zone': 'prod' },
-      created_at: '2025-01-15 10:40:00',
-      last_heartbeat: '2 秒前',
-    },
-  ]);
+  // Fetch workers from backend
+  const fetchWorkers = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get('/workers');
+      // Handle both array and paginated response
+      const workersData = Array.isArray(response.data)
+        ? response.data
+        : (response.data?.items || []);
+      setWorkers(workersData);
+
+      // Fetch GPU metrics for each worker
+      await fetchWorkersMetrics(workersData);
+    } catch (error: any) {
+      message.error(`Failed to load workers: ${error.response?.data?.detail || error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch GPU metrics for workers
+  const fetchWorkersMetrics = async (workersList: Worker[]) => {
+    const metrics: Record<number, WorkerMetrics> = {};
+
+    for (const worker of workersList) {
+      if (worker.status !== 'READY' || !worker.ip) continue;
+
+      try {
+        const response = await axios.get(`/metrics/workers/${worker.id}`);
+        metrics[worker.id] = response.data;
+      } catch (error) {
+        console.warn(`Failed to fetch metrics for worker ${worker.id}:`, error);
+      }
+    }
+
+    setWorkerMetrics(metrics);
+  };
+
+  useEffect(() => {
+    fetchWorkers();
+
+    // Auto-refresh metrics every 10 seconds
+    const interval = setInterval(() => {
+      fetchWorkersMetrics(workers);
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const stats = {
     total_workers: workers.length,
     total_gpus: workers.reduce((sum, w) => sum + w.gpu_count, 0),
     running_gpus: workers.reduce((sum, w) => sum + w.gpu_count, 0),
-    unhealthy: workers.filter(w => w.status === 'Unhealthy').length,
+    unhealthy: workers.filter(w => w.status === 'UNHEALTHY').length,
   };
 
   // 收集所有的 label keys 和对应的 values
@@ -112,6 +99,7 @@ const ClusterOverview = () => {
     const keyValueMap: Record<string, Set<string>> = {};
 
     workers.forEach(w => {
+      if (!w.labels) return;
       Object.entries(w.labels).forEach(([key, value]) => {
         if (!keyValueMap[key]) {
           keyValueMap[key] = new Set<string>();
@@ -140,6 +128,7 @@ const ClusterOverview = () => {
   const filteredWorkers = useMemo(() => {
     return workers.filter(worker => {
       if (!filterKey || filterValues.length === 0) return true;
+      if (!worker.labels) return false;
 
       const workerValue = worker.labels[filterKey];
       return filterValues.includes(workerValue);
@@ -147,13 +136,27 @@ const ClusterOverview = () => {
   }, [workers, filterKey, filterValues]);
 
   const getStatusColor = (status: Worker['status']) => {
-    const colorMap: Record<Worker['status'], string> = {
-      Ready: 'success',
-      Busy: 'processing',
-      Draining: 'warning',
-      Unhealthy: 'error',
+    const colorMap: Record<string, string> = {
+      'READY': 'success',
+      'BUSY': 'processing',
+      'DRAINING': 'warning',
+      'UNHEALTHY': 'error',
+      'OFFLINE': 'default',
+      'REGISTERING': 'processing',
     };
-    return colorMap[status];
+    return colorMap[status || ''] || 'default';
+  };
+
+  const getStatusText = (status: Worker['status']) => {
+    const textMap: Record<string, string> = {
+      'READY': 'Ready',
+      'BUSY': 'Busy',
+      'DRAINING': 'Draining',
+      'UNHEALTHY': 'Unhealthy',
+      'OFFLINE': 'Offline',
+      'REGISTERING': 'Registering',
+    };
+    return textMap[status || ''] || status || 'Unknown';
   };
 
   const getUtilizationColor = (utilization: number) => {
@@ -167,36 +170,42 @@ const ClusterOverview = () => {
     navigate(`/cluster/workers/${worker.id}`);
   };
 
-  const handleDrain = (worker: Worker) => {
+  const handleDrain = async (worker: Worker) => {
     Modal.confirm({
       title: '确认排空节点',
       content: `确定要排空节点 ${worker.name} 吗？排空后节点将不再接受新任务。`,
-      onOk: () => {
-        setWorkers(workers.map(w =>
-          w.id === worker.id ? { ...w, status: 'Draining' } : w
-        ));
-        message.success('节点排空成功');
+      onOk: async () => {
+        try {
+          await axios.post(`/workers/${worker.id}/set-status`, 'DRAINING', {
+            headers: { 'Content-Type': 'application/json' }
+          });
+          message.success('节点排空成功');
+          fetchWorkers();
+        } catch (error: any) {
+          message.error(`排空失败: ${error.response?.data?.detail || error.message}`);
+        }
       },
     });
   };
 
-  const handleDelete = (worker: Worker) => {
+  const handleDelete = async (worker: Worker) => {
     Modal.confirm({
       title: '确认删除节点',
       content: `确定要删除节点 ${worker.name} 吗？此操作不可恢复。`,
-      onOk: () => {
-        setWorkers(workers.filter(w => w.id !== worker.id));
-        message.success('节点删除成功');
+      onOk: async () => {
+        try {
+          await axios.delete(`/workers/${worker.id}`);
+          message.success('节点删除成功');
+          fetchWorkers();
+        } catch (error: any) {
+          message.error(`删除失败: ${error.response?.data?.detail || error.message}`);
+        }
       },
     });
   };
 
   const handleRefresh = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      message.success('刷新成功');
-    }, 1000);
+    fetchWorkers();
   };
 
   const columns = [
@@ -213,13 +222,14 @@ const ClusterOverview = () => {
       dataIndex: 'status',
       key: 'status',
       render: (status: Worker['status']) => (
-        <Tag color={getStatusColor(status)}>{status}</Tag>
+        <Tag color={getStatusColor(status)}>{getStatusText(status)}</Tag>
       ),
     },
     {
       title: 'IP 地址',
       dataIndex: 'ip',
       key: 'ip',
+      render: (ip: string) => ip || 'N/A',
     },
     {
       title: 'GPU 数量',
@@ -228,36 +238,53 @@ const ClusterOverview = () => {
     },
     {
       title: 'GPU 利用率',
-      dataIndex: 'gpu_utilization',
       key: 'gpu_utilization',
-      render: (utilization: number) => (
-        <Progress
-          percent={utilization}
-          strokeColor={getUtilizationColor(utilization)}
-          size="small"
-        />
-      ),
+      render: (_: any, record: Worker) => {
+        // Get real-time GPU utilization from metrics API
+        const metrics = workerMetrics[record.id];
+        if (!metrics || !metrics.gpus || metrics.gpus.length === 0) {
+          return <Progress percent={0} size="small" />;
+        }
+        const avgUtil = metrics.avg_utilization_percent || 0;
+        return (
+          <Progress
+            percent={Math.round(avgUtil)}
+            strokeColor={getUtilizationColor(avgUtil)}
+            size="small"
+          />
+        );
+      },
     },
     {
       title: '显存使用',
       key: 'memory',
-      render: (_: any, record: Worker) => (
-        <span>
-          {record.gpu_memory_used}GB / {record.gpu_memory_total}GB
-        </span>
-      ),
+      render: (_: any, record: Worker) => {
+        // Get real-time memory usage from metrics API
+        const metrics = workerMetrics[record.id];
+        if (!metrics) {
+          return <span>N/A</span>;
+        }
+        const usedGB = metrics.used_memory_gb?.toFixed(1) || '0';
+        const totalGB = metrics.total_memory_gb?.toFixed(1) || '0';
+        return <span>{usedGB}GB / {totalGB}GB</span>;
+      },
     },
     {
       title: '标签',
       dataIndex: 'labels',
       key: 'labels',
-      render: (labels: Record<string, string>) => (
-        <Space size={4}>
-          {Object.entries(labels).map(([key, value]) => (
-            <Tag key={key}>{key}={value}</Tag>
-          ))}
-        </Space>
-      ),
+      render: (labels: Record<string, string> | undefined) => {
+        if (!labels || Object.keys(labels).length === 0) {
+          return <span>-</span>;
+        }
+        return (
+          <Space size={4}>
+            {Object.entries(labels).map(([key, value]) => (
+              <Tag key={key}>{key}={value}</Tag>
+            ))}
+          </Space>
+        );
+      },
     },
     {
       title: '操作',
@@ -271,7 +298,7 @@ const ClusterOverview = () => {
           >
             详情
           </Button>
-          {record.status !== 'Draining' && record.status !== 'Unhealthy' && (
+          {record.status !== 'DRAINING' && record.status !== 'UNHEALTHY' && (
             <Button
               type="link"
               icon={<StopOutlined />}
@@ -424,27 +451,14 @@ const ClusterOverview = () => {
       <AddWorkerModal
         visible={isAddModalVisible}
         onCancel={() => setIsAddModalVisible(false)}
-        onOk={(worker) => {
-          // 注意：这里不再直接关闭modal，而是等待worker注册完成
-          setWorkers([
-            ...workers,
-            {
-              ...worker,
-              id: Date.now().toString(),
-              status: 'Ready',
-              gpu_utilization: 0,
-              gpu_memory_used: 0,
-              created_at: new Date().toLocaleString(),
-              last_heartbeat: '刚刚',
-            },
-          ]);
+        onOk={() => {
+          // Refresh worker list after adding
+          fetchWorkers();
         }}
         onWorkerRegistered={(workerName) => {
           // Worker注册成功后的回调
           message.success(`Worker ${workerName} 注册成功！`);
-          setWorkers(prev => prev.map(w =>
-            w.name === workerName ? { ...w, status: 'Ready' as const } : w
-          ));
+          fetchWorkers();
         }}
       />
     </div>

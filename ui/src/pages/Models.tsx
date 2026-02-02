@@ -616,7 +616,7 @@ const Models = () => {
           m.id === selectedModelForAction.id
             ? {
                 ...m,
-                instances: m.instances?.filter((inst) => inst.id !== instanceId),
+                instances: m.instances?.filter((inst: any) => inst.id !== instanceId),
               }
             : m
         )

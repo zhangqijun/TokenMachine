@@ -447,7 +447,7 @@ class WorkerResponse(BaseModel):
     name: str
     cluster_id: int
     status: WorkerStatus
-    ip: Optional[str] = None
+    ips: Optional[List[str]] = None  # List of all IPs
     hostname: Optional[str] = None
     labels: Optional[Dict[str, str]] = None
     expected_gpu_count: int

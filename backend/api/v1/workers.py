@@ -326,7 +326,7 @@ async def register_worker_with_token(
     db: Session = Depends(get_db),
 ):
     """
-    Register worker with IP connectivity verification.
+    Register worker with multiple IP addresses.
 
     This endpoint allows workers to register themselves using a pre-generated token
     or auto-creates a worker if the token doesn't exist yet.
@@ -340,7 +340,7 @@ async def register_worker_with_token(
         )
 
     hostname = request.get("hostname", "")
-    ip = request.get("ip", "")
+    ips = request.get("ips", [])  # List of all IPs
     total_gpu_count = request.get("total_gpu_count", 0)
     selected_gpu_count = request.get("selected_gpu_count", 0)
     gpu_models = request.get("gpu_models", [])
@@ -349,6 +349,17 @@ async def register_worker_with_token(
     capabilities = request.get("capabilities", ["vLLM", "SGLang"])
     agent_type = request.get("agent_type", "gpu")
     agent_version = request.get("agent_version", "1.0.0")
+
+    # Validate IPs - need at least one IP
+    if not ips:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="At least one IP address is required (ips)"
+        )
+
+    # Normalize ips to list
+    if isinstance(ips, str):
+        ips = [ips]
 
     # Find worker by token hash
     import hashlib
@@ -395,17 +406,10 @@ async def register_worker_with_token(
 
             print(f"[Worker Registration] Auto-created worker: {worker_name} (ID: {worker.id})")
 
-    # Verify worker IP connectivity (basic check)
-    if not ip:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="IP address is required"
-        )
-
     # Update worker information
     worker.hostname = hostname
     worker.status = WorkerStatus.READY
-    worker.ip = ip
+    worker.ips = ips
     worker.gpu_count = selected_gpu_count
     worker.capabilities = capabilities
     worker.agent_type = agent_type
@@ -419,6 +423,7 @@ async def register_worker_with_token(
         db.delete(gpu)
 
     # Add selected GPUs
+    primary_ip = ips[0] if ips else None
     for i, idx in enumerate(selected_indices):
         if i < len(gpu_models) and i < len(gpu_memorys):
             # Convert MB to bytes
@@ -427,9 +432,9 @@ async def register_worker_with_token(
             gpu = GPUDevice(
                 worker_id=worker.id,
                 uuid=f"gpu-{worker.id}-{idx}",
-                name=gpu_models[i],  # GPU model name (e.g., "RTX3090")
+                name=gpu_models[i],
                 index=idx,
-                ip=ip,
+                ip=primary_ip,
                 port=9001,
                 hostname=hostname,
                 memory_total=memory_bytes,
@@ -442,6 +447,8 @@ async def register_worker_with_token(
 
     db.commit()
     db.refresh(worker)
+
+    print(f"[Worker Registration] Worker {worker.name} registered with IPs: {ips}")
 
     # Generate worker secret for authentication
     import secrets

@@ -360,16 +360,15 @@ class Worker(Base):
     cluster_id = Column(Integer, ForeignKey("clusters.id", ondelete="CASCADE"), nullable=False, index=True)
     pool_id = Column(Integer, ForeignKey("worker_pools.id", ondelete="SET NULL"), nullable=True, index=True)
     name = Column(String(255), nullable=False, index=True)
-    ip = Column(String(45), nullable=True)  # IPv4 or IPv6 (deprecated: kept for compatibility)
-    port = Column(Integer, default=8080, nullable=False)  # (deprecated: kept for compatibility)
-    ifname = Column(String(50))  # Network interface name (deprecated: kept for compatibility)
-    hostname = Column(String(255))  # (deprecated: kept for compatibility)
+    ips = Column(JSON, nullable=True)  # List of all IPs, e.g., ["192.168.1.1", "10.0.0.1"]
+    port = Column(Integer, default=8080, nullable=False)
+    hostname = Column(String(255))
     status = Column(SQLEnum(WorkerStatus), default=WorkerStatus.REGISTERING, nullable=False, index=True)
-    labels = Column(JSON)  # {"gpu": "nvidia", "zone": "us-west-1"}
-    status_json = Column(JSON)  # {cpu: {...}, memory: {...}, gpu_devices: [...], filesystem: [...]}
+    labels = Column(JSON)
+    status_json = Column(JSON)
     token_hash = Column(String(255), unique=True, nullable=True, index=True)
     gpu_count = Column(Integer, default=0, nullable=False)
-    expected_gpu_count = Column(Integer, default=0, nullable=False)  # Expected GPU count for the worker
+    expected_gpu_count = Column(Integer, default=0, nullable=False)
     last_heartbeat_at = Column(TIMESTAMP, nullable=True)
     last_status_update_at = Column(TIMESTAMP, nullable=True)
     created_at = Column(TIMESTAMP, default=func.now(), nullable=False)

@@ -5,8 +5,13 @@
 
 set -e
 
-# 配置
-WORK_DIR="/opt/tokenmachine"
+# 自动检测用户目录模式（非 root 用户自动使用用户目录）
+if [[ $EUID -ne 0 ]]; then
+    WORK_DIR="${HOME}/.local/tokenmachine"
+else
+    WORK_DIR="/opt/tokenmachine"
+fi
+
 WORKER_CONFIG="$WORK_DIR/.worker_config"
 HEARTBEAT_INTERVAL=30  # 心跳间隔（秒）
 

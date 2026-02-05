@@ -73,12 +73,6 @@ async def lifespan(app: FastAPI):
 
     # Cleanup
     logger.info("Shutting down...")
-
-    # Cleanup worker pool
-    from backend.workers.worker_pool import get_worker_pool
-    worker_pool = get_worker_pool()
-    await worker_pool.cleanup()
-
     logger.info(f"{settings.app_name} stopped")
 
 
@@ -103,13 +97,9 @@ setup_middleware(app)
 @app.get("/health")
 async def health_check():
     """Health check endpoint."""
-    gpu_manager = get_gpu_manager()
-
     return {
         "status": "healthy",
-        "version": settings.app_version,
-        "gpu_detected": gpu_manager.is_available(),
-        "gpu_count": gpu_manager.num_gpus if gpu_manager.is_available() else 0,
+        "version": settings.app_version
     }
 
 
@@ -154,7 +144,7 @@ app.include_router(benchmark.router, prefix="/api/v1/benchmark", tags=["benchmar
 app.include_router(backends.router, prefix="/api/v1", tags=["backends"])
 app.include_router(monitoring.router, prefix="/api/v1/monitoring", tags=["monitoring"])
 app.include_router(auth.router)
-app.include_router(workers.router)
+app.include_router(workers.router, prefix="/api/v1")
 app.include_router(metrics.router)
 
 

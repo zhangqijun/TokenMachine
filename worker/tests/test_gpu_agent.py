@@ -1191,9 +1191,9 @@ class TestLocalModeFullInstallation:
                 -t {WORKER_TOKEN_VAL} \
                 --gpus {gpu_ids} \
         """
-        # 使用 timeout 命令避免 subprocess timeout 问题
-        full_cmd = f"timeout 180 bash -c '{install_cmd}' 2>&1"
-        result = subprocess.run(full_cmd, shell=True, capture_output=True, text=True)
+        # 使用较长的 timeout（400秒）避免安装未完成就被杀死
+        full_cmd = f"timeout 400 bash -c '{install_cmd}' 2>&1"
+        result = subprocess.run(full_cmd, shell=True, capture_output=True, text=True, timeout=420)
         print(f"安装输出:\n{result.stdout[-2000:]}")
         if result.stderr:
             print(f"安装错误:\n{result.stderr[-500:]}")

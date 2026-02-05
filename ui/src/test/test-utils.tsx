@@ -4,8 +4,30 @@
 import type { ReactElement } from 'react'
 import { render, type RenderOptions } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
-import { ConfigProvider, theme } from 'antd'
+import { ConfigProvider, theme, App } from 'antd'
 import { vi } from 'vitest'
+
+// Mock localStorage
+const localStorageMock = (() => {
+  let store: Record<string, string> = {}
+
+  return {
+    getItem: (key: string) => store[key] || null,
+    setItem: (key: string, value: string) => {
+      store[key] = value.toString()
+    },
+    removeItem: (key: string) => {
+      delete store[key]
+    },
+    clear: () => {
+      store = {}
+    },
+  }
+})()
+
+Object.defineProperty(global, 'localStorage', {
+  value: localStorageMock,
+})
 
 // Mock store
 const mockStore = {
@@ -46,7 +68,7 @@ function AllTheProviders({ children }: AllTheProvidersProps) {
           },
         }}
       >
-        {children}
+        <App>{children}</App>
       </ConfigProvider>
     </BrowserRouter>
   )

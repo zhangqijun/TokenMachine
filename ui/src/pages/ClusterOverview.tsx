@@ -451,13 +451,8 @@ const ClusterOverview = () => {
       <AddWorkerModal
         visible={isAddModalVisible}
         onCancel={() => setIsAddModalVisible(false)}
-        onOk={() => {
+        onSuccess={() => {
           // Refresh worker list after adding
-          fetchWorkers();
-        }}
-        onWorkerRegistered={(workerName) => {
-          // Worker注册成功后的回调
-          message.success(`Worker ${workerName} 注册成功！`);
           fetchWorkers();
         }}
       />

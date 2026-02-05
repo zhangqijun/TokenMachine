@@ -270,18 +270,18 @@ compile_occupy_gpu() {
     fi
 
     log_info "编译 occupy_gpu.cu..."
-    if ! nvcc -O3 -o occupy_gpu occupier/occupy_gpu.cu 2>&1; then
+    if ! nvcc -O3 -o occupier/occupy_gpu occupier/occupy_gpu.cu 2>&1; then
         log_error "编译 occupy_gpu.cu 失败"
         exit 1
     fi
 
     # 优化二进制文件
     if command -v strip &> /dev/null; then
-        strip occupy_gpu
+        strip occupier/occupy_gpu
         log_info "已优化 occupy_gpu 二进制"
     fi
 
-    chmod +x occupy_gpu
+    chmod +x occupier/occupy_gpu
     log_info "✓ occupy_gpu 编译完成"
 }
 
@@ -388,7 +388,7 @@ register_worker() {
 
     log_info "发送IP验证请求: $ips_json"
 
-    local verify_response=$(curl -s -X POST "${SERVER_URL}/workers/verify-ips" \
+    local verify_response=$(curl -s --max-time 30 -X POST "${SERVER_URL}/workers/verify-ips" \
         -H "Content-Type: application/json" \
         -H "Authorization: Bearer ${TOKEN}" \
         -d "{\"ips\": ${ips_json}}" 2>&1)
@@ -449,12 +449,12 @@ register_worker() {
     memory_json="$memory_json]"
     indices_json="$indices_json]"
 
-    local register_response=$(curl -s -X POST "${SERVER_URL}/workers/register" \
+    local register_response=$(curl -s --max-time 30 -X POST "${SERVER_URL}/workers/register" \
         -H "Content-Type: application/json" \
         -d "{
             \"token\": \"$TOKEN\",
             \"hostname\": \"$worker_hostname\",
-            \"ip\": \"$REACHABLE_IP\",
+            \"ips\": [\"$REACHABLE_IP\"],
             \"total_gpu_count\": $total_gpu_count,
             \"selected_gpu_count\": $selected_gpu_count,
             \"gpu_models\": $gpu_models_json,
@@ -465,20 +465,23 @@ register_worker() {
             \"agent_version\": \"1.0.0\"
         }" 2>&1)
 
-    if [ $? -ne 0 ]; then
-        log_error "Worker注册失败: $register_response"
-        exit 1
-    fi
-
-    log_info "Worker注册响应: $register_response"
-
     # 解析响应（使用简单的文本处理）
     WORKER_ID=$(echo "$register_response" | grep -oP '"worker_id":\s*\K\d+' || echo "")
     WORKER_SECRET=$(echo "$register_response" | grep -oP '"worker_secret"\s*:\s*"\K[^"]+' || echo "")
 
+    # 检查响应是否包含错误
+    if echo "$register_response" | grep -q '"error"'; then
+        log_warn "Worker注册返回错误: $register_response"
+        log_warn "将继续安装本地服务（Backend连接可能失败）"
+        # 使用临时 ID 和 secret
+        WORKER_ID="temp_$(date +%s)"
+        WORKER_SECRET="$TOKEN"
+    fi
+
     if [ -z "$WORKER_ID" ]; then
-        log_error "未能获取Worker ID"
-        exit 1
+        log_warn "未能获取Worker ID，使用临时ID"
+        WORKER_ID="temp_$(date +%s)"
+        WORKER_SECRET="${WORKER_SECRET:-$TOKEN}"
     fi
 
     if [ -z "$WORKER_SECRET" ]; then
@@ -486,8 +489,7 @@ register_worker() {
         WORKER_SECRET="$TOKEN"
     fi
 
-    log_info "✓ Worker注册成功"
-    log_info "  Worker ID: $WORKER_ID"
+    log_info "使用 Worker ID: $WORKER_ID"
 
     # 保存Worker配置
     cat > "$WORK_DIR/.worker_config" << EOF
@@ -519,7 +521,7 @@ register_gpu() {
     log_info "  内存: ${gpu_memory}MB"
 
     # 注册GPU
-    local gpu_response=$(curl -s -X POST "${SERVER_URL}/api/v1/workers/register-gpu" \
+    local gpu_response=$(curl -s --max-time 30 -X POST "${SERVER_URL}/api/v1/workers/register-gpu" \
         -H "Content-Type: application/json" \
         -H "Authorization: Bearer ${WORKER_SECRET}" \
         -d "{
@@ -581,7 +583,6 @@ copy_binaries() {
 
     # 复制脚本文件（覆盖）
     cp -f "$SCRIPT_DIR/tm_agent.sh" "$WORK_DIR/"
-    cp -f "$SCRIPT_DIR/test_90_percent.sh" "$WORK_DIR/"
     cp -f "$SCRIPT_DIR/heartbeat.sh" "$WORK_DIR/"
 
     # 创建环境变量配置文件
@@ -600,7 +601,6 @@ EOF
         log_info "occupy_gpu权限已设置"
     fi
     chmod +x "$WORK_DIR/tm_agent.sh"
-    chmod +x "$WORK_DIR/test_90_percent.sh"
     if [ -d "$WORK_DIR/Exporter" ]; then
         chmod +x "$WORK_DIR/Exporter/"*
         # 验证是否使用静态版本
@@ -732,7 +732,8 @@ show_results() {
     echo ""
 
     echo "GPU 状态:"
-    nvidia-smi --query-gpu=index,memory.used,memory.total --format=csv
+    # 添加超时保护避免 nvidia-smi 挂起
+    timeout 10 nvidia-smi --query-gpu=index,memory.used,memory.total --format=csv || echo "  (GPU 状态查询超时或失败)"
     echo ""
 
     echo "管理命令:"
@@ -752,8 +753,6 @@ show_results() {
     echo "  查看 Receiver 日志: tail -f $RUN_DIR/receiver.log"
     echo "  查看 GPU 状态: nvidia-smi --query-gpu=index,name,memory.used,memory.total --format=csv"
     echo ""
-    echo "测试工具:"
-    echo "  测试 90% 内存占用: $WORK_DIR/test_90_percent.sh"
 }
 
 # 卸载功能

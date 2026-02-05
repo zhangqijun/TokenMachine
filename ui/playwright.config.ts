@@ -10,7 +10,7 @@ export default defineConfig({
   use: {
     // 使用系统 Chrome
     channel: 'chrome',
-    baseURL: 'http://localhost:5173',
+    baseURL: 'http://localhost:1579',
     trace: 'on-first-retry',
   },
 
@@ -24,8 +24,8 @@ export default defineConfig({
   // 启动开发服务器
   webServer: {
     command: 'npm run dev',
-    url: 'http://localhost:5173',
-    reuseExistingServer: !process.env.CI,
+    url: 'http://localhost:1579',
+    reuseExistingServer: true,
     timeout: 120000,
   },
 });

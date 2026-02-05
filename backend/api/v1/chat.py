@@ -11,13 +11,12 @@ from loguru import logger
 import httpx
 
 from backend.api.deps import get_current_db, verify_api_key_auth, get_deployment_by_name
-from backend.models.database import ApiKey, UsageLog, UsageLogStatus
+from backend.models.database import ApiKey, UsageLog, UsageLogStatus, ModelInstance, ModelInstanceStatus
 from backend.models.schemas import (
     ChatCompletionRequest,
     ChatCompletionResponse,
     ChatCompletionStreamResponse,
 )
-from backend.workers.worker_pool import get_worker_pool
 from backend.monitoring.metrics import (
     model_tokens_total,
     model_requests_total,
@@ -41,9 +40,21 @@ async def chat_completions(
     """
     deployment = await get_deployment_by_name(request.model, db)
 
-    # Get worker endpoint
-    worker_pool = get_worker_pool()
-    endpoint = worker_pool.get_healthy_worker_endpoint(deployment.id)
+    # Get healthy worker endpoint from deployment's model instances
+    endpoint = None
+    for instance in deployment.model_instances:
+        if instance.status == ModelInstanceStatus.RUNNING:
+            health = instance.health_status or {}
+            if health.get("healthy", False):
+                endpoint = instance.endpoint
+                break
+
+    if not endpoint:
+        # Fallback: take any running instance
+        for instance in deployment.model_instances:
+            if instance.status == ModelInstanceStatus.RUNNING:
+                endpoint = instance.endpoint
+                break
 
     if not endpoint:
         raise HTTPException(

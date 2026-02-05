@@ -83,13 +83,8 @@ const NodeManagement = () => {
     setAddNodeModalVisible(true);
   };
 
-  const handleAddNodeConfirm = () => {
+  const handleAddNodeSuccess = () => {
     // Refresh worker list after adding
-    fetchWorkers();
-  };
-
-  const handleWorkerRegistered = (workerName: string) => {
-    message.success(`Worker "${workerName}" 注册成功！`);
     fetchWorkers();
   };
 
@@ -611,8 +606,7 @@ const NodeManagement = () => {
       <AddWorkerModal
         visible={addNodeModalVisible}
         onCancel={() => setAddNodeModalVisible(false)}
-        onOk={handleAddNodeConfirm}
-        onWorkerRegistered={handleWorkerRegistered}
+        onSuccess={handleAddNodeSuccess}
       />
     </div>
   );

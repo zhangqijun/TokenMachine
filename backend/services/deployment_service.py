@@ -1,16 +1,15 @@
 """
 Deployment service for managing model deployments.
 """
-import asyncio
 from typing import List, Optional, Dict, Any
 from loguru import logger
 from sqlalchemy.orm import Session
 
 from backend.models.database import (
-    Deployment, DeploymentStatus, Model, ModelStatus, GPU, GPUStatus
+    Deployment, DeploymentStatus, Model, ModelStatus, GPU, GPUStatus,
+    ModelInstance, ModelInstanceStatus, Worker, WorkerStatus
 )
 from backend.models.schemas import DeploymentCreate, DeploymentConfig
-from backend.workers.worker_pool import VLLMWorkerPool
 from backend.services.model_service import ModelService
 from backend.core.config import get_settings
 from backend.core.gpu import get_gpu_manager
@@ -26,7 +25,6 @@ class DeploymentService:
         self.db = db
         self.gpu_manager = get_gpu_manager()
         self.model_service = ModelService(db)
-        self.worker_pool = VLLMWorkerPool()
 
     async def create_deployment(self, data: DeploymentCreate) -> Deployment:
         """
@@ -83,49 +81,62 @@ class DeploymentService:
         self.db.commit()
         self.db.refresh(deployment)
 
-        # Start workers
+        # Create model instances (records only, no actual process management)
         try:
-            await self._start_workers(deployment, model)
+            await self._create_model_instances(deployment, model)
+            deployment.status = DeploymentStatus.RUNNING
         except Exception as e:
             deployment.status = DeploymentStatus.ERROR
             deployment.config = {**deployment.config, "error": str(e)}
             self.db.commit()
             raise
 
+        self.db.commit()
         logger.info(f"Created deployment {data.name} with ID {deployment.id}")
         return deployment
 
-    async def _start_workers(self, deployment: Deployment, model: Model):
-        """Start worker processes for a deployment."""
-        logger.info(f"Starting {deployment.replicas} workers for deployment {deployment.name}")
+    async def _create_model_instances(self, deployment: Deployment, model: Model):
+        """Create model instance records for a deployment."""
+        logger.info(f"Creating {deployment.replicas} instances for deployment {deployment.name}")
 
         config = DeploymentConfig(**deployment.config) if deployment.config else DeploymentConfig()
-        workers = []
+
+        # Find available workers
+        workers = self.db.query(Worker).filter(
+            Worker.status == WorkerStatus.READY
+        ).all()
+
+        if not workers:
+            raise ValueError("No workers available for deployment")
 
         for i in range(deployment.replicas):
             gpu_id = deployment.gpu_ids[i % len(deployment.gpu_ids)]
             port = settings.get_worker_port(deployment.id * 10 + i)
 
-            worker_config = {
-                "model_path": model.path,
-                "model_name": deployment.name,
-                "gpu_id": gpu_id,
-                "port": port,
-                "config": {
+            # Select worker (round-robin)
+            worker = workers[i % len(workers)]
+
+            # Create model instance record
+            instance = ModelInstance(
+                deployment_id=deployment.id,
+                model_id=model.id,
+                worker_id=worker.id,
+                name=f"{deployment.name}-instance-{i}",
+                status=ModelInstanceStatus.RUNNING,
+                endpoint=f"http://{worker.ips[0] if worker.ips else worker.hostname}:{port}",
+                backend=deployment.backend,
+                config={
                     "tensor_parallel_size": config.tensor_parallel_size,
                     "max_model_len": config.max_model_len,
                     "gpu_memory_utilization": config.gpu_memory_utilization,
                     "dtype": config.dtype,
                     "trust_remote_code": config.trust_remote_code,
-                }
-            }
-
-            worker = await self.worker_pool.create_worker(
-                deployment_id=deployment.id,
-                worker_index=i,
-                **worker_config
+                },
+                gpu_ids=[gpu_id],
+                port=port,
+                health_status={"healthy": True, "last_check": "deployment-created"}
             )
-            workers.append(worker)
+            self.db.add(instance)
 
         # Update GPU status
         for gpu_id in deployment.gpu_ids:
@@ -134,16 +145,8 @@ class DeploymentService:
                 gpu.status = GPUStatus.IN_USE
                 gpu.deployment_id = deployment.id
 
-        # Update deployment status
-        all_healthy = all(w.is_healthy() for w in workers)
-        deployment.status = DeploymentStatus.RUNNING if all_healthy else DeploymentStatus.ERROR
-        deployment.health_status = {
-            str(i): {"healthy": w.is_healthy(), "endpoint": w.get_endpoint()}
-            for i, w in enumerate(workers)
-        }
         self.db.commit()
-
-        logger.info(f"Workers started for deployment {deployment.name}: {len(workers)} healthy")
+        logger.info(f"Model instances created for deployment {deployment.name}")
 
     async def stop_deployment(self, deployment_id: int) -> Deployment:
         """
@@ -162,8 +165,10 @@ class DeploymentService:
         if deployment.status == DeploymentStatus.STOPPED:
             return deployment
 
-        # Stop all workers
-        await self.worker_pool.stop_deployment_workers(deployment_id)
+        # Update model instances status
+        for instance in deployment.model_instances:
+            instance.status = ModelInstanceStatus.STOPPED
+            instance.health_status = {"healthy": False, "reason": "deployment-stopped"}
 
         # Free up GPUs
         for gpu_id in deployment.gpu_ids or []:
@@ -190,7 +195,15 @@ class DeploymentService:
         deployment.status = DeploymentStatus.STARTING
         self.db.commit()
 
-        await self._start_workers(deployment, model)
+        # Delete old instances
+        for instance in deployment.model_instances:
+            self.db.delete(instance)
+        self.db.commit()
+
+        await self._create_model_instances(deployment, model)
+        deployment.status = DeploymentStatus.RUNNING
+        self.db.commit()
+
         return deployment
 
     def get_deployment(self, deployment_id: int) -> Optional[Deployment]:
@@ -235,8 +248,18 @@ class DeploymentService:
 
     def get_worker_endpoints(self, deployment_id: int) -> List[str]:
         """Get list of worker endpoints for a deployment."""
-        workers = self.worker_pool.get_deployment_workers(deployment_id)
-        return [w.get_endpoint() for w in workers if w.is_healthy()]
+        deployment = self.get_deployment(deployment_id)
+        if not deployment:
+            return []
+
+        endpoints = []
+        for instance in deployment.model_instances:
+            if instance.status == ModelInstanceStatus.RUNNING:
+                health = instance.health_status or {}
+                if health.get("healthy", False):
+                    endpoints.append(instance.endpoint)
+
+        return endpoints
 
     def get_deployment_stats(self, deployment_id: int) -> Dict[str, Any]:
         """Get deployment statistics."""
@@ -244,15 +267,19 @@ class DeploymentService:
         if not deployment:
             return {}
 
-        workers = self.worker_pool.get_deployment_workers(deployment_id)
-        healthy_workers = [w for w in workers if w.is_healthy()]
+        healthy_instances = [
+            i for i in deployment.model_instances
+            if i.status == ModelInstanceStatus.RUNNING
+            and (i.health_status or {}).get("healthy", False)
+        ]
 
         return {
             "deployment_id": deployment.id,
             "name": deployment.name,
             "status": deployment.status,
             "replicas": deployment.replicas,
-            "healthy_replicas": len(healthy_workers),
-            "endpoints": [w.get_endpoint() for w in healthy_workers],
+            "healthy_replicas": len(healthy_instances),
+            "total_instances": len(deployment.model_instances),
+            "endpoints": [i.endpoint for i in healthy_instances],
             "gpus": deployment.gpu_ids,
         }

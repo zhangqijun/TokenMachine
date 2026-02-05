@@ -1,0 +1,273 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e7] [cursor=pointer]:
+        - img [ref=e8]
+        - generic [ref=e33]: TokenMachine
+      - menu [ref=e34]:
+        - menuitem "dashboard 仪表盘" [ref=e35] [cursor=pointer]:
+          - img "dashboard" [ref=e36]:
+            - img [ref=e37]
+          - text: 仪表盘
+        - menuitem "cloud-server 节点与引擎" [ref=e39] [cursor=pointer]:
+          - img "cloud-server" [ref=e40]:
+            - img [ref=e41]
+          - text: 节点与引擎
+        - menuitem "database 模型与实例" [ref=e45] [cursor=pointer]:
+          - img "database" [ref=e46]:
+            - img [ref=e47]
+          - text: 模型与实例
+        - menuitem "experiment 测试场" [ref=e49] [cursor=pointer]:
+          - img "experiment" [ref=e50]:
+            - img [ref=e51]
+          - text: 测试场
+        - menuitem "bar-chart 监控面板" [ref=e53] [cursor=pointer]:
+          - img "bar-chart" [ref=e54]:
+            - img [ref=e55]
+          - text: 监控面板
+        - menuitem "safety 网关管理" [ref=e57] [cursor=pointer]:
+          - img "safety" [ref=e58]:
+            - img [ref=e59]
+          - text: 网关管理
+        - menuitem "setting 系统设置" [ref=e62] [cursor=pointer]:
+          - img "setting" [ref=e63]:
+            - img [ref=e64]
+          - text: 系统设置
+        - menuitem [disabled]:
+          - img:
+            - img
+    - generic [ref=e66]:
+      - generic [ref=e68]:
+        - img "bell" [ref=e69] [cursor=pointer]:
+          - img [ref=e70]
+        - superscript [ref=e72]:
+          - generic [ref=e74]: "3"
+      - generic [ref=e76] [cursor=pointer]:
+        - img "user" [ref=e79]:
+          - img [ref=e80]
+        - generic [ref=e82]: 管理员
+  - main [ref=e83]:
+    - generic [ref=e85]:
+      - heading "仪表盘" [level=2] [ref=e86]
+      - generic [ref=e87]:
+        - generic [ref=e90]:
+          - generic [ref=e92]:
+            - img "thunderbolt" [ref=e94]:
+              - img [ref=e95]
+            - generic [ref=e97]:
+              - generic [ref=e98]: 实时 QPS
+              - generic [ref=e99]: 12,540
+          - generic [ref=e100]:
+            - generic [ref=e101]:
+              - img "arrow-up" [ref=e102]:
+                - img [ref=e103]
+              - text: +8.5%
+            - generic [ref=e105]: 较上小时
+        - generic [ref=e111]:
+          - generic [ref=e113]:
+            - img "fire" [ref=e115]:
+              - img [ref=e116]
+            - generic [ref=e118]:
+              - generic [ref=e119]: TPS
+              - generic [ref=e120]: 2.5M
+          - generic [ref=e122]: tokens/s
+        - generic [ref=e128]:
+          - generic [ref=e130]:
+            - img "clock-circle" [ref=e132]:
+              - img [ref=e133]
+            - generic [ref=e136]:
+              - generic [ref=e137]: TTFT
+              - generic [ref=e138]: 45ms
+          - generic [ref=e140]: 首token延迟
+        - generic [ref=e146]:
+          - generic [ref=e148]:
+            - img "arrow-down" [ref=e150]:
+              - img [ref=e151]
+            - generic [ref=e153]:
+              - generic [ref=e154]: TPOT
+              - generic [ref=e155]: 12ms
+          - generic [ref=e157]: 输出token延迟
+        - generic [ref=e163]:
+          - generic [ref=e165]:
+            - img "database" [ref=e167]:
+              - img [ref=e168]
+            - generic [ref=e170]:
+              - generic [ref=e171]: 显存占用率
+              - generic [ref=e172]: 68%
+          - generic [ref=e174]: 692 / 1024 GB
+          - progressbar [ref=e176]
+        - generic [ref=e182]:
+          - generic [ref=e184]:
+            - img "database" [ref=e186]:
+              - img [ref=e187]
+            - generic [ref=e189]:
+              - generic [ref=e190]: GPU 利用率
+              - generic [ref=e191]: 73%
+          - generic [ref=e193]: 18 / 32 使用中
+      - generic [ref=e199]:
+        - generic [ref=e202]: 活跃部署
+        - table [ref=e210]:
+          - rowgroup [ref=e211]:
+            - row "部署名称 模型 环境 副本数 QPS 延迟 状态" [ref=e212]:
+              - columnheader "部署名称" [ref=e213]
+              - columnheader "模型" [ref=e214]
+              - columnheader "环境" [ref=e215]
+              - columnheader "副本数" [ref=e216]
+              - columnheader "QPS" [ref=e217]
+              - columnheader "延迟" [ref=e218]
+              - columnheader "状态" [ref=e219]
+          - rowgroup [ref=e220]:
+            - row "暂无数据 暂无数据" [ref=e221]:
+              - cell "暂无数据 暂无数据" [ref=e222]:
+                - generic [ref=e223]:
+                  - img "暂无数据" [ref=e225]
+                  - generic [ref=e231]: 暂无数据
+      - generic [ref=e232]:
+        - generic [ref=e234]:
+          - generic [ref=e236]:
+            - generic [ref=e237]: GPU 集群状态
+            - generic [ref=e239]: "总计: 32 个"
+          - generic [ref=e247]:
+            - generic [ref=e249]:
+              - generic [ref=e250]: 可用
+              - generic [ref=e251]:
+                - text: "12"
+                - generic [ref=e252]: (38%)
+            - generic [ref=e254]:
+              - generic [ref=e255]: 使用中
+              - generic [ref=e256]:
+                - text: "18"
+                - generic [ref=e257]: (56%)
+            - generic [ref=e259]:
+              - generic [ref=e260]: 故障
+              - generic [ref=e261]:
+                - text: "2"
+                - generic [ref=e262]: (6%)
+        - generic [ref=e264]:
+          - generic [ref=e267]: 存储状态
+          - generic [ref=e269]:
+            - generic [ref=e271]:
+              - generic [ref=e272]:
+                - img "database" [ref=e273]:
+                  - img [ref=e274]
+                - generic [ref=e276]: 模型存储
+              - progressbar [ref=e277]:
+                - generic "450 / 1000 GB" [ref=e281]
+            - generic [ref=e283]:
+              - generic [ref=e284]:
+                - img "file-text" [ref=e285]:
+                  - img [ref=e286]
+                - generic [ref=e288]: 日志存储
+              - progressbar [ref=e289]:
+                - generic "120 / 500 GB" [ref=e293]
+            - generic [ref=e296]:
+              - generic [ref=e297]:
+                - generic [ref=e298]: 总使用空间
+                - generic [ref=e299]: 570 GB
+              - generic [ref=e300]:
+                - generic [ref=e301]: 总可用空间
+                - generic [ref=e302]: 1500 GB
+      - generic [ref=e303]:
+        - generic [ref=e305]:
+          - generic [ref=e308]: 热门模型 Top 5
+          - table [ref=e316]:
+            - rowgroup [ref=e319]:
+              - row "排名 模型名称 当前 QPS 今日调用量 状态" [ref=e320]:
+                - columnheader "排名" [ref=e321]
+                - columnheader "模型名称" [ref=e322]
+                - columnheader "当前 QPS" [ref=e323]
+                - columnheader "今日调用量" [ref=e324]
+                - columnheader "状态" [ref=e325]
+            - rowgroup [ref=e326]:
+              - row "1 qwen-14b-chat 3,240 156,000 运行中" [ref=e327]:
+                - cell "1" [ref=e328]:
+                  - generic [ref=e329]: "1"
+                - cell "qwen-14b-chat" [ref=e330]
+                - cell "3,240" [ref=e331]
+                - cell "156,000" [ref=e332]
+                - cell "运行中" [ref=e333]:
+                  - generic [ref=e334]: 运行中
+              - row "2 llama-3-8b-instruct 2,850 142,000 运行中" [ref=e335]:
+                - cell "2" [ref=e336]:
+                  - generic [ref=e337]: "2"
+                - cell "llama-3-8b-instruct" [ref=e338]
+                - cell "2,850" [ref=e339]
+                - cell "142,000" [ref=e340]
+                - cell "运行中" [ref=e341]:
+                  - generic [ref=e342]: 运行中
+              - row "3 qwen-vl-plus 1,980 98,000 运行中" [ref=e343]:
+                - cell "3" [ref=e344]:
+                  - generic [ref=e345]: "3"
+                - cell "qwen-vl-plus" [ref=e346]
+                - cell "1,980" [ref=e347]
+                - cell "98,000" [ref=e348]
+                - cell "运行中" [ref=e349]:
+                  - generic [ref=e350]: 运行中
+              - row "4 deepseek-coder-33b 1,560 76,000 运行中" [ref=e351]:
+                - cell "4" [ref=e352]:
+                  - generic [ref=e353]: "4"
+                - cell "deepseek-coder-33b" [ref=e354]
+                - cell "1,560" [ref=e355]
+                - cell "76,000" [ref=e356]
+                - cell "运行中" [ref=e357]:
+                  - generic [ref=e358]: 运行中
+              - row "5 chatglm3-6b 980 45,000 运行中" [ref=e359]:
+                - cell "5" [ref=e360]:
+                  - generic [ref=e361]: "5"
+                - cell "chatglm3-6b" [ref=e362]
+                - cell "980" [ref=e363]
+                - cell "45,000" [ref=e364]
+                - cell "运行中" [ref=e365]:
+                  - generic [ref=e366]: 运行中
+        - generic [ref=e368]:
+          - generic [ref=e371]: 最近事件
+          - list [ref=e373]:
+            - listitem [ref=e374]:
+              - generic [ref=e375]:
+                - img "check-circle" [ref=e377]:
+                  - img [ref=e378]
+                - generic [ref=e384]:
+                  - generic [ref=e385]:
+                    - generic [ref=e386]: 部署完成
+                    - generic [ref=e387]: 2分钟前
+                  - generic [ref=e388]: qwen-14b-chat 在 worker-01 上部署成功
+            - listitem [ref=e389]:
+              - generic [ref=e390]:
+                - img "warning" [ref=e392]:
+                  - img [ref=e393]
+                - generic [ref=e398]:
+                  - generic [ref=e399]:
+                    - generic [ref=e400]: GPU 温度警告
+                    - generic [ref=e401]: 15分钟前
+                  - generic [ref=e402]: "worker-03: GPU:2 温度达到 82°C"
+            - listitem [ref=e403]:
+              - generic [ref=e404]:
+                - img "warning" [ref=e406]:
+                  - img [ref=e407]
+                - generic [ref=e412]:
+                  - generic [ref=e413]:
+                    - generic [ref=e414]: API 错误率异常
+                    - generic [ref=e415]: 32分钟前
+                  - generic [ref=e416]: deepseek-coder-33b 错误率超过 5%
+            - listitem [ref=e417]:
+              - generic [ref=e418]:
+                - img "clock-circle" [ref=e420]:
+                  - img [ref=e421]
+                - generic [ref=e427]:
+                  - generic [ref=e428]:
+                    - generic [ref=e429]: 模型更新
+                    - generic [ref=e430]: 1小时前
+                  - generic [ref=e431]: llama-3-8b-instruct 更新到 v2.1
+            - listitem [ref=e432]:
+              - generic [ref=e433]:
+                - img "check-circle" [ref=e435]:
+                  - img [ref=e436]
+                - generic [ref=e441]:
+                  - generic [ref=e442]:
+                    - generic [ref=e443]: 自动扩容
+                    - generic [ref=e444]: 2小时前
+                  - generic [ref=e445]: qwen-vl-plus 副本数自动扩容到 2
+```

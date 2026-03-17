@@ -210,7 +210,7 @@ __marimo__/
 tmp/
 worktrees/
 .env.production
-config/
+/config/
 
 # Third party code
 third_party/

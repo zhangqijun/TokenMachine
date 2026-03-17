@@ -771,17 +771,14 @@ class WorkerModelCache(Base):
 class BackendEngineType(str, Enum):
     """Backend engine type enumeration."""
     VLLM = "vllm"
-    SGLANG = "sglang"
+    MINDIE = "mindie"
     LLAMA_CPP = "llama_cpp"
 
 
 class BackendEngineStatus(str, Enum):
     """Backend engine status enumeration."""
     NOT_INSTALLED = "not_installed"
-    INSTALLING = "installing"
     INSTALLED = "installed"
-    ERROR = "error"
-    OUTDATED = "outdated"
 
 
 class BackendEngine(Base):
@@ -793,10 +790,9 @@ class BackendEngine(Base):
     version = Column(String(50), nullable=False)
     status = Column(SQLEnum(BackendEngineStatus), default=BackendEngineStatus.NOT_INSTALLED, nullable=False, index=True)
 
-    # Installation information
-    install_path = Column(String(1024))  # Installation path
-    image_name = Column(String(255))  # Docker image name
-    tarball_path = Column(String(1024))  # Path to tarball file
+    # Registry information
+    registry_url = Column(String(255))  # Private registry URL
+    image_name = Column(String(255))  # Full image name (registry/image:tag)
     installed_at = Column(TIMESTAMP)  # Installation time
 
     # Configuration
@@ -804,7 +800,7 @@ class BackendEngine(Base):
     env_vars = Column(JSON)  # Environment variables
 
     # Statistics
-    size_mb = Column(Integer)  # Disk space usage in MB
+    size_mb = Column(Integer)  # Image size in MB
     active_deployments = Column(Integer, default=0, nullable=False)  # Number of active deployments
 
     created_at = Column(TIMESTAMP, default=func.now(), nullable=False)

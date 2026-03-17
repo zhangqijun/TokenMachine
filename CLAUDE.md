@@ -96,6 +96,12 @@ TokenMachine/
 │       ├── store/       # Zustand state management
 │       └── api/         # API client
 │
+├── worker/              # Heterogeneous computing resource agent (Go + CUDA)
+│   ├── gpu-agent/       # NVIDIA GPU Agent (Exporter, Receiver, Occupier)
+│   ├── ascend-agent/    # Huawei Ascend NPU Agent
+│   ├── amd-agent/       # AMD AI chip Agent
+│   └── intel-agent/     # Intel AI accelerator Agent
+│
 ├── infra/               # Infrastructure
 │   ├── docker/          # Docker files (Dockerfile, docker-compose.yml)
 │   ├── prometheus/      # Prometheus config
@@ -108,12 +114,12 @@ TokenMachine/
 │   ├── integration/    # Backend integration tests
 │   └── conftest.py     # Shared pytest fixtures
 │
-└── docs/               # Documentation
-    ├── PRODUCT_DESIGN.md  # Product requirements
-    ├── BACKEND_DESIGN.md  # Backend architecture
-    ├── FRONTEND_DESIGN.md # Frontend design
-    ├── TESTING.md         # Testing guide
-    └── DEPLOYMENT.md      # Deployment instructions
+├── docs/               # Design documentation
+│   ├── PRODUCT_DESIGN.md
+│   ├── BACKEND_DESIGN.md
+│   ├── FRONTEND_DESIGN.md
+│   ├── TESTING.md
+│   └── DEPLOYMENT.md
 ```
 
 ## Architecture Notes
@@ -183,6 +189,30 @@ The platform supports multiple inference engines via the worker pool:
 - **Chitu**: Chinese domestic chip support (华为昇腾, 沐曦, 海光)
 
 Worker abstraction in `workers/worker_pool.py` allows pluggable inference backends.
+
+## Worker Agent (异构计算资源管理)
+
+The `worker/` directory contains standalone agents for heterogeneous hardware monitoring (Go + CUDA):
+
+- **gpu-agent/**: NVIDIA GPU Agent (Exporter, Receiver, Occupier) - production ready
+- **ascend-agent/**: Huawei Ascend NPU Agent - in development
+- **amd-agent/**: AMD AI chip Agent - in development
+- **intel-agent/**: Intel AI accelerator Agent - in development
+
+Core components (gpu-agent):
+- **Exporter** (port 9090): Prometheus metrics exporter for GPU monitoring
+- **Receiver** (port 9001): Task receiver for worker communication
+- **occupier/**: CUDA program for GPU memory occupation testing
+
+See `worker/README.md` for detailed architecture and deployment instructions.
+
+## Design Documentation
+
+Reference `docs/` for detailed architecture:
+- **PRODUCT_DESIGN.md**: Product requirements and features
+- **BACKEND_DESIGN.md**: Backend architecture details
+- **FRONTEND_DESIGN.md**: Frontend design specifications
+- **DEPLOYMENT.md**: Deployment instructions
 
 ## Important Notes
 

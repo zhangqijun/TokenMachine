@@ -1,0 +1,31 @@
+import { defineConfig, devices } from '@playwright/test';
+
+export default defineConfig({
+  testDir: './tests/e2e',
+  fullyParallel: true,
+  forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 2 : 0,
+  workers: process.env.CI ? 1 : undefined,
+  reporter: 'html',
+  use: {
+    // 使用系统 Chrome
+    channel: 'chrome',
+    baseURL: 'http://localhost:1579',
+    trace: 'on-first-retry',
+  },
+
+  projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+    },
+  ],
+
+  // 启动开发服务器
+  webServer: {
+    command: 'npm run dev',
+    url: 'http://localhost:1579',
+    reuseExistingServer: true,
+    timeout: 120000,
+  },
+});

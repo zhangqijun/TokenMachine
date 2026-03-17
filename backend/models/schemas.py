@@ -699,17 +699,14 @@ class BenchmarkDatasetResponse(BaseModel):
 class BackendEngineType(str, Enum):
     """Backend engine type enumeration."""
     VLLM = "vllm"
-    SGLANG = "sglang"
+    MINDIE = "mindie"
     LLAMA_CPP = "llama_cpp"
 
 
 class BackendEngineStatus(str, Enum):
     """Backend engine status enumeration."""
     NOT_INSTALLED = "not_installed"
-    INSTALLING = "installing"
     INSTALLED = "installed"
-    ERROR = "error"
-    OUTDATED = "outdated"
 
 
 class BackendEngineFeatures(BaseModel):
@@ -737,9 +734,8 @@ class BackendEngineResponse(BaseModel):
     engine_type: str
     version: str
     status: str
-    install_path: Optional[str] = None
+    registry_url: Optional[str] = None
     image_name: Optional[str] = None
-    tarball_path: Optional[str] = None
     installed_at: Optional[datetime] = None
     size_mb: Optional[int] = None
     active_deployments: int
@@ -753,7 +749,7 @@ class BackendEngineResponse(BaseModel):
 class BackendEngineInfo(BaseModel):
     """Backend engine detailed information."""
     id: int
-    name: str  # vllm, sglang, llama_cpp
+    name: str  # vllm, mindie, llama_cpp
     display_name: str
     version: str
     status: str
@@ -762,6 +758,8 @@ class BackendEngineInfo(BaseModel):
     homepage: str
     features: BackendEngineFeatures
     compatibility: BackendEngineCompatibility
+    registry_url: Optional[str] = None
+    image_name: Optional[str] = None
     config: Optional[Dict[str, Any]] = None
     env_vars: Optional[Dict[str, Any]] = None
     stats: Dict[str, Any]
@@ -770,8 +768,8 @@ class BackendEngineInfo(BaseModel):
 class BackendEngineInstallRequest(BaseModel):
     """Backend engine installation request."""
     version: str = Field(..., min_length=1, max_length=50, description="Engine version")
-    image_name: Optional[str] = Field(None, max_length=255, description="Custom image name")
-    install_path: Optional[str] = Field(None, max_length=1024, description="Installation path")
+    registry_url: Optional[str] = Field(None, max_length=255, description="Private registry URL")
+    image_name: Optional[str] = Field(None, max_length=255, description="Full image name (registry/image:tag)")
     config: Optional[Dict[str, Any]] = Field(None, description="Engine configuration")
     env_vars: Optional[Dict[str, str]] = Field(None, description="Environment variables")
 
@@ -782,7 +780,6 @@ class BackendEngineInstallResponse(BaseModel):
     engine_type: str
     version: str
     status: str
-    install_command: Optional[str] = None
     message: str
 
 
@@ -800,6 +797,8 @@ class BackendEngineStatsResponse(BaseModel):
     active_deployments: int
     size_mb: Optional[int] = None
     installed_at: Optional[str] = None
+    registry_url: Optional[str] = None
+    image_name: Optional[str] = None
 
 
 # ============================================================================

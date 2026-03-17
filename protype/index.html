@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TokenMachine - AI 模型部署平台</title>
+
+    <!-- Environment injection script (for runtime configuration) -->
+    <script>
+      // These placeholders will be replaced by nginx using sub_filter
+      window.__ENV__ = {
+        ENVIRONMENT: '__ENVIRONMENT__',
+        API_BASE_URL: '__API_BASE_URL__',
+        PUBLIC_DOMAIN: '__PUBLIC_DOMAIN__',
+        USE_MOCK_DATA: '__USE_MOCK_DATA__'
+      };
+
+      // Clean up empty values (fallback to development defaults)
+      if (window.__ENV__.ENVIRONMENT === '__ENVIRONMENT__') {
+        window.__ENV__.ENVIRONMENT = 'development';
+      }
+      if (window.__ENV__.API_BASE_URL === '__API_BASE_URL__') {
+        window.__ENV__.API_BASE_URL = 'http://localhost:8000/api';
+      }
+      if (window.__ENV__.USE_MOCK_DATA === '__USE_MOCK_DATA__') {
+        window.__ENV__.USE_MOCK_DATA = 'false';
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -212,6 +212,17 @@ worktrees/
 .env.production
 config/
 
+# Third party code
+third_party/
+
+# Prototype temporary files
+protype/scripts/
+protype/screenshots/
+protype/protype/
+protype/playwright-report/
+protype/test-results/
+protype/node_modules/
+
 # Frontend / Node.js
 node_modules/
 ui/node_modules/

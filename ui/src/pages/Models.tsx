@@ -1,246 +1,58 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Row, Col, Button, Space, Empty, message } from 'antd';
+import { Row, Col, Button, message, Divider } from 'antd';
 import {
-  PlusOutlined,
   ReloadOutlined,
-  DownloadOutlined,
 } from '@ant-design/icons';
-import {
-  ViewToggle,
-  SearchBar,
-  FilterPanel,
-  SortDropdown,
-  ModelCard,
-  ModelList,
-  DeployModal,
-  AddNewModelModal,
-  DownloadModal,
-  ScaleModal,
-  LogsModal,
-  StopModal,
-  DeleteConfirmDialog,
-} from './models/components';
+import ModelCardSimple from './models/components/ModelCardSimple';
 import type { ModelData } from './models/components';
-import type { DownloadConfig } from './models/components';
-import type { NewModelInfo } from './models/components';
-import {
-  useViewModel,
-  useModelSearch,
-  useModelFilter,
-  useModelSort,
-  useModelActions,
-} from './models/hooks';
 
 // Mock data - TODO: 替换为真实 API 调用
+// 保留 DeepSeek、GLM、Kimi、MiniMax 系列模型
 const mockModelsData: ModelData[] = [
+  // DeepSeek 系列
   {
-    id: '1',
-    name: 'Llama-2-7b-chat-hf',
+    id: 'ds-v3',
+    name: 'DeepSeek-V3',
     type: 'chat',
-    creator: 'Meta',
-    size: '7B',
+    creator: 'DeepSeek',
+    size: '685B',
     quantization: 'fp16',
-    tags: ['vision', 'inference'],
-    downloadStatus: 'downloaded',
-    deploymentStatus: 'running',
-    deploymentName: 'llama-2-7b-prod',
-    instances: [
-      {
-        id: '1-1',
-        name: 'llama-2-7b-prod',
-        worker: 'worker-1',
-        gpuMemory: 12.5,
-        gpuMemoryTotal: 16,
-        tps: 125,
-      },
-      {
-        id: '1-2',
-        name: 'llama-2-7b-prod-2',
-        worker: 'worker-2',
-        gpuMemory: 14.2,
-        gpuMemoryTotal: 16,
-        tps: 110,
-      },
-    ],
-    createdAt: '2024-01-15T10:30:00Z',
-  },
-  {
-    id: '2',
-    name: 'Qwen-14b-chat',
-    type: 'chat',
-    creator: 'Alibaba',
-    size: '14B',
-    quantization: 'int8',
-    tags: ['moe', 'tools'],
-    downloadStatus: 'downloaded',
+    tags: ['chat', 'reasoning', 'moe'],
+    downloadStatus: 'not_downloaded',
     deploymentStatus: 'not_deployed',
-    createdAt: '2024-01-10T08:00:00Z',
+    createdAt: '2025-01-10T00:00:00Z',
+    description: 'DeepSeek 第三代大模型，强大的推理能力',
   },
   {
-    id: '3',
-    name: 'DeepSeek-Coder-33b',
+    id: 'ds-r1',
+    name: 'DeepSeek-R1',
+    type: 'chat',
+    creator: 'DeepSeek',
+    size: '671B',
+    quantization: 'fp16',
+    tags: ['chat', 'reasoning'],
+    downloadStatus: 'not_downloaded',
+    deploymentStatus: 'not_deployed',
+    createdAt: '2025-02-01T00:00:00Z',
+    description: 'DeepSeek 推理增强模型',
+  },
+  {
+    id: 'ds-coder-33b',
+    name: 'DeepSeek-Coder-33B',
     type: 'chat',
     creator: 'DeepSeek',
     size: '33B',
     quantization: 'int4',
-    tags: ['coder'],
-    downloadStatus: 'downloading',
+    tags: ['coder', 'programming'],
+    downloadStatus: 'downloaded',
     deploymentStatus: 'not_deployed',
     createdAt: '2024-01-20T14:20:00Z',
+    description: '专为代码生成优化的模型',
   },
   {
-    id: '4',
-    name: 'Qwen-72b-chat',
-    type: 'chat',
-    creator: 'Alibaba',
-    size: '72B',
-    quantization: 'int4',
-    tags: ['moe', 'tools'],
-    downloadStatus: 'downloaded',
-    deploymentStatus: 'running',
-    deploymentName: 'qwen-72b-prod',
-    instances: [
-      {
-        id: '4-1',
-        name: 'qwen-72b-prod',
-        worker: 'worker-2',
-        gpuMemory: 15.2,
-        gpuMemoryTotal: 16,
-        tps: 45,
-      },
-    ],
-    createdAt: '2024-01-12T09:15:00Z',
-  },
-  {
-    id: '5',
-    name: 'ChatGLM-6b',
-    type: 'chat',
-    creator: '智谱',
-    size: '6B',
-    quantization: 'int8',
-    tags: ['chinese'],
-    downloadStatus: 'not_downloaded',
-    deploymentStatus: 'not_deployed',
-    createdAt: '2024-01-08T11:30:00Z',
-  },
-  {
-    id: '6',
-    name: 'Llama-3-70b-instruct',
-    type: 'chat',
-    creator: 'Meta',
-    size: '70B',
-    quantization: 'fp16',
-    tags: ['inference', 'tools'],
-    downloadStatus: 'downloaded',
-    deploymentStatus: 'running',
-    deploymentName: 'llama-3-70b-prod',
-    instances: [
-      {
-        id: '6-1',
-        name: 'llama-3-70b-prod',
-        worker: 'worker-1',
-        gpuMemory: 14.8,
-        gpuMemoryTotal: 16,
-        tps: 38,
-      },
-      {
-        id: '6-2',
-        name: 'llama-3-70b-prod-2',
-        worker: 'worker-1',
-        gpuMemory: 15.5,
-        gpuMemoryTotal: 16,
-        tps: 35,
-      },
-      {
-        id: '6-3',
-        name: 'llama-3-70b-prod-3',
-        worker: 'worker-2',
-        gpuMemory: 15.1,
-        gpuMemoryTotal: 16,
-        tps: 36,
-      },
-    ],
-    createdAt: '2024-01-18T16:45:00Z',
-  },
-  {
-    id: '7',
-    name: 'Mistral-7b-instruct',
-    type: 'chat',
-    creator: 'Mistral AI',
-    size: '7B',
-    quantization: 'fp16',
-    tags: ['inference'],
-    downloadStatus: 'downloaded',
-    deploymentStatus: 'not_deployed',
-    createdAt: '2024-01-05T10:20:00Z',
-  },
-  {
-    id: '8',
-    name: 'Yi-34b-chat',
-    type: 'chat',
-    creator: '01.AI',
-    size: '34B',
-    quantization: 'int4',
-    tags: ['chinese', 'coder'],
-    downloadStatus: 'downloaded',
-    deploymentStatus: 'stopping',
-    deploymentName: 'yi-34b-test',
-    workerName: 'worker-2',
-    createdAt: '2024-01-14T13:50:00Z',
-  },
-  {
-    id: '9',
-    name: 'Baichuan2-13b-chat',
-    type: 'chat',
-    creator: '百川',
-    size: '13B',
-    quantization: 'int8',
-    tags: ['chinese'],
-    downloadStatus: 'downloaded',
-    deploymentStatus: 'not_deployed',
-    createdAt: '2024-01-07T08:40:00Z',
-  },
-  {
-    id: '10',
-    name: 'Phi-3-mini-4k',
-    type: 'chat',
-    creator: 'Microsoft',
-    size: '3.8B',
-    quantization: 'fp16',
-    tags: ['inference', 'coder'],
-    downloadStatus: 'downloaded',
-    deploymentStatus: 'error',
-    deploymentName: 'phi-3-test',
-    createdAt: '2024-01-19T15:10:00Z',
-  },
-  {
-    id: '11',
-    name: 'Gemma-7b-instruct',
-    type: 'chat',
-    creator: 'Google',
-    size: '7B',
-    quantization: 'fp16',
-    tags: ['inference'],
-    downloadStatus: 'not_downloaded',
-    deploymentStatus: 'not_deployed',
-    createdAt: '2024-01-11T12:00:00Z',
-  },
-  {
-    id: '12',
-    name: 'InternLM-20b',
-    type: 'chat',
-    creator: '上海AI实验室',
-    size: '20B',
-    quantization: 'int8',
-    tags: ['chinese', 'tools'],
-    downloadStatus: 'not_downloaded',
-    deploymentStatus: 'not_deployed',
-    createdAt: '2024-01-09T14:30:00Z',
-  },
-  {
-    id: '13',
-    name: 'DeepSeek-V2-236b',
+    id: 'ds-v2-236b',
+    name: 'DeepSeek-V2-236B',
     type: 'chat',
     creator: 'DeepSeek',
     size: '236B',
@@ -251,7 +63,7 @@ const mockModelsData: ModelData[] = [
     deploymentName: 'deepseek-v2-prod',
     instances: [
       {
-        id: '13-1',
+        id: 'ds-v2-1',
         name: 'deepseek-v2-prod',
         worker: 'worker-1',
         gpuMemory: 15.8,
@@ -260,556 +72,355 @@ const mockModelsData: ModelData[] = [
       },
     ],
     createdAt: '2024-01-17T10:00:00Z',
+    description: 'DeepSeek 第二代 MoE 架构模型',
   },
+
+  // GLM 系列
   {
-    id: '14',
-    name: 'Qwen1.5-110b-chat',
+    id: 'glm-4-9b',
+    name: 'GLM-4-9B',
     type: 'chat',
-    creator: 'Alibaba',
-    size: '110B',
-    quantization: 'int4',
-    tags: ['moe', 'tools'],
-    downloadStatus: 'not_downloaded',
-    deploymentStatus: 'not_deployed',
-    createdAt: '2024-01-16T11:20:00Z',
-  },
-  {
-    id: '15',
-    name: 'StableLM-2-12b',
-    type: 'chat',
-    creator: 'Stability AI',
-    size: '12B',
+    creator: '智谱AI',
+    size: '9B',
     quantization: 'fp16',
-    tags: ['inference'],
+    tags: ['chat', 'chinese'],
+    downloadStatus: 'downloaded',
     deploymentStatus: 'not_deployed',
-    downloadStatus: 'not_downloaded',
-    createdAt: '2024-01-13T09:50:00Z',
+    createdAt: '2024-06-01T00:00:00Z',
+    description: '智谱 GLM-4 系列 9B 参数模型',
   },
   {
-    id: '16',
-    name: 'Solar-10.7b-instruct',
+    id: 'chatglm-6b',
+    name: 'ChatGLM-6B',
     type: 'chat',
-    creator: 'Upstage',
-    size: '10.7B',
-    quantization: 'fp16',
-    tags: ['inference'],
-    deploymentStatus: 'not_deployed',
-    downloadStatus: 'not_downloaded',
-    createdAt: '2024-01-06T13:15:00Z',
-  },
-  {
-    id: '17',
-    name: 'OpenChat-3.5-7b',
-    type: 'chat',
-    creator: 'OpenChat',
-    size: '7B',
-    quantization: 'fp16',
-    tags: ['inference', 'tools'],
-    deploymentStatus: 'not_deployed',
-    downloadStatus: 'not_downloaded',
-    createdAt: '2024-01-04T10:40:00Z',
-  },
-  {
-    id: '18',
-    name: 'WizardLM-2-8x22b',
-    type: 'chat',
-    creator: 'Microsoft',
-    size: '141B',
-    quantization: 'int4',
-    tags: ['moe', 'coder'],
-    deploymentStatus: 'not_deployed',
-    downloadStatus: 'not_downloaded',
-    createdAt: '2024-01-15T15:25:00Z',
-  },
-  {
-    id: '19',
-    name: 'Vicuna-13b-v1.5',
-    type: 'chat',
-    creator: 'LMSYS',
-    size: '13B',
-    quantization: 'fp16',
-    tags: ['inference'],
-    deploymentStatus: 'not_deployed',
-    downloadStatus: 'not_downloaded',
-    createdAt: '2024-01-03T08:55:00Z',
-  },
-  {
-    id: '20',
-    name: 'CodeQwen-7b-chat',
-    type: 'chat',
-    creator: 'Alibaba',
-    size: '7B',
+    creator: '智谱AI',
+    size: '6B',
     quantization: 'int8',
-    tags: ['coder'],
+    tags: ['chinese', 'chat'],
+    downloadStatus: 'downloaded',
     deploymentStatus: 'not_deployed',
+    createdAt: '2024-01-08T11:30:00Z',
+    description: '开源中英双语对话模型',
+  },
+  {
+    id: 'glm-4-9b-chat',
+    name: 'GLM-4-9B-Chat',
+    type: 'chat',
+    creator: '智谱AI',
+    size: '9B',
+    quantization: 'int4',
+    tags: ['chat', 'chinese'],
     downloadStatus: 'not_downloaded',
-    createdAt: '2024-01-12T14:10:00Z',
+    deploymentStatus: 'not_deployed',
+    createdAt: '2024-06-01T00:00:00Z',
+    description: 'GLM-4 对话优化版本',
+  },
+
+  // Kimi 系列 (Moonshot)
+  {
+    id: 'kimi-moonshot-v1-8b',
+    name: 'Kimi-Moonshot-v1-8B',
+    type: 'chat',
+    creator: 'Moonshot AI',
+    size: '8B',
+    quantization: 'fp16',
+    tags: ['chat', 'long-context'],
+    downloadStatus: 'not_downloaded',
+    deploymentStatus: 'not_deployed',
+    createdAt: '2024-03-01T00:00:00Z',
+    description: 'Moonshot Kimi 长上下文模型',
+  },
+  {
+    id: 'kimi-moonshot-v1-32b',
+    name: 'Kimi-Moonshot-v1-32B',
+    type: 'chat',
+    creator: 'Moonshot AI',
+    size: '32B',
+    quantization: 'int4',
+    tags: ['chat', 'long-context'],
+    downloadStatus: 'not_downloaded',
+    deploymentStatus: 'not_deployed',
+    createdAt: '2024-03-01T00:00:00Z',
+    description: 'Kimi 32B 长上下文对话模型',
+  },
+
+  // MiniMax 系列
+  {
+    id: 'minimax-abab-6.5-chat',
+    name: 'MiniMax-ABAB-6.5-Chat',
+    type: 'chat',
+    creator: 'MiniMax',
+    size: '7B',
+    quantization: 'fp16',
+    tags: ['chat', 'multimodal'],
+    downloadStatus: 'not_downloaded',
+    deploymentStatus: 'not_deployed',
+    createdAt: '2024-04-01T00:00:00Z',
+    description: 'MiniMax ABAB 6.5 对话模型',
+  },
+  {
+    id: 'minimax-abab-6.5s-chat',
+    name: 'MiniMax-ABAB-6.5S-Chat',
+    type: 'chat',
+    creator: 'MiniMax',
+    size: '13B',
+    quantization: 'int8',
+    tags: ['chat', 'multimodal'],
+    downloadStatus: 'downloaded',
+    deploymentStatus: 'running',
+    deploymentName: 'minimax-chat-prod',
+    instances: [
+      {
+        id: 'mm-1',
+        name: 'minimax-chat-prod',
+        worker: 'worker-2',
+        gpuMemory: 14.5,
+        gpuMemoryTotal: 16,
+        tps: 85,
+      },
+    ],
+    createdAt: '2024-04-15T00:00:00Z',
+    description: 'MiniMax ABAB 6.5S 高性能对话模型',
   },
 ];
 
 const Models = () => {
   const navigate = useNavigate();
-
-  // 视图管理
-  const { viewMode, viewPreferences, setViewMode } = useViewModel();
-
-  // 搜索
-  const { keyword, setKeyword, filterModels: filterBySearch } = useModelSearch();
-
-  // 筛选
-  const { filters, setFilters, resetFilters, filterModels: filterByFilters } = useModelFilter();
-
-  // 排序
-  const { field, order, setSort, sortModels } = useModelSort();
-
-  // 模型操作
-  const {
-    deployingModelId,
-    stoppingModelId,
-    deployModalVisible,
-    selectedModelForDeploy,
-    handleDeploy,
-    handleStop,
-    handleConfigure,
-    handleLogs,
-    handleDelete,
-    confirmDeploy,
-    confirmStop,
-    confirmDelete,
-    saveConfig,
-    closeDeployModal,
-  } = useModelActions();
-
-  // Modal states
-  const [logsModalVisible, setLogsModalVisible] = useState(false);
-  const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
-  const [downloadModalVisible, setDownloadModalVisible] = useState(false);
-  const [scaleModalVisible, setScaleModalVisible] = useState(false);
-  const [stopModalVisible, setStopModalVisible] = useState(false);
-  const [deployNewModelModalVisible, setDeployNewModelModalVisible] = useState(false);
-  const [selectedModelForAction, setSelectedModelForAction] = useState<ModelData | null>(null);
-
-  // 数据加载
   const [loading, setLoading] = useState(false);
   const [allModels, setAllModels] = useState<ModelData[]>(mockModelsData);
+  const [downloadModalVisible, setDownloadModalVisible] = useState(false);
+  const [deployModalVisible, setDeployModalVisible] = useState(false);
+  const [selectedModel, setSelectedModel] = useState<ModelData | null>(null);
+  const [selectedDeployType, setSelectedDeployType] = useState<'cpu' | 'gpu'>('gpu');
 
-  // 加载模型列表
+  // 按厂商分组
+  const groupedModels = {
+    'DeepSeek': allModels.filter(m => m.creator === 'DeepSeek'),
+    '智谱AI': allModels.filter(m => m.creator === '智谱AI'),
+    'Moonshot AI': allModels.filter(m => m.creator === 'Moonshot AI'),
+    'MiniMax': allModels.filter(m => m.creator === 'MiniMax'),
+  };
+
   const loadModels = async () => {
     setLoading(true);
     try {
-      // TODO: 调用后端 API
-      // const response = await fetch('/api/v1/models');
-      // const data = await response.json();
-      // setAllModels(data.models);
-
-      // 模拟网络请求
       await new Promise((resolve) => setTimeout(resolve, 500));
       message.success('刷新成功');
     } catch (error) {
-      console.error('Failed to load models:', error);
       message.error('加载模型列表失败');
     } finally {
       setLoading(false);
     }
   };
 
-  // 初始加载
   useEffect(() => {
     loadModels();
   }, []);
 
-  // 组合所有过滤和排序逻辑
-  const processedModels = useMemo(() => {
-    let models = [...allModels];
-
-    // 应用搜索过滤
-    models = filterBySearch(models);
-
-    // 应用筛选条件
-    models = filterByFilters(models);
-
-    // 应用排序
-    models = sortModels(models);
-
-    return models;
-  }, [allModels, filterBySearch, filterByFilters, sortModels]);
-
-  // 处理刷新
-  const handleRefresh = () => {
-    loadModels();
-  };
-
-  // 处理部署配置保存
-  const handleSaveDeployConfig = (config: any) => {
-    message.success('配置已保存');
-    closeDeployModal();
-  };
-
-  // 处理日志查看
-  const handleLogsClick = (model: ModelData) => {
-    setSelectedModelForAction(model);
-    setLogsModalVisible(true);
-  };
-
-  // 处理删除确认
-  const handleDeleteClick = (model: ModelData) => {
-    setSelectedModelForAction(model);
-    setDeleteConfirmVisible(true);
-  };
-
-  // 确认删除
-  const handleConfirmDelete = async (deleteFiles: boolean) => {
-    if (!selectedModelForAction) return;
-    await confirmDelete(deleteFiles);
-    setDeleteConfirmVisible(false);
-    setSelectedModelForAction(null);
-  };
-
-  // 下载日志
-  const handleDownloadLogs = () => {
-    message.info('下载日志功能');
-  };
-
-  // 处理下载
-  const handleDownloadClick = (model: ModelData) => {
-    setSelectedModelForAction(model);
+  const handleDownload = (model: ModelData) => {
+    setSelectedModel(model);
     setDownloadModalVisible(true);
   };
 
-  // 确认下载
-  const handleConfirmDownload = async (config: DownloadConfig) => {
-    if (!selectedModelForAction) return;
+  const handleDeploy = (model: ModelData, deployType: 'cpu' | 'gpu') => {
+    setSelectedModel(model);
+    setSelectedDeployType(deployType);
+    setDeployModalVisible(true);
+  };
+
+  const confirmDownload = async () => {
+    if (!selectedModel) return;
 
     try {
-      // TODO: 调用后端 API 开始下载
-      // const response = await fetch(`/api/v1/models/${selectedModelForAction.id}/download`, {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(config),
-      // });
-      // if (!response.ok) throw new Error('下载失败');
-
-      // 模拟下载请求
-      message.success(`开始下载模型 "${selectedModelForAction.name}"`);
+      message.success(`开始下载模型 "${selectedModel.name}"`);
       setDownloadModalVisible(false);
 
-      // 模拟下载状态变化
-      setTimeout(() => {
-        setAllModels((prev) =>
-          prev.map((m) =>
-            m.id === selectedModelForAction.id
-              ? { ...m, downloadStatus: 'downloading' }
-              : m
-          )
-        );
-      }, 500);
+      // 模拟下载
+      setAllModels(prev =>
+        prev.map(m =>
+          m.id === selectedModel.id
+            ? { ...m, downloadStatus: 'downloading' as const }
+            : m
+        )
+      );
 
       setTimeout(() => {
-        setAllModels((prev) =>
-          prev.map((m) =>
-            m.id === selectedModelForAction.id
-              ? { ...m, downloadStatus: 'downloaded' }
+        setAllModels(prev =>
+          prev.map(m =>
+            m.id === selectedModel.id
+              ? { ...m, downloadStatus: 'downloaded' as const }
               : m
           )
         );
-        message.success(`模型 "${selectedModelForAction.name}" 下载完成`);
-      }, 5000);
+        message.success(`模型 "${selectedModel.name}" 下载完成`);
+      }, 3000);
     } catch (error: any) {
-      console.error('Download failed:', error);
       message.error(`下载失败: ${error.message || '未知错误'}`);
     } finally {
-      setSelectedModelForAction(null);
+      setSelectedModel(null);
     }
   };
 
-  // 处理添加新模型
-  const handleDeployNewModelClick = () => {
-    setDeployNewModelModalVisible(true);
-  };
-
-  // 确认添加新模型
-  const handleConfirmAddModel = async (modelInfo: NewModelInfo) => {
-    try {
-      // TODO: 调用后端 API 添加新模型
-      // const response = await fetch('/api/v1/models/add', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(modelInfo),
-      // });
-      // if (!response.ok) throw new Error('添加失败');
-
-      message.success(`成功添加模型 "${modelInfo.name}"`);
-      setDeployNewModelModalVisible(false);
-
-      // 模拟添加新模型到列表
-      const newModel: ModelData = {
-        id: `${Date.now()}`,
-        name: modelInfo.name,
-        type: modelInfo.type,
-        creator: modelInfo.creator,
-        size: modelInfo.size,
-        quantization: modelInfo.quantization,
-        tags: modelInfo.tags,
-        downloadStatus: 'not_downloaded',
-        deploymentStatus: 'not_deployed',
-        createdAt: new Date().toISOString(),
-      };
-      setAllModels((prev) => [...prev, newModel]);
-    } catch (error: any) {
-      console.error('Add model failed:', error);
-      message.error(`添加失败: ${error.message || '未知错误'}`);
-    }
-  };
-
-  // 处理扩容
-  const handleScaleClick = (model: ModelData) => {
-    setSelectedModelForAction(model);
-    setScaleModalVisible(true);
-  };
-
-  // 确认扩容
-  const handleConfirmScale = async (config: any) => {
-    if (!selectedModelForAction) return;
+  const confirmDeploy = async () => {
+    if (!selectedModel) return;
 
     try {
-      // TODO: 调用后端 API 进行扩容
-      // const response = await fetch(`/api/v1/models/${selectedModelForAction.id}/scale`, {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(config),
-      // });
-      // if (!response.ok) throw new Error('扩容失败');
+      const deploymentName = `${selectedModel.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}-prod`;
+      message.success(
+        `开始${selectedDeployType.toUpperCase()}部署模型 "${selectedModel.name}" (部署名称: ${deploymentName})`
+      );
+      setDeployModalVisible(false);
 
-      message.success(`模型 "${selectedModelForAction.name}" 开始扩容`);
-      setScaleModalVisible(false);
-    } catch (error: any) {
-      console.error('Scale failed:', error);
-      message.error(`扩容失败: ${error.message || '未知错误'}`);
-    } finally {
-      setSelectedModelForAction(null);
-    }
-  };
-
-  // 处理停止
-  const handleStopClick = (model: ModelData) => {
-    setSelectedModelForAction(model);
-    setStopModalVisible(true);
-  };
-
-  // 确认停止实例
-  const handleConfirmStop = async (instanceId: string) => {
-    if (!selectedModelForAction) return;
-
-    try {
-      // TODO: 调用后端 API 停止实例
-      // const response = await fetch(`/api/v1/models/${selectedModelForAction.id}/instances/${instanceId}`, {
-      //   method: 'POST',
-      // });
-      // if (!response.ok) throw new Error('停止失败');
-
-      message.success('实例已停止');
-      setStopModalVisible(false);
-
-      // 更新实例列表（移除已停止的实例）
-      setAllModels((prev) =>
-        prev.map((m) =>
-          m.id === selectedModelForAction.id
+      // 模拟部署
+      setAllModels(prev =>
+        prev.map(m =>
+          m.id === selectedModel.id
             ? {
                 ...m,
-                instances: m.instances?.filter((inst: any) => inst.id !== instanceId),
+                deploymentStatus: 'running' as const,
+                deploymentName,
+                instances: [
+                  {
+                    id: `${m.id}-inst-1`,
+                    name: deploymentName,
+                    worker: 'worker-1',
+                    gpuMemory: selectedDeployType === 'gpu' ? 14.5 : 2.0,
+                    gpuMemoryTotal: selectedDeployType === 'gpu' ? 16 : 4,
+                    tps: selectedDeployType === 'gpu' ? 80 : 20,
+                  },
+                ],
               }
             : m
         )
       );
     } catch (error: any) {
-      console.error('Stop failed:', error);
-      message.error(`停止失败: ${error.message || '未知错误'}`);
+      message.error(`部署失败: ${error.message || '未知错误'}`);
     } finally {
-      setSelectedModelForAction(null);
+      setSelectedModel(null);
     }
   };
 
-  // 处理聊天
-  const handleChatClick = (model: ModelData) => {
-    // 跳转到测试场页面
-    navigate(`/playground?model=${model.id}`);
-  };
-
   return (
-    <div>
+    <div style={{ padding: '24px' }}>
       {/* Header */}
-      <div style={{ marginBottom: 24 }}>
-        <h2 style={{ margin: 0, fontSize: 24, fontWeight: 600 }}>模型中心</h2>
+      <div style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h1 style={{ margin: 0, fontSize: 24, fontWeight: 600 }}>模型中心</h1>
+        <Button
+          icon={<ReloadOutlined />}
+          onClick={loadModels}
+          loading={loading}
+        >
+          刷新
+        </Button>
       </div>
 
-      {/* First Row: Search and Actions */}
-      <div
-        style={{
-          marginBottom: 12,
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: 12,
-        }}
-      >
-        <Space size="middle">
-          <SearchBar
-            value={keyword}
-            onChange={setKeyword}
-            placeholder="搜索模型名称、ID或标签..."
-            style={{ width: 300 }}
-          />
-          <SortDropdown
-            field={field}
-            order={order}
-            onChange={setSort}
-          />
-        </Space>
+      {/* Model Groups */}
+      {Object.entries(groupedModels).map(([creator, models]) => (
+        models.length > 0 && (
+          <div key={creator} style={{ marginBottom: 32 }}>
+            <Divider orientation="left" style={{ fontSize: 18, fontWeight: 600, margin: '24px 0 16px' }}>
+              {creator} 系列
+            </Divider>
+            <Row gutter={[16, 16]}>
+              {models.map((model) => (
+                <Col xs={24} sm={12} md={8} lg={6} xl={6} key={model.id}>
+                  <ModelCardSimple
+                    model={model}
+                    onDownload={handleDownload}
+                    onDeploy={handleDeploy}
+                  />
+                </Col>
+              ))}
+            </Row>
+          </div>
+        )
+      ))}
 
-        <Space size="middle">
-          <Button
-            icon={<ReloadOutlined />}
-            onClick={handleRefresh}
-            loading={loading}
+      {/* Download Modal - Simple confirm */}
+      {downloadModalVisible && selectedModel && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0,0,0,0.45)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+          }}
+          onClick={() => setDownloadModalVisible(false)}
+        >
+          <div
+            style={{
+              background: '#fff',
+              padding: 24,
+              borderRadius: 8,
+              minWidth: 400,
+              maxWidth: 500,
+            }}
+            onClick={(e) => e.stopPropagation()}
           >
-            刷新
-          </Button>
-          <ViewToggle
-            value={viewMode}
-            onChange={setViewMode}
-          />
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={handleDeployNewModelClick}
-          >
-            添加新模型
-          </Button>
-        </Space>
-      </div>
-
-      {/* Second Row: Filter Panel */}
-      <div style={{ marginBottom: 16 }}>
-        <FilterPanel
-          value={filters}
-          onChange={setFilters}
-        />
-      </div>
-
-      {/* Content */}
-      {processedModels.length === 0 ? (
-        <Empty
-          description="未找到匹配的模型"
-          style={{ marginTop: 64 }}
-        />
-      ) : viewMode === 'card' ? (
-        <Row gutter={[16, 16]}>
-          {processedModels.map((model) => (
-            <Col
-              xs={24}
-              sm={12}
-              md={8}
-              lg={24 / viewPreferences.cardColumns!}
-              xl={24 / viewPreferences.cardColumns!}
-              key={model.id}
-            >
-              <ModelCard
-                model={model}
-                onDeploy={handleDeploy}
-                onChat={handleChatClick}
-                onLogs={handleLogsClick}
-                onDelete={handleDeleteClick}
-                onDownload={handleDownloadClick}
-                onScale={handleScaleClick}
-                onStop={handleStopClick}
-              />
-            </Col>
-          ))}
-        </Row>
-      ) : (
-        <ModelList
-          models={processedModels}
-          onDeploy={handleDeploy}
-          onChat={handleChatClick}
-          onLogs={handleLogsClick}
-          onDelete={handleDeleteClick}
-          onDownload={handleDownloadClick}
-          onScale={handleScaleClick}
-          onStop={handleStopClick}
-        />
+            <h3 style={{ marginBottom: 16 }}>确认下载模型</h3>
+            <p style={{ marginBottom: 24 }}>
+              即将下载模型 <strong>{selectedModel.name}</strong> ({selectedModel.size})，确认继续吗？
+            </p>
+            <div style={{ textAlign: 'right' }}>
+              <Button style={{ marginRight: 8 }} onClick={() => setDownloadModalVisible(false)}>
+                取消
+              </Button>
+              <Button type="primary" onClick={confirmDownload}>
+                确认下载
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
 
-      {/* Deploy Modal */}
-      <DeployModal
-        visible={deployModalVisible}
-        model={selectedModelForDeploy}
-        onCancel={closeDeployModal}
-        onDeploy={confirmDeploy}
-        onSaveConfig={handleSaveDeployConfig}
-      />
-
-      {/* Add New Model Modal */}
-      <AddNewModelModal
-        visible={deployNewModelModalVisible}
-        onCancel={() => setDeployNewModelModalVisible(false)}
-        onAdd={handleConfirmAddModel}
-      />
-
-      {/* Logs Modal */}
-      <LogsModal
-        visible={logsModalVisible}
-        model={selectedModelForAction}
-        onClose={() => {
-          setLogsModalVisible(false);
-          setSelectedModelForAction(null);
-        }}
-        onDownload={handleDownloadLogs}
-      />
-
-      {/* Download Modal */}
-      <DownloadModal
-        visible={downloadModalVisible}
-        model={selectedModelForAction}
-        onCancel={() => {
-          setDownloadModalVisible(false);
-          setSelectedModelForAction(null);
-        }}
-        onDownload={handleConfirmDownload}
-      />
-
-      {/* Scale Modal */}
-      <ScaleModal
-        visible={scaleModalVisible}
-        model={selectedModelForAction}
-        onCancel={() => {
-          setScaleModalVisible(false);
-          setSelectedModelForAction(null);
-        }}
-        onScale={handleConfirmScale}
-      />
-
-      {/* Stop Modal */}
-      <StopModal
-        visible={stopModalVisible}
-        model={selectedModelForAction}
-        onCancel={() => {
-          setStopModalVisible(false);
-          setSelectedModelForAction(null);
-        }}
-        onConfirm={handleConfirmStop}
-      />
-
-      {/* Delete Confirm Dialog */}
-      <DeleteConfirmDialog
-        visible={deleteConfirmVisible}
-        model={selectedModelForAction}
-        onCancel={() => {
-          setDeleteConfirmVisible(false);
-          setSelectedModelForAction(null);
-        }}
-        onConfirm={handleConfirmDelete}
-      />
+      {/* Deploy Modal - Simple confirm */}
+      {deployModalVisible && selectedModel && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0,0,0,0.45)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+          }}
+          onClick={() => setDeployModalVisible(false)}
+        >
+          <div
+            style={{
+              background: '#fff',
+              padding: 24,
+              borderRadius: 8,
+              minWidth: 400,
+              maxWidth: 500,
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 style={{ marginBottom: 16 }}>确认部署模型</h3>
+            <p style={{ marginBottom: 24 }}>
+              即将{selectedDeployType.toUpperCase()}部署模型 <strong>{selectedModel.name}</strong>，确认继续吗？
+            </p>
+            <div style={{ textAlign: 'right' }}>
+              <Button style={{ marginRight: 8 }} onClick={() => setDeployModalVisible(false)}>
+                取消
+              </Button>
+              <Button type="primary" onClick={confirmDeploy}>
+                确认部署
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

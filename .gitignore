@@ -227,7 +227,7 @@ protype/node_modules/
 node_modules/
 ui/node_modules/
 ui/dist/
-package-lock.json
+/package-lock.json
 ui/package-lock.json
 *.log
 npm-debug.log*

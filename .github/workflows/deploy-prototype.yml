@@ -33,7 +33,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./protype
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Build
         working-directory: ./protype

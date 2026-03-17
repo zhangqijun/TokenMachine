@@ -1,0 +1,4609 @@
+[
+  {
+    "model_card_name": "DeepSeek-OCR",
+    "input_modality": [
+      "文字",
+      "图片"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "视觉理解"
+    ],
+    "description": "DeepSeek-OCR 是由深度求索（DeepSeek AI）推出的一个视觉语言模型，专注于光学字符识别（OCR）与“上下文光学压缩”。该模型旨在探索从图像中压缩上下文信息的边界，能够高效处理文档并将其转换为如 Markdown 等结构化文本格式",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0,
+    "max_input_price": 0.3,
+    "min_output_price": 0,
+    "max_output_price": 1.2,
+    "min_context_length": 8192,
+    "max_context_length": 8192,
+    "tags": [
+      "视觉 Vision"
+    ],
+    "discount_rate": 1,
+    "model_price_info": null,
+    "estimated_vram_gb": 4.2,
+    "estimated_tps": 107.1,
+    "params_b": 7,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "DeepSeek-OCR-2",
+    "input_modality": [
+      "文字",
+      "图片"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "视觉理解"
+    ],
+    "description": "DeepSeek团队开源DeepSeek-OCR 2模型，采用创新的DeepEncoder V2方法，让AI能够根据图像的含义动态重排图像的各个部分，更接近人类的视觉编码逻辑。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0,
+    "max_input_price": 0.22,
+    "min_output_price": 0,
+    "max_output_price": 0.22,
+    "min_context_length": 8192,
+    "max_context_length": 8192,
+    "tags": [
+      "视觉 Vision"
+    ],
+    "discount_rate": 1,
+    "model_price_info": null,
+    "estimated_vram_gb": 8.4,
+    "estimated_tps": 35.7,
+    "params_b": 14,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "DeepSeek-R1",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "DeepSeek-R1-Zero 和 DeepSeek-R1 属于第一代推理模型。\nDeepSeek-R1-Zero 通过大规模强化学习（RL）进行训练，未将监督微调（SFT）作为初步步骤，在推理方面展现出卓越性能。通过 RL，模型自然涌现出多种强大且有趣的推理行为。然而，该模型也面临无限重复、可读性差和语言混合等挑战。\n为解决这些问题并进一步提升推理性能，引入了 DeepSeek-R1。该模型在 RL 之前加入了冷启动数据，从而在数学、代码和推理任务上取得了与 OpenAI-o1 相当的表现。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 4,
+    "max_input_price": 4,
+    "min_output_price": 16,
+    "max_output_price": 16,
+    "min_context_length": 65536,
+    "max_context_length": 147456,
+    "tags": [
+      "工具调用 Tools",
+      "推理"
+    ],
+    "discount_rate": 1,
+    "model_price_info": null,
+    "estimated_vram_gb": 42.2,
+    "estimated_tps": 7.1,
+    "params_b": 67,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "DeepSeek-R1-0528",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "DeepSeek R1 模型已经进行了小版本升级，当前版本为 DeepSeek-R1-0528。在最新更新中，DeepSeek R1 通过增加计算资源并引入算法优化机制在后续训练中，显著提升了其推理深度和推理能力。该模型在数学、编程和通用逻辑等各个基准评估中均表现出色。其整体性能现已接近 O3 和 Gemini 2.5 Pro 等领先模型。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 4,
+    "max_input_price": 4,
+    "min_output_price": 16,
+    "max_output_price": 16,
+    "min_context_length": 65536,
+    "max_context_length": 163840,
+    "tags": [
+      "推理"
+    ],
+    "discount_rate": 1,
+    "model_price_info": null,
+    "estimated_vram_gb": 42.2,
+    "estimated_tps": 7.1,
+    "params_b": 67,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "DeepSeek-R1-Distill-Llama-70B",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "DeepSeek为支持研究社区，DeepSeek-R1-Zero、DeepSeek-R1 以及基于 Llama 和 Qwen 从 DeepSeek-R1 蒸馏出的六个密集模型已开源。其中，DeepSeek-R1-Distill-Qwen-32B 在多项基准测试中优于 OpenAI-o1-mini，为密集模型实现了新的最先进结果。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 4.1,
+    "max_input_price": 4.1,
+    "min_output_price": 4.1,
+    "max_output_price": 4.1,
+    "min_context_length": 32768,
+    "max_context_length": 32768,
+    "tags": [
+      "推理"
+    ],
+    "discount_rate": 1,
+    "model_price_info": null,
+    "estimated_vram_gb": 44.2,
+    "estimated_tps": 5.4,
+    "params_b": 72,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "DeepSeek-R1-Distill-Llama-8B",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "DeepSeek为支持研究社区，DeepSeek-R1-Zero、DeepSeek-R1 以及基于 Llama 和 Qwen 从 DeepSeek-R1 蒸馏出的六个密集模型已开源。其中，DeepSeek-R1-Distill-Qwen-32B 在多项基准测试中优于 OpenAI-o1-mini，为密集模型实现了新的最先进结果。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0,
+    "max_input_price": 0,
+    "min_output_price": 0,
+    "max_output_price": 0,
+    "min_context_length": 32768,
+    "max_context_length": 32768,
+    "tags": [
+      "推理"
+    ],
+    "discount_rate": 1,
+    "model_price_info": null,
+    "estimated_vram_gb": 5.2,
+    "estimated_tps": 86.5,
+    "params_b": 7,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "DeepSeek-R1-Distill-Qwen-14B",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "DeepSeek为支持研究社区，DeepSeek-R1-Zero、DeepSeek-R1 以及基于 Llama 和 Qwen 从 DeepSeek-R1 蒸馏出的六个密集模型已开源。其中，DeepSeek-R1-Distill-Qwen-32B 在多项基准测试中优于 OpenAI-o1-mini，为密集模型实现了新的最先进结果。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0.6,
+    "max_input_price": 1,
+    "min_output_price": 0.7,
+    "max_output_price": 3,
+    "min_context_length": 32768,
+    "max_context_length": 131072,
+    "tags": [
+      "工具调用 Tools",
+      "推理"
+    ],
+    "discount_rate": 1,
+    "model_price_info": null,
+    "estimated_vram_gb": 10.4,
+    "estimated_tps": 28.8,
+    "params_b": 14,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "DeepSeek-R1-Distill-Qwen-32B",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "DeepSeek为支持研究社区，DeepSeek-R1-Zero、DeepSeek-R1 以及基于 Llama 和 Qwen 从 DeepSeek-R1 蒸馏出的六个密集模型已开源。其中，DeepSeek-R1-Distill-Qwen-32B 在多项基准测试中优于 OpenAI-o1-mini，为密集模型实现了新的最先进结果。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0.35,
+    "max_input_price": 2.9,
+    "min_output_price": 0.35,
+    "max_output_price": 6,
+    "min_context_length": 32768,
+    "max_context_length": 131072,
+    "tags": [
+      "工具调用 Tools",
+      "推理"
+    ],
+    "discount_rate": 1,
+    "model_price_info": null,
+    "estimated_vram_gb": 21.2,
+    "estimated_tps": 14.2,
+    "params_b": 32,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "DeepSeek-R1-Distill-Qwen-7B",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "DeepSeek为支持研究社区，DeepSeek-R1-Zero、DeepSeek-R1 以及基于 Llama 和 Qwen 从 DeepSeek-R1 蒸馏出的六个密集模型已开源。其中，DeepSeek-R1-Distill-Qwen-32B 在多项基准测试中优于 OpenAI-o1-mini，为密集模型实现了新的最先进结果。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0.5,
+    "max_input_price": 0.5,
+    "min_output_price": 1,
+    "max_output_price": 1,
+    "min_context_length": 32768,
+    "max_context_length": 32768,
+    "tags": [
+      "工具调用 Tools",
+      "推理"
+    ],
+    "discount_rate": 1,
+    "model_price_info": null,
+    "estimated_vram_gb": 5.2,
+    "estimated_tps": 86.5,
+    "params_b": 7,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "DeepSeek-V3",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "DeepSeek-V3 是一款强大的专家混合（MoE）语言模型，总参数量为 6710 亿，每个 token 激活 37 亿个参数。为实现高效推理和具成本效益的训练，该模型采用了多头潜在注意力（MLA）机制和在 DeepSeek-V2 中已验证有效的 DeepSeekMoE 架构。此外，DeepSeek-V3 首次引入无辅助损失（auxiliary-loss-free）策略进行负载均衡，并设定多 token 预测的训练目标以提升性能。\n模型在 14.8 万亿个多样且高质量的 token 上进行了预训练，随后通过监督微调（Supervised Fine-Tuning）和强化学习（Reinforcement Learning）阶段充分发挥其潜力。综合评估结果显示，DeepSeek-V3 性能优于其他开源模型，并达到与领先闭源模型相当的水平。\n尽管性能优异，DeepSeek-V3 的完整训练仅耗费 278.8 万 H800 GPU 小时。其训练过程高度稳定，未出现任何无法挽回的损失峰值，也未进行任何回滚操作。",
+    "fe_config": {
+      "pin": 11,
+      "label_icons": [
+        {
+          "label": "hot",
+          "icon_url": "https://assets.qc-ai.cn/maashub/campaigns/tag-hot@2x_7feaca48607c07f94b4f39e995d3a625.webp",
+          "side": "rb"
+        }
+      ],
+      "pre_discount_input_price": "",
+      "pre_discount_output_price": ""
+    },
+    "dimension": 0,
+    "min_input_price": 2,
+    "max_input_price": 4,
+    "min_output_price": 8,
+    "max_output_price": 16,
+    "min_context_length": 65536,
+    "max_context_length": 131072,
+    "tags": [
+      "工具调用 Tools"
+    ],
+    "discount_rate": 1,
+    "model_price_info": null,
+    "estimated_vram_gb": 42.2,
+    "estimated_tps": 7.1,
+    "params_b": 67,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "DeepSeek-V3-0324",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "DeepSeek-V3-0324 在核心架构和功能维度实现系统性升级，其技术突破已全面覆盖认知推理、工程实践与语言创作三大领域。在技术架构层面，通过重构推理引擎与优化参数调度机制，模型展现出更强大的复杂任务处理能力：在MMLU-Pro、GPQA等权威基准测试中取得突破性进展，分数分别提升至81.2（+5.3）和68.4（+9.3），AIME数学解题能力更实现近50%的跨越式增长。工程实践领域实现双重突破，代码生成准确率提升至59.4（+19.8）的同时，前端开发产出在代码可执行性及界面美观度方面达到工业级标准，成功构建起从原型设计到功能落地的完整开发闭环。\n\n中文创作能力完成从量变到质变的跃升，在保持与R1系列一致的风格体系基础上，中长篇文本的叙事连贯性与细节刻画深度达到专业创作水准。技术团队特别针对多模态交互场景进行深度优化，使函数调用准确率提升至98.7%，历史对话重写响应速度缩短40%，有效解决多轮交互中的语义漂移问题。在功能生态建设方面，通过建立动态知识更新机制，中文搜索响应的深度分析能力显著增强，报告生成维度扩展至12类专业领域，翻译系统在信达雅三重指标上均实现正向突破。经第三方评测，该版本综合性能指标已全面进入行业第一梯队，在复杂系统建模、跨模态创作等前沿场景中展现出与顶尖模型同量级的工程化落地能力。",
+    "fe_config": {
+      "pin": 14,
+      "label_icons": [
+        {
+          "label": "hot",
+          "icon_url": "https://assets.qc-ai.cn/maashub/campaigns/tag-hot@2x_7feaca48607c07f94b4f39e995d3a625.webp",
+          "side": "rb"
+        }
+      ],
+      "pre_discount_input_price": "",
+      "pre_discount_output_price": ""
+    },
+    "dimension": 0,
+    "min_input_price": 0.6,
+    "max_input_price": 2,
+    "min_output_price": 8,
+    "max_output_price": 8,
+    "min_context_length": 65536,
+    "max_context_length": 163840,
+    "tags": [
+      "工具调用 Tools"
+    ],
+    "discount_rate": 1,
+    "model_price_info": null,
+    "estimated_vram_gb": 42.2,
+    "estimated_tps": 7.1,
+    "params_b": 67,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "DeepSeek-V3.1",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "DeepSeek-V3.1本次升级包含以下主要变化：\n混合推理架构：一个模型同时支持思考模式与非思考模式；\n更高的思考效率：相比 DeepSeek-R1-0528，DeepSeek-V3.1-Think 能在更短时间内给出答案；\n更强的 Agent 能力：通过 Post-Training 优化，新模型在工具使用与智能体任务中的表现有较大提升。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 2,
+    "max_input_price": 4,
+    "min_output_price": 8,
+    "max_output_price": 16,
+    "min_context_length": 131072,
+    "max_context_length": 163840,
+    "tags": [
+      "工具调用 Tools"
+    ],
+    "discount_rate": 1,
+    "model_price_info": null,
+    "estimated_vram_gb": 42.2,
+    "estimated_tps": 7.1,
+    "params_b": 67,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "DeepSeek-V3.1-Terminus",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "此次更新在保持模型原有能力的基础上，针对用户反馈的问题进行了改进，包括：\n语言一致性： 缓解了中英文混杂、偶发异常字符等情况；\nAgent 能力： 进一步优化了 Code Agent 与 Search Agent 的表现。\nDeepSeek-V3.1-Terminus 的输出效果相比前一版本更加稳定",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 2,
+    "max_input_price": 4,
+    "min_output_price": 12,
+    "max_output_price": 12,
+    "min_context_length": 131072,
+    "max_context_length": 131072,
+    "tags": [
+      "工具调用 Tools"
+    ],
+    "discount_rate": 1,
+    "model_price_info": null,
+    "estimated_vram_gb": 42.2,
+    "estimated_tps": 7.1,
+    "params_b": 67,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "DeepSeek-V3.2",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "DeepSeek-V3.2 的目标是平衡推理能力与输出长度，适合日常使用，例如问答场景和通用 Agent 任务场景。",
+    "fe_config": {
+      "pin": 8,
+      "label_icons": [
+        {
+          "label": "hot",
+          "icon_url": "https://assets.qc-ai.cn/maashub/campaigns/tag-hot@2x_7feaca48607c07f94b4f39e995d3a625.webp",
+          "side": "rb"
+        }
+      ],
+      "pre_discount_input_price": "",
+      "pre_discount_output_price": ""
+    },
+    "dimension": 0,
+    "min_input_price": 0.2,
+    "max_input_price": 2,
+    "min_output_price": 1.5,
+    "max_output_price": 3,
+    "min_context_length": 131072,
+    "max_context_length": 167936,
+    "tags": [
+      "工具调用 Tools",
+      "推理"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "cached_input_price",
+            "official_supplier_tip": "缓存命中",
+            "price": 0.2,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 2,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 3,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original_thinking",
+            "official_supplier_tip": "思考模式输出token价格(按百万token计费)",
+            "price": 3,
+            "unit": "million_tokens",
+            "sort_order": 3,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 42.2,
+    "estimated_tps": 7.1,
+    "params_b": 67,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "DeepSeek-V3.2-Exp",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "DeepSeek-V3.2-Exp 模型，这是一个实验性（Experimental）的版本。作为迈向新一代架构的中间步骤，V3.2-Exp 在 V3.1-Terminus 的基础上引入了 DeepSeek Sparse Attention（一种稀疏注意力机制），针对长文本的训练和推理效率进行了探索性的优化和验证。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 2,
+    "max_input_price": 2,
+    "min_output_price": 3,
+    "max_output_price": 3,
+    "min_context_length": 65536,
+    "max_context_length": 163840,
+    "tags": [
+      "工具调用 Tools",
+      "推理"
+    ],
+    "discount_rate": 1,
+    "model_price_info": null,
+    "estimated_vram_gb": 42.2,
+    "estimated_tps": 7.1,
+    "params_b": 67,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "GLM-4-32B-0414",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "GLM-4-32B-0414 系列是新一代开源模型，拥有 320 亿参数，性能可与 OpenAI 的 GPT 系列及 DeepSeek 的 V3/R1 系列相媲美，并支持便捷的本地部署功能。GLM-4-32B-Base-0414 在 15 万亿高质量数据上完成预训练，其中包含大量推理类型的合成数据，为后续强化学习扩展奠定了基础。在后训练阶段，除在人类偏好对齐以适配对话场景外，还通过拒绝采样和强化学习等技术，在指令遵循、工程代码和函数调用方面提升性能，增强了智能体任务所需的基础能力。该系列模型在工程代码、Artifact 生成、函数调用、基于搜索的问答以及报告生成等任务上表现出色，在部分基准测试中可媲美更大规模的模型，如 GPT-4o 和 DeepSeek-V3-0324（671B）。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 1.89,
+    "max_input_price": 1.89,
+    "min_output_price": 1.89,
+    "max_output_price": 1.89,
+    "min_context_length": 32768,
+    "max_context_length": 32768,
+    "tags": [
+      "工具调用 Tools"
+    ],
+    "discount_rate": 1,
+    "model_price_info": null,
+    "estimated_vram_gb": 20.2,
+    "estimated_tps": 14.9,
+    "params_b": 32,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "GLM-4-9B-0414",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "GLM-4-9B-0414 由于模型容量较小，未进行与 GLM-4-32B-0414 类似的智能体能力强化，优化重点放在翻译等需要大批量调用的场景，以提升此类任务的执行效率。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0,
+    "max_input_price": 0,
+    "min_output_price": 0,
+    "max_output_price": 0,
+    "min_context_length": 32768,
+    "max_context_length": 32768,
+    "tags": [
+      "工具调用 Tools"
+    ],
+    "discount_rate": 1,
+    "model_price_info": null,
+    "estimated_vram_gb": 6.4,
+    "estimated_tps": 46.9,
+    "params_b": 9,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "GLM-4.5",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "GLM-4.5 和 GLM-4.5-Air 是最新的旗舰模型系列，作为智能体应用的基础模型构建，均采用混合专家（Mixture-of-Experts）架构。GLM-4.5 总参数为 3550 亿，激活参数为 320 亿；GLM-4.5-Air 设计更加精简，总参数为 1060 亿，激活参数为 120 亿。两者的训练流程相似：首先在 15 万亿令牌的通用数据上进行预训练，其后在代码、推理、智能体等领域的数据上进行针对性训练，将上下文长度扩展至 128k，最后通过强化学习进一步增强推理、代码及智能体能力。\nGLM-4.5 和 GLM-4.5-Air 针对工具调用、网页浏览、软件工程、前端编程等领域进行了优化，可集成至 Claude Code、Roo Code 等代码智能体中使用，也可通过工具调用接口支持各类智能体应用。两者均采用混合推理模式，提供两种模式：适用于复杂推理和工具使用的思考模式，以及适用于即时响应的非思考模式，可通过 thinking.type 参数进行启用或关闭（支持 enabled 和 disabled 两种设置），默认开启动态思考功能。GLM-4.5-Air 作为轻量版，在性能与性价比之间实现平衡，并支持灵活切换混合思考模型。智谱最新旗舰模型，支持思考模式切换，综合能力达到开源模型的 SOTA 水平，上下文长度可达128K。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0.8,
+    "max_input_price": 4,
+    "min_output_price": 8,
+    "max_output_price": 16,
+    "min_context_length": 131072,
+    "max_context_length": 131072,
+    "tags": [
+      "工具调用 Tools",
+      "推理"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 2,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 8,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original_thinking",
+            "official_supplier_tip": "思考模式输出token价格(按百万token计费)",
+            "price": 8,
+            "unit": "million_tokens",
+            "sort_order": 3,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 7.4,
+    "estimated_tps": 40.5,
+    "params_b": 9,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "GLM-4.5-Air",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "GLM-4.5 和 GLM-4.5-Air 是最新的旗舰模型系列，作为智能体应用的基础模型构建，均采用混合专家（Mixture-of-Experts）架构。GLM-4.5 总参数为 3550 亿，激活参数为 320 亿；GLM-4.5-Air 设计更加精简，总参数为 1060 亿，激活参数为 120 亿。两者的训练流程相似：首先在 15 万亿令牌的通用数据上进行预训练，其后在代码、推理、智能体等领域的数据上进行针对性训练，将上下文长度扩展至 128k，最后通过强化学习进一步增强推理、代码及智能体能力。\nGLM-4.5 和 GLM-4.5-Air 针对工具调用、网页浏览、软件工程、前端编程等领域进行了优化，可集成至 Claude Code、Roo Code 等代码智能体中使用，也可通过工具调用接口支持各类智能体应用。两者均采用混合推理模式，提供两种模式：适用于复杂推理和工具使用的思考模式，以及适用于即时响应的非思考模式，可通过 thinking.type 参数进行启用或关闭（支持 enabled 和 disabled 两种设置），默认开启动态思考功能。GLM-4.5-Air 作为轻量版，在性能与性价比之间实现平衡，并支持灵活切换混合思考模型。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0.24,
+    "max_input_price": 2,
+    "min_output_price": 2,
+    "max_output_price": 8,
+    "min_context_length": 131072,
+    "max_context_length": 131072,
+    "tags": [
+      "工具调用 Tools",
+      "推理"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 0.8,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 2,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original_thinking",
+            "official_supplier_tip": "思考模式输出token价格(按百万token计费)",
+            "price": 2,
+            "unit": "million_tokens",
+            "sort_order": 3,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 7.4,
+    "estimated_tps": 40.5,
+    "params_b": 9,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "GLM-4.5V",
+    "input_modality": [
+      "文字",
+      "图片",
+      "视频"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "视觉理解"
+    ],
+    "description": "GLM-4.5V 是智谱新一代基于 MOE 架构的视觉推理模型，以 106B 的总参数量和 12B 激活参数量，在各类基准测试中达到全球同级别开源多模态模型 SOTA，涵盖图像、视频、文档理解及 GUI 任务等常见任务。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0.8,
+    "max_input_price": 4.57,
+    "min_output_price": 6,
+    "max_output_price": 13.71,
+    "min_context_length": 65536,
+    "max_context_length": 131072,
+    "tags": [
+      "工具调用 Tools",
+      "推理",
+      "视觉 Vision"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 2,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 6,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original_thinking",
+            "official_supplier_tip": "思考模式输出token价格(按百万token计费)",
+            "price": 6,
+            "unit": "million_tokens",
+            "sort_order": 3,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 7.4,
+    "estimated_tps": 40.5,
+    "params_b": 9,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "GLM-4.6",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "GLM-4.6 是智谱最新的旗舰模型，其总参数量 355B，激活参数 32B，上下文提升至 200K，8 大权威基准全面提升，稳居国产模型首位。在编程、推理、搜索、写作、智能体应用等核心能力均完成对 GLM-4.5 的超越。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0.4,
+    "max_input_price": 7.2,
+    "min_output_price": 8,
+    "max_output_price": 16,
+    "min_context_length": 202752,
+    "max_context_length": 206848,
+    "tags": [
+      "工具调用 Tools",
+      "推理",
+      "编程 Coder"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "cached_input_price",
+            "official_supplier_tip": "缓存命中",
+            "price": 0.4,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 2,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 8,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original_thinking",
+            "official_supplier_tip": "思考模式输出token价格(按百万token计费)",
+            "price": 8,
+            "unit": "million_tokens",
+            "sort_order": 3,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 7.4,
+    "estimated_tps": 40.5,
+    "params_b": 9,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "GLM-4.6V",
+    "input_modality": [
+      "文字",
+      "图片",
+      "视频"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "视觉理解"
+    ],
+    "description": "GLM-4.6V 是 GLM 系列在多模态方向上的一次重要迭代，它将训练时上下文窗口提升到128k tokens，在视觉理解精度上达到同参数规模 SOTA，并首次在模型架构中将 Function Call（工具调用）能力原生融入视觉模型，打通从「视觉感知」到「可执行行动（Action）」的链路，为真实业务场景中的多模态 Agent 提供统一的技术底座。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0.4,
+    "max_input_price": 2.29,
+    "min_output_price": 3,
+    "max_output_price": 6.86,
+    "min_context_length": 131072,
+    "max_context_length": 204800,
+    "tags": [
+      "视觉 Vision"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "cached_input_price",
+            "official_supplier_tip": "缓存命中",
+            "price": 0.4,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 1,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 3,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original_thinking",
+            "official_supplier_tip": "思考模式输出token价格(按百万token计费)",
+            "price": 3,
+            "unit": "million_tokens",
+            "sort_order": 3,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 7.4,
+    "estimated_tps": 40.5,
+    "params_b": 9,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "GLM-4.7",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "GLM-4.7 是智谱最新旗舰模型，GLM-4.7 面向 Agentic Coding 场景强化了编码能力、长程任务规划与工具协同，并在多个公开基准的当期榜单中取得开源模型中的领先表现。通用能力提升，回复更简洁自然，写作更具沉浸感。在执行复杂智能体任务，在工具调用时指令遵循更强，Artifacts 与 Agentic Coding 的前端美感和长程任务完成效率进一步提升。",
+    "fe_config": {
+      "pin": 10,
+      "label_icons": [
+        {
+          "label": "hot",
+          "icon_url": "https://assets.qc-ai.cn/maashub/campaigns/tag-hot@2x_7feaca48607c07f94b4f39e995d3a625.webp",
+          "side": "rb"
+        }
+      ],
+      "pre_discount_input_price": "",
+      "pre_discount_output_price": ""
+    },
+    "dimension": 0,
+    "min_input_price": 0.4,
+    "max_input_price": 4,
+    "min_output_price": 8,
+    "max_output_price": 16,
+    "min_context_length": 131072,
+    "max_context_length": 204800,
+    "tags": [
+      "工具调用 Tools",
+      "推理",
+      "编程 Coder"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "cached_input_price",
+            "official_supplier_tip": "缓存命中",
+            "price": 0.4,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 2,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 8,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original_thinking",
+            "official_supplier_tip": "思考模式输出token价格(按百万token计费)",
+            "price": 8,
+            "unit": "million_tokens",
+            "sort_order": 3,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 7.4,
+    "estimated_tps": 40.5,
+    "params_b": 9,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "GLM-4.7-Flash",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "GLM-4.7-Flash 作为 30B 级 SOTA 模型，提供了一个兼顾性能与效率的新选择。面向 Agentic Coding 场景强化了编码能力、长程任务规划与工具协同，并在多个公开基准的当期榜单中取得同尺寸开源模型中的领先表现。在执行复杂智能体任务，在工具调用时指令遵循更强，Artifacts 与 Agentic Coding 的前端美感和长程任务完成效率进一步提升。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0,
+    "max_input_price": 1,
+    "min_output_price": 0,
+    "max_output_price": 3,
+    "min_context_length": 131072,
+    "max_context_length": 204800,
+    "tags": [],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 0,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 0,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 7.4,
+    "estimated_tps": 40.5,
+    "params_b": 9,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "GLM-5",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "GLM-5 是面向 Coding 与 Agent 场景的新一代大模型，在复杂系统工程与长程任务中达到开源 SOTA，真实编程体验逼近 Claude Opus 级别；基于 744B 新基座、异步强化学习与稀疏注意力，实现从“写代码”到“写工程”的全面升级。\n",
+    "fe_config": {
+      "pin": 3,
+      "label_icons": [
+        {
+          "label": "hot",
+          "icon_url": "https://assets.qc-ai.cn/maashub/campaigns/tag-hot@2x_7feaca48607c07f94b4f39e995d3a625.webp",
+          "side": "rb"
+        }
+      ],
+      "pre_discount_input_price": "",
+      "pre_discount_output_price": ""
+    },
+    "dimension": 0,
+    "min_input_price": 0.8,
+    "max_input_price": 6,
+    "min_output_price": 18,
+    "max_output_price": 22,
+    "min_context_length": 131072,
+    "max_context_length": 204800,
+    "tags": [
+      "工具调用 Tools",
+      "推理",
+      "编程 Coder"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 4,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 18,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original_thinking",
+            "official_supplier_tip": "思考模式输出token价格(按百万token计费)",
+            "price": 18,
+            "unit": "million_tokens",
+            "sort_order": 3,
+            "discount_rate": 1
+          },
+          {
+            "specification": "cached_input_price",
+            "official_supplier_tip": "缓存命中",
+            "price": 1.5,
+            "unit": "million_tokens",
+            "sort_order": 4,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 21.2,
+    "estimated_tps": 14.2,
+    "params_b": 32,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "GLM-Image",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "图片"
+    ],
+    "category": [
+      "图像生成"
+    ],
+    "description": "GLM-Image 是智谱新旗舰图像生成模型， 模型全程基于国产芯片完成训练，采用独创的「自回归+扩散解码器」混合架构，兼顾全局指令理解与局部细节刻画，克服了海报、PPT、科普图等知识密集型场景生成难题，是面向以 Nano Banana Pro 为代表的新一代「认知型生成」技术范式的一次重要探索。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0,
+    "max_input_price": 0,
+    "min_output_price": 0.1,
+    "max_output_price": 0.1,
+    "min_context_length": 0,
+    "max_context_length": 0,
+    "tags": [],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 0.1,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          },
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 0,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 8.4,
+    "estimated_tps": 35.7,
+    "params_b": 14,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "GLM-Z1-32B-0414",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "GLM-Z1-32B-0414 是一款具备深度思考能力的推理模型，基于 GLM-4-32B-0414 通过冷启动、强化学习扩展以及在数学、代码和逻辑等任务上的进一步训练而构建。与基础模型相比，GLM-Z1-32B-0414 在数学能力和复杂任务求解能力方面有显著提升。在训练过程中引入了基于成对排序反馈的通用强化学习，进一步增强了模型的综合能力。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 1,
+    "max_input_price": 1,
+    "min_output_price": 4,
+    "max_output_price": 4,
+    "min_context_length": 131072,
+    "max_context_length": 131072,
+    "tags": [
+      "工具调用 Tools",
+      "推理"
+    ],
+    "discount_rate": 1,
+    "model_price_info": null,
+    "estimated_vram_gb": 21.2,
+    "estimated_tps": 14.2,
+    "params_b": 32,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "GLM-Z1-9B-0414",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "GLM-Z1-9B-0414 是一款小规模（9B 参数）的模型，延续了开源传统，基于此前系列模型的多项技术进行训练。尽管规模较小，该模型在数学推理及通用任务中依然表现优异，在同等规模的开源模型中处于领先水平。尤其在资源受限的场景下，GLM-Z1-9B-0414 在效率与效果之间实现了良好平衡，为轻量化部署需求提供了高效且性能出色的选择。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0,
+    "max_input_price": 0,
+    "min_output_price": 0,
+    "max_output_price": 0,
+    "min_context_length": 131072,
+    "max_context_length": 131072,
+    "tags": [
+      "工具调用 Tools",
+      "推理"
+    ],
+    "discount_rate": 1,
+    "model_price_info": null,
+    "estimated_vram_gb": 21.2,
+    "estimated_tps": 14.2,
+    "params_b": 32,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Kimi-K2-0905",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "上下文长度 256k，在 0711 版本基础上增强了 Agentic Coding 能力、前端代码美观度和实用性、以及上下文理解能力",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 1,
+    "max_input_price": 4.5,
+    "min_output_price": 16,
+    "max_output_price": 18,
+    "min_context_length": 262144,
+    "max_context_length": 262144,
+    "tags": [
+      "工具调用 Tools"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "cached_input_price",
+            "official_supplier_tip": "缓存命中",
+            "price": 1,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 4,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 16,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 602.0,
+    "estimated_tps": 5,
+    "params_b": 1000,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Kimi-K2-Instruct",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "kimi-k2 是一款具备超强代码和 Agent 能力的 MoE 架构基础模型，总参数 1T，激活参数 32B。在通用知识推理、编程、数学、Agent 等主要类别的基准性能测试中，K2 模型的性能超过其他主流开源模型",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 1,
+    "max_input_price": 4,
+    "min_output_price": 16,
+    "max_output_price": 16,
+    "min_context_length": 131072,
+    "max_context_length": 262144,
+    "tags": [
+      "工具调用 Tools"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "cached_input_price",
+            "official_supplier_tip": "缓存命中",
+            "price": 1,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 4,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 16,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 602.0,
+    "estimated_tps": 5,
+    "params_b": 1000,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Kimi-K2-Thinking",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "K2 长思考模型，支持 256k 上下文，支持多步工具调用与思考，擅长解决更复杂的问题",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 1,
+    "max_input_price": 4,
+    "min_output_price": 16,
+    "max_output_price": 16,
+    "min_context_length": 262144,
+    "max_context_length": 262144,
+    "tags": [
+      "工具调用 Tools",
+      "推理"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "cached_input_price",
+            "official_supplier_tip": "缓存命中",
+            "price": 1,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 4,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 16,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 602.0,
+    "estimated_tps": 5,
+    "params_b": 1000,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Kimi-K2.5",
+    "input_modality": [
+      "文字",
+      "图片",
+      "视频"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "视觉理解"
+    ],
+    "description": "Kimi K2.5 是 Kimi 迄今最智能的模型，在 Agent、代码、视觉理解及一系列通用智能任务上取得开源 SoTA 表现。同时 Kimi K2.5 也是 Kimi 迄今最全能的模型，原生的多模态架构设计，同时支持视觉与文本输入、思考与非思考模式、对话与 Agent 任务。",
+    "fe_config": {
+      "pin": 5,
+      "label_icons": [
+        {
+          "label": "hot",
+          "icon_url": "https://assets.qc-ai.cn/maashub/campaigns/tag-hot@2x_7feaca48607c07f94b4f39e995d3a625.webp",
+          "side": "rb"
+        }
+      ],
+      "pre_discount_input_price": "",
+      "pre_discount_output_price": ""
+    },
+    "dimension": 0,
+    "min_input_price": 0.7,
+    "max_input_price": 4,
+    "min_output_price": 12,
+    "max_output_price": 21,
+    "min_context_length": 131072,
+    "max_context_length": 262144,
+    "tags": [
+      "工具调用 Tools",
+      "推理",
+      "编程 Coder",
+      "视觉 Vision"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 4,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 21,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original_thinking",
+            "official_supplier_tip": "思考模式输出token价格(按百万token计费)",
+            "price": 21,
+            "unit": "million_tokens",
+            "sort_order": 3,
+            "discount_rate": 1
+          },
+          {
+            "specification": "cached_input_price",
+            "official_supplier_tip": "缓存命中",
+            "price": 0.7,
+            "unit": "million_tokens",
+            "sort_order": 4,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 602.0,
+    "estimated_tps": 5,
+    "params_b": 1000,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "MiniMax-Hailuo-02",
+    "input_modality": [
+      "文字",
+      "图片"
+    ],
+    "output_modality": [
+      "视频"
+    ],
+    "category": [
+      "视频生成"
+    ],
+    "description": "新一代视频生成模型，1080p 原生，SOTA 指令遵循，极致物理表现",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0,
+    "max_input_price": 0,
+    "min_output_price": 0,
+    "max_output_price": 0,
+    "min_context_length": 0,
+    "max_context_length": 0,
+    "tags": [],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "video",
+        "pricing_specs": [
+          {
+            "specification": "768p-6s",
+            "official_supplier_tip": "文生视频，图生视频，768P 6s",
+            "price": 0.33,
+            "unit": "second",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "768p-10s",
+            "official_supplier_tip": "文生视频，图生视频，768P 10s",
+            "price": 0.4,
+            "unit": "second",
+            "sort_order": 2,
+            "discount_rate": 1
+          },
+          {
+            "specification": "1080p",
+            "official_supplier_tip": "文生视频，图生视频，1080P",
+            "price": 0.58,
+            "unit": "second",
+            "sort_order": 3,
+            "discount_rate": 1
+          },
+          {
+            "specification": "512p",
+            "official_supplier_tip": "图生视频，512P",
+            "price": 0.1,
+            "unit": "second",
+            "sort_order": 4,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 48.0,
+    "estimated_tps": 5.0,
+    "params_b": 80,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "MiniMax-Hailuo-2.3",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "视频"
+    ],
+    "category": [
+      "视频生成"
+    ],
+    "description": "MiniMax-Hailuo-2.3 是 MiniMax 于 2025 年 10 月 28 日发布的 AI 视频生成模型，基于 Hailuo 02 迭代而来，核心升级动态表现力、风格化与人物微表情，同时优化运动指令响应，支持文本生成视频（T2V）和图像生成视频（I2V），兼顾效果与成本MiniMax。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0,
+    "max_input_price": 0,
+    "min_output_price": 0,
+    "max_output_price": 0,
+    "min_context_length": 0,
+    "max_context_length": 0,
+    "tags": [],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "video",
+        "pricing_specs": [
+          {
+            "specification": "768p-6s",
+            "official_supplier_tip": "文生视频，图生视频，768P 6s",
+            "price": 0.33,
+            "unit": "second",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "768p-10s",
+            "official_supplier_tip": "文生视频，图生视频，768P 10s",
+            "price": 0.4,
+            "unit": "second",
+            "sort_order": 2,
+            "discount_rate": 1
+          },
+          {
+            "specification": "1080p",
+            "official_supplier_tip": "文生视频，图生视频，1080P",
+            "price": 0.58,
+            "unit": "second",
+            "sort_order": 3,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 48.0,
+    "estimated_tps": 5.0,
+    "params_b": 80,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "MiniMax-M1-80k",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "MiniMax-M1 是全球首个开源的大规模混合架构推理模型。在面向生产力的复杂场景中，其能力位于开源模型的顶尖水平，超越国内闭源模型，接近海外最先进模型，同时具备业内最高的性价比。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0.8,
+    "max_input_price": 4,
+    "min_output_price": 8,
+    "max_output_price": 16,
+    "min_context_length": 131072,
+    "max_context_length": 1024000,
+    "tags": [
+      "推理"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 0.8,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 8,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 50.0,
+    "estimated_tps": 5,
+    "params_b": 80,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "MiniMax-M2",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "专为高效编码与Agent工作流而生",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0.21,
+    "max_input_price": 2.1,
+    "min_output_price": 8.4,
+    "max_output_price": 8.4,
+    "min_context_length": 204800,
+    "max_context_length": 204800,
+    "tags": [
+      "工具调用 Tools",
+      "推理",
+      "编程 Coder"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 2.1,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 8.4,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 50.0,
+    "estimated_tps": 5,
+    "params_b": 80,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "MiniMax-M2.1",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "强大多语言编程实力，全面升级编程体验",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0.21,
+    "max_input_price": 2.1,
+    "min_output_price": 8.4,
+    "max_output_price": 8.4,
+    "min_context_length": 98304,
+    "max_context_length": 204800,
+    "tags": [
+      "工具调用 Tools",
+      "推理"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "cached_input_price",
+            "official_supplier_tip": "缓存命中",
+            "price": 0.21,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 2.1,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 8.4,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 50.0,
+    "estimated_tps": 5,
+    "params_b": 80,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "MiniMax-M2.5",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "顶尖性能与极致性价比，轻松驾驭复杂任务",
+    "fe_config": {
+      "pin": 4,
+      "label_icons": [
+        {
+          "label": "hot",
+          "icon_url": "https://assets.qc-ai.cn/maashub/campaigns/tag-hot@2x_7feaca48607c07f94b4f39e995d3a625.webp",
+          "side": "rb"
+        }
+      ],
+      "pre_discount_input_price": "",
+      "pre_discount_output_price": ""
+    },
+    "dimension": 0,
+    "min_input_price": 0.21,
+    "max_input_price": 2.1,
+    "min_output_price": 8.4,
+    "max_output_price": 8.4,
+    "min_context_length": 131072,
+    "max_context_length": 204800,
+    "tags": [
+      "工具调用 Tools",
+      "推理",
+      "编程 Coder"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 2.1,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 8.4,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          },
+          {
+            "specification": "cached_input_price",
+            "official_supplier_tip": "缓存命中",
+            "price": 0.21,
+            "unit": "million_tokens",
+            "sort_order": 3,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 50.0,
+    "estimated_tps": 5,
+    "params_b": 80,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "MiniMax-Speech-02-hd",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "语音"
+    ],
+    "category": [
+      "语音生成"
+    ],
+    "description": "MiniMax 语音大模型能够根据上下文，智能预测文本的情绪、语调等信息，并生成超自然、高保真、个性化的语音。在社交、播客、有声书、新闻资讯、教育、数字人等多种场景中展现出强大的实力。\n",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0,
+    "max_input_price": 0,
+    "min_output_price": 3.5,
+    "max_output_price": 3.5,
+    "min_context_length": 0,
+    "max_context_length": 0,
+    "tags": [],
+    "discount_rate": 1,
+    "model_price_info": null,
+    "estimated_vram_gb": 48.0,
+    "estimated_tps": 5.0,
+    "params_b": 80,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "MiniMax-Speech-2.8-hd",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "语音"
+    ],
+    "category": [
+      "语音生成"
+    ],
+    "description": "MiniMax 语音大模型能够根据上下文，智能预测文本的情绪、语调等信息，并生成超自然、高保真、个性化的语音。在社交、播客、有声书、新闻资讯、教育、数字人等多种场景中展现出强大的实力。\n",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0,
+    "max_input_price": 0,
+    "min_output_price": 3.5,
+    "max_output_price": 3.5,
+    "min_context_length": 0,
+    "max_context_length": 0,
+    "tags": [],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 3.5,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 48.0,
+    "estimated_tps": 5.0,
+    "params_b": 80,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen-Image",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "图片"
+    ],
+    "category": [
+      "图像生成"
+    ],
+    "description": "通义千问系列首个图像生成模型，参数规模200亿。具备卓越的文本渲染能力，在复杂文本渲染、各类生成与编辑任务重表现出色，在多个公开基准测试中获得SOTA。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0,
+    "max_input_price": 0,
+    "min_output_price": 0.15,
+    "max_output_price": 0.3,
+    "min_context_length": 0,
+    "max_context_length": 0,
+    "tags": [],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 0.25,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          },
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 0,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 19.2,
+    "estimated_tps": 15.6,
+    "params_b": 32,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen-Image-2.0",
+    "input_modality": [
+      "文字",
+      "图片"
+    ],
+    "output_modality": [
+      "图片"
+    ],
+    "category": [
+      "图像生成"
+    ],
+    "description": "Qwen-Image-2.0系列加速版模型，实现了图片生成和图片编辑的融合；具备更专业的文字渲染1k token指令支持能力、更细腻的真实质感，细腻刻画写实场景、更强的语义遵循能力。加速版有效实现了模型效果和性能的最佳平衡。",
+    "fe_config": {
+      "pin": 2,
+      "label_icons": [
+        {
+          "label": "new",
+          "icon_url": "https://assets.qc-ai.cn/maashub/campaigns/tag-new@2x_2682f35a5cdf902c26dcbfec6023f9b3.png",
+          "side": "rt"
+        }
+      ],
+      "pre_discount_input_price": "",
+      "pre_discount_output_price": ""
+    },
+    "dimension": 0,
+    "min_input_price": 0,
+    "max_input_price": 0,
+    "min_output_price": 0.2,
+    "max_output_price": 0.2,
+    "min_context_length": 0,
+    "max_context_length": 0,
+    "tags": [],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 0.2,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 4.2,
+    "estimated_tps": 107.1,
+    "params_b": 7,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen-Image-2.0-Pro",
+    "input_modality": [
+      "文字",
+      "图片"
+    ],
+    "output_modality": [
+      "图片"
+    ],
+    "category": [
+      "图像生成"
+    ],
+    "description": "Qwen-Image-2.0系列满血版模型，实现了图片生成和图片编辑的融合；具备更专业的文字渲染1k token指令支持能力、更细腻的真实质感，细腻刻画写实场景、更强的语义遵循能力。满血版具备2.0系列最强的文字渲染能力和真实质感。",
+    "fe_config": {
+      "pin": 2,
+      "label_icons": [
+        {
+          "label": "new",
+          "icon_url": "https://assets.qc-ai.cn/maashub/campaigns/tag-new@2x_2682f35a5cdf902c26dcbfec6023f9b3.png",
+          "side": "rt"
+        }
+      ],
+      "pre_discount_input_price": "",
+      "pre_discount_output_price": ""
+    },
+    "dimension": 0,
+    "min_input_price": 0,
+    "max_input_price": 0,
+    "min_output_price": 0.5,
+    "max_output_price": 0.5,
+    "min_context_length": 0,
+    "max_context_length": 0,
+    "tags": [],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 0.5,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 4.2,
+    "estimated_tps": 107.1,
+    "params_b": 7,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen-Image-Edit",
+    "input_modality": [
+      "图片"
+    ],
+    "output_modality": [
+      "图片"
+    ],
+    "category": [
+      "图像生成"
+    ],
+    "description": "通义千问系列首个图像编辑模型，成功将Qwen-Image的文本渲染能力拓展到编辑任务上。支持精准的中英双语文字编辑、视觉外观与语义双重编辑、具备强大的跨基准性能表现。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0,
+    "max_input_price": 0,
+    "min_output_price": 0.15,
+    "max_output_price": 0.3,
+    "min_context_length": 0,
+    "max_context_length": 0,
+    "tags": [],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 0.3,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          },
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 0,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 8.4,
+    "estimated_tps": 35.7,
+    "params_b": 14,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen-Image-Edit-Plus",
+    "input_modality": [
+      "图片"
+    ],
+    "output_modality": [
+      "图片"
+    ],
+    "category": [
+      "图像生成"
+    ],
+    "description": "通义千问系列图像编辑Plus模型，在首版Edit模型基础上进一步优化了推理性能与系统稳定性，大幅缩短图像生成与编辑的响应时间；支持单次请求返回多张图片，显著提升用户体验。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0,
+    "max_input_price": 0,
+    "min_output_price": 0.2,
+    "max_output_price": 0.2,
+    "min_context_length": 0,
+    "max_context_length": 0,
+    "tags": [],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 0.2,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          },
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 0,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 19.2,
+    "estimated_tps": 15.6,
+    "params_b": 32,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen-Image-Plus",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "图片"
+    ],
+    "category": [
+      "图像生成"
+    ],
+    "description": "通义千问系列图像生成模型，参数规模200亿。具备卓越的文本渲染能力，在复杂文本渲染、各类生成与编辑任务重表现出色，在多个公开基准测试中获得SOTA，模型性能大幅提升。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0,
+    "max_input_price": 0,
+    "min_output_price": 0.2,
+    "max_output_price": 0.2,
+    "min_context_length": 0,
+    "max_context_length": 0,
+    "tags": [],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 0.2,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          },
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 0,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 19.2,
+    "estimated_tps": 15.6,
+    "params_b": 32,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen-Max",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "通义千问2.5系列千亿级别超大规模语言模型，支持中文、英文等不同语言输入。随着模型的升级，qwen-max将滚动更新升级。如果希望使用固定版本，请使用历史快照版本。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 2.4,
+    "max_input_price": 2.4,
+    "min_output_price": 9.6,
+    "max_output_price": 9.6,
+    "min_context_length": 32768,
+    "max_context_length": 32768,
+    "tags": [],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 2.4,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 9.6,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 5.2,
+    "estimated_tps": 86.5,
+    "params_b": 7,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen2.5-14B-Instruct",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "Qwen2.5系列14B模型，相较于 Qwen2，Qwen2.5 获得了显著更多的知识，并在编程能力和数学能力方面有了大幅提升。此外，新模型在指令执行、生成长文本、理解结构化数据（例如表格）以及生成结构化输出特别是 JSON 方面取得了显著改进。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0.99,
+    "max_input_price": 2,
+    "min_output_price": 0.99,
+    "max_output_price": 3,
+    "min_context_length": 32768,
+    "max_context_length": 131072,
+    "tags": [
+      "工具调用 Tools"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 1,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 3,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 10.4,
+    "estimated_tps": 28.8,
+    "params_b": 14,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen2.5-32B-Instruct",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "Qwen2.5 是 Qwen 大型语言模型的最新系列，包括一系列基础语言模型和指令微调语言模型，参数量范围从 50 亿到 720 亿。与 Qwen2 相比，Qwen2.5 在多个方面进行了改进：\n知识量显著增加，并且由于在相关领域配备了专门的专家模型，编码和数学能力得到了极大提升。\n在指令遵循能力、长文本生成（超过 8K 个 token）、结构化数据（例如表格）理解以及结构化输出（尤其是 JSON）的生成等方面均有显著进步。\n对系统提示的多样性具备更高的韧性，增强了角色扮演的实现能力以及聊天机器人的条件设置功能。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 1.26,
+    "max_input_price": 2.9,
+    "min_output_price": 1.26,
+    "max_output_price": 6,
+    "min_context_length": 32768,
+    "max_context_length": 131072,
+    "tags": [
+      "工具调用 Tools"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 2,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 6,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 21.2,
+    "estimated_tps": 14.2,
+    "params_b": 32,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen2.5-72B-Instruct",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "Qwen2.5 是 Qwen 大型语言模型的最新系列，包括一系列基础语言模型和指令微调语言模型，参数量范围从 50 亿到 720 亿。与 Qwen2 相比，Qwen2.5 在多个方面进行了改进：\n知识量显著增加，并且由于在相关领域配备了专门的专家模型，编码和数学能力得到了极大提升。\n在指令遵循能力、长文本生成（超过 8K 个 token）、结构化数据（例如表格）理解以及结构化输出（尤其是 JSON）的生成等方面均有显著进步。\n对系统提示的多样性具备更高的韧性，增强了角色扮演的实现能力以及聊天机器人的条件设置功能。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 2.75,
+    "max_input_price": 5.71,
+    "min_output_price": 2.88,
+    "max_output_price": 17.14,
+    "min_context_length": 32768,
+    "max_context_length": 131072,
+    "tags": [
+      "工具调用 Tools"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 4,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 12,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 45.2,
+    "estimated_tps": 5.3,
+    "params_b": 72,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen2.5-7B-Instruct",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "Qwen2.5系列7B模型，相较于 Qwen2，Qwen2.5 获得了显著更多的知识，并在编程能力和数学能力方面有了大幅提升。此外，新模型在指令执行、生成长文本、理解结构化数据（例如表格）以及生成结构化输出特别是 JSON 方面取得了显著改进。\n",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0.35,
+    "max_input_price": 1,
+    "min_output_price": 0.35,
+    "max_output_price": 1,
+    "min_context_length": 32768,
+    "max_context_length": 131072,
+    "tags": [
+      "工具调用 Tools"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 0.5,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 1,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 6.2,
+    "estimated_tps": 72.6,
+    "params_b": 7,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen2.5-Coder-32B-Instruct",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "Qwen2.5系列编程专家32B模型，相较于 Qwen2，Qwen2.5 获得了显著更多的知识，并在编程能力和数学能力方面有了大幅提升。此外，新模型在指令执行、生成长文本、理解结构化数据（例如表格）以及生成结构化输出特别是 JSON 方面取得了显著改进。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 1.26,
+    "max_input_price": 2.9,
+    "min_output_price": 1.26,
+    "max_output_price": 6,
+    "min_context_length": 32768,
+    "max_context_length": 131072,
+    "tags": [
+      "编程 Coder"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 2,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 6,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 21.2,
+    "estimated_tps": 14.2,
+    "params_b": 32,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen2.5-VL-32B-Instruct",
+    "input_modality": [
+      "文字",
+      "图片",
+      "视频"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "视觉理解"
+    ],
+    "description": "Qwen2.5VL系列模型，在math和学科问题解答达到了接近Qwen2.5VL-72B的水平，回复风格面向人类偏好进行大幅调整，尤其是数学、逻辑推理、知识问答等客观类query，模型回复详实程度和格式清晰度明显改善。此版本为32B版本。\n",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 1.89,
+    "max_input_price": 8,
+    "min_output_price": 1.89,
+    "max_output_price": 24,
+    "min_context_length": 32768,
+    "max_context_length": 131072,
+    "tags": [
+      "视觉 Vision"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 8,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 24,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 21.2,
+    "estimated_tps": 14.2,
+    "params_b": 32,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen2.5-VL-72B-Instruct",
+    "input_modality": [
+      "文字",
+      "图片",
+      "视频"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "视觉理解"
+    ],
+    "description": "指令跟随、数学、解题、代码整体提升，万物识别能力提升，支持多样格式直接精准定位视觉元素，支持对长视频文件（最长10分钟）进行理解和秒级别的事件时刻定位，能理解时间先后和快慢，基于解析和定位能力支持操控OS或Mobile的Agent，关键信息抽取能力和Json格式输出能力强，此版本为72B版本，本系列能力最强的版本。\n",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 4.13,
+    "max_input_price": 16,
+    "min_output_price": 4.13,
+    "max_output_price": 48,
+    "min_context_length": 8192,
+    "max_context_length": 131072,
+    "tags": [
+      "视觉 Vision"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 16,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 48,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 45.2,
+    "estimated_tps": 5.3,
+    "params_b": 72,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen2.5-VL-7B-Instruct",
+    "input_modality": [
+      "文字",
+      "图片",
+      "视频"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "视觉理解"
+    ],
+    "description": "指令跟随、数学、解题、代码整体提升，万物识别能力提升，支持多样格式直接精准定位视觉元素，支持对长视频文件（最长10分钟）进行理解和秒级别的事件时刻定位，能理解时间先后和快慢，基于解析和定位能力支持操控OS或Mobile的Agent，关键信息抽取能力和Json格式输出能力强，此版本为7B版本，计算量与性能相对平衡。\n",
+    "fe_config": {
+      "pin": 14,
+      "label_icons": [
+        {
+          "label": "hot",
+          "icon_url": "https://assets.qc-ai.cn/maashub/campaigns/tag-hot@2x_7feaca48607c07f94b4f39e995d3a625.webp",
+          "side": "rb"
+        }
+      ],
+      "pre_discount_input_price": "",
+      "pre_discount_output_price": ""
+    },
+    "dimension": 0,
+    "min_input_price": 0.35,
+    "max_input_price": 2,
+    "min_output_price": 0.35,
+    "max_output_price": 5,
+    "min_context_length": 16384,
+    "max_context_length": 131072,
+    "tags": [
+      "视觉 Vision"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 2,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 5,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 6.2,
+    "estimated_tps": 72.6,
+    "params_b": 7,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen3-1.7B",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "实现思考模式和非思考模式的有效融合，可在对话中切换模式。通用能力显著超过Qwen2.5小规模系列，模型人类偏好能力显著增强，创意写作、角色扮演、多轮对话、指令遵循能力均有明显提升，用户体验预期明显更佳。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0.3,
+    "max_input_price": 0.3,
+    "min_output_price": 1.2,
+    "max_output_price": 1.2,
+    "min_context_length": 32768,
+    "max_context_length": 32768,
+    "tags": [],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 0.3,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 1.2,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original_thinking",
+            "official_supplier_tip": "思考模式输出token价格(按百万token计费)",
+            "price": 3,
+            "unit": "million_tokens",
+            "sort_order": 3,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 5.2,
+    "estimated_tps": 86.5,
+    "params_b": 7,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen3-14B",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "实现思考模式和非思考模式的有效融合，可在对话中切换模式。推理能力达到同规模业界SOTA水平、通用能力显著超过Qwen2.5-14B。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0.5,
+    "max_input_price": 1,
+    "min_output_price": 1.6,
+    "max_output_price": 4,
+    "min_context_length": 32768,
+    "max_context_length": 131072,
+    "tags": [
+      "工具调用 Tools",
+      "推理"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 1,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 4,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original_thinking",
+            "official_supplier_tip": "思考模式输出token价格(按百万token计费)",
+            "price": 10,
+            "unit": "million_tokens",
+            "sort_order": 3,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 10.4,
+    "estimated_tps": 28.8,
+    "params_b": 14,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen3-235B-A22B",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "实现思考模式和非思考模式的有效融合，可在对话中切换模式。推理能力显著超过QwQ、通用能力显著超过Qwen2.5-72B-Instruct，达到同规模业界SOTA水平。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0,
+    "max_input_price": 5,
+    "min_output_price": 0,
+    "max_output_price": 40,
+    "min_context_length": 32768,
+    "max_context_length": 131072,
+    "tags": [
+      "工具调用 Tools",
+      "推理"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 2,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 8,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original_thinking",
+            "official_supplier_tip": "思考模式输出token价格(按百万token计费)",
+            "price": 20,
+            "unit": "million_tokens",
+            "sort_order": 3,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 6.2,
+    "estimated_tps": 72.6,
+    "params_b": 7,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen3-235B-A22B-Instruct-2507",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "基于Qwen3的非思考模式开源模型，相较上一版本（通义千问3-235B-A22B）主观创作能力与模型安全性均有小幅度提升。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0,
+    "max_input_price": 2.86,
+    "min_output_price": 0,
+    "max_output_price": 11.43,
+    "min_context_length": 131072,
+    "max_context_length": 262144,
+    "tags": [
+      "工具调用 Tools"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 2,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 8,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 10.4,
+    "estimated_tps": 28.8,
+    "params_b": 14,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen3-235B-A22B-Thinking-2507",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "基于Qwen3的思考模式开源模型，相较上一版本（通义千问3-235B-A22B）逻辑能力、通用能力、知识增强及创作能力均有大幅提升，适用于高难度强推理场景。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 2,
+    "max_input_price": 2.86,
+    "min_output_price": 10,
+    "max_output_price": 28.57,
+    "min_context_length": 131072,
+    "max_context_length": 262144,
+    "tags": [
+      "工具调用 Tools"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 2,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 20,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 21.2,
+    "estimated_tps": 14.2,
+    "params_b": 32,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen3-30B-A3B",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "实现思考模式和非思考模式的有效融合，可在对话中切换模式。推理能力以更小参数规模比肩QwQ-32B、通用能力显著超过Qwen2.5-14B，达到同规模业界SOTA水平。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0.75,
+    "max_input_price": 2.2,
+    "min_output_price": 3,
+    "max_output_price": 8.7,
+    "min_context_length": 131072,
+    "max_context_length": 131072,
+    "tags": [
+      "工具调用 Tools",
+      "推理"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 0.75,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 3,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original_thinking",
+            "official_supplier_tip": "思考模式输出token价格(按百万token计费)",
+            "price": 7.5,
+            "unit": "million_tokens",
+            "sort_order": 3,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 6.2,
+    "estimated_tps": 72.6,
+    "params_b": 7,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen3-30B-A3B-Instruct-2507",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "基于Qwen3的非思考模式开源模型，相较上一版本（通义千问3-30B-A3B）中英文和多语言整体通用能力有大幅提升。主观开放类任务专项优化，显著更加符合用户偏好，能够提供更有帮助性的回复。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0.2,
+    "max_input_price": 1.07,
+    "min_output_price": 0.2,
+    "max_output_price": 4.29,
+    "min_context_length": 32768,
+    "max_context_length": 262144,
+    "tags": [
+      "工具调用 Tools"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 0.75,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 3,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 21.2,
+    "estimated_tps": 14.2,
+    "params_b": 32,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen3-30B-A3B-Thinking-2507",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "基于Qwen3的思考模式开源模型，相较上一版本（通义千问3-30B-A3B）复杂推理类任务性能优秀，包括逻辑推理、数学、科学、代码类等具有一定难度的任务场景，指令遵循、文本理解、多语言翻译等能力显著提高。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0.7,
+    "max_input_price": 1.07,
+    "min_output_price": 2.8,
+    "max_output_price": 10.71,
+    "min_context_length": 129024,
+    "max_context_length": 262144,
+    "tags": [
+      "工具调用 Tools",
+      "推理"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 0.75,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 7.5,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 21.2,
+    "estimated_tps": 14.2,
+    "params_b": 32,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen3-32B",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "Qwen3 是 Qwen 系列中最新一代的大型语言模型，提供了一套全面的密集模型和专家混合模型（MoE）。基于广泛的训练，Qwen3 在推理、指令遵循、代理能力和多语言支持方面取得了突破性进展",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0,
+    "max_input_price": 2.9,
+    "min_output_price": 0,
+    "max_output_price": 20,
+    "min_context_length": 32768,
+    "max_context_length": 131072,
+    "tags": [
+      "工具调用 Tools",
+      "推理"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 2,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 8,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original_thinking",
+            "official_supplier_tip": "思考模式输出token价格(按百万token计费)",
+            "price": 20,
+            "unit": "million_tokens",
+            "sort_order": 3,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 21.2,
+    "estimated_tps": 14.2,
+    "params_b": 32,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen3-4B",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "实现思考模式和非思考模式的有效融合，可在对话中切换模式。推理能力达到同规模业界SOTA水平、模型人类偏好能力显著增强，创意写作、角色扮演、多轮对话、指令遵循能力均有明显提升，用户体验预期明显更佳。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0.3,
+    "max_input_price": 0.3,
+    "min_output_price": 1.2,
+    "max_output_price": 1.2,
+    "min_context_length": 32768,
+    "max_context_length": 131072,
+    "tags": [],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 0.3,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 1.2,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original_thinking",
+            "official_supplier_tip": "思考模式输出token价格(按百万token计费)",
+            "price": 3,
+            "unit": "million_tokens",
+            "sort_order": 3,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 6.2,
+    "estimated_tps": 72.6,
+    "params_b": 7,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen3-8B",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "实现思考模式和非思考模式的有效融合，可在对话中切换模式。推理能力达到同规模业界SOTA水平、通用能力显著超过Qwen2.5-7B。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0,
+    "max_input_price": 0.5,
+    "min_output_price": 0,
+    "max_output_price": 2,
+    "min_context_length": 32768,
+    "max_context_length": 131072,
+    "tags": [
+      "工具调用 Tools",
+      "推理"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 0.5,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 2,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original_thinking",
+            "official_supplier_tip": "思考模式输出token价格(按百万token计费)",
+            "price": 5,
+            "unit": "million_tokens",
+            "sort_order": 3,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 6.2,
+    "estimated_tps": 72.6,
+    "params_b": 7,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen3-Coder-30B-A3B-Instruct",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "基于Qwen3的代码生成模型，继承Qwen3-Coder-480B-A35B-Instruct的coding agent能力，代码能力达到同尺寸规模模型SOTA。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0.7,
+    "max_input_price": 1.5,
+    "min_output_price": 2.8,
+    "max_output_price": 6,
+    "min_context_length": 262144,
+    "max_context_length": 262144,
+    "tags": [
+      "工具调用 Tools",
+      "编程 Coder"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 1.5,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 6,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 10.4,
+    "estimated_tps": 28.8,
+    "params_b": 14,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen3-Coder-480B-A35B-Instruct",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "基于Qwen3的代码生成模型，具有强大的Coding Agent能力，代码能力达到开源模型 SOTA。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 6,
+    "max_input_price": 15,
+    "min_output_price": 16,
+    "max_output_price": 60,
+    "min_context_length": 65536,
+    "max_context_length": 268288,
+    "tags": [
+      "工具调用 Tools",
+      "编程 Coder"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 6,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 24,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 10.4,
+    "estimated_tps": 28.8,
+    "params_b": 14,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen3-Embedding-0.6B",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "Embedding"
+    ],
+    "description": "Qwen3-Embedding-0.6B 是 Qwen3 嵌入模型系列的最新专有模型，专为文本嵌入和排序任务设计。该模型基于 Qwen3 系列的密集基础模型，具有 6 亿参数规模，支持长达 32K 的上下文长度，可生成最高 1024 维的嵌入向量。模型继承了基础模型卓越的多语言能力，支持超过 100 种语言，具备长文本理解和推理能力。在 MTEB 多语言排行榜上表现优异（得分 64.33），在文本检索、代码检索、文本分类、文本聚类和双语挖掘等多项任务中表现出色。模型支持用户自定义输出维度（32 到 1024）和指令感知功能，可根据特定任务、语言或场景进行优化，为需要平衡效率和效果的应用场景提供理想选择",
+    "fe_config": null,
+    "dimension": 1024,
+    "min_input_price": 0,
+    "max_input_price": 0.5,
+    "min_output_price": 0,
+    "max_output_price": 0.07,
+    "min_context_length": 8192,
+    "max_context_length": 32768,
+    "tags": [],
+    "discount_rate": 1,
+    "model_price_info": null,
+    "estimated_vram_gb": 20.2,
+    "estimated_tps": 14.9,
+    "params_b": 32,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen3-Embedding-4B",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "Embedding"
+    ],
+    "description": "Qwen3-Embedding-4B 是 Qwen3 嵌入模型系列的最新专有模型，专为文本嵌入和排序任务设计。该模型基于 Qwen3 系列的密集基础模型，具有 40 亿参数规模，支持长达 32K 的上下文长度，可生成最高 2560 维的嵌入向量。模型继承了基础模型卓越的多语言能力，支持超过 100 种语言，具备长文本理解和推理能力。在 MTEB 多语言排行榜上表现卓越（得分 69.45），在文本检索、代码检索、文本分类、文本聚类和双语挖掘等多项任务中表现出色。模型支持用户自定义输出维度（32 到 2560）和指令感知功能，可根据特定任务、语言或场景进行优化，在效率和效果之间达到良好平衡",
+    "fe_config": null,
+    "dimension": 2560,
+    "min_input_price": 0.14,
+    "max_input_price": 0.5,
+    "min_output_price": 0,
+    "max_output_price": 0,
+    "min_context_length": 8192,
+    "max_context_length": 32768,
+    "tags": [],
+    "discount_rate": 1,
+    "model_price_info": null,
+    "estimated_vram_gb": 5.2,
+    "estimated_tps": 86.5,
+    "params_b": 7,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen3-Embedding-8B",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "Embedding"
+    ],
+    "description": "Qwen3-Embedding-8B 是 Qwen3 嵌入模型系列的最新专有模型，专为文本嵌入和排序任务设计。该模型基于 Qwen3 系列的密集基础模型，具有 80 亿参数规模，支持长达 32K 的上下文长度，可生成最高 4096 维的嵌入向量。该模型继承了基础模型卓越的多语言能力，支持超过 100 种语言，具备长文本理解和推理能力。在 MTEB 多语言排行榜上排名第一（截至 2025 年 6 月 5 日，得分 70.58），在文本检索、代码检索、文本分类、文本聚类和双语挖掘等多项任务中表现出色。模型支持用户自定义输出维度（32 到 4096）和指令感知功能，可根据特定任务、语言或场景进行优化",
+    "fe_config": null,
+    "dimension": 4096,
+    "min_input_price": 0.28,
+    "max_input_price": 0.5,
+    "min_output_price": 0,
+    "max_output_price": 0.35,
+    "min_context_length": 8192,
+    "max_context_length": 32768,
+    "tags": [],
+    "discount_rate": 1,
+    "model_price_info": null,
+    "estimated_vram_gb": 5.2,
+    "estimated_tps": 86.5,
+    "params_b": 7,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen3-Max",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "通义千问3系列Max模型，相较preview版本在智能体编程与工具调用方向进行了专项升级。本次发布的正式版模型达到领域SOTA水平，适配场景更加复杂的智能体需求。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 3.2,
+    "max_input_price": 3.2,
+    "min_output_price": 12.8,
+    "max_output_price": 12.8,
+    "min_context_length": 262144,
+    "max_context_length": 262144,
+    "tags": [],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 3.2,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 12.8,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 21.2,
+    "estimated_tps": 14.2,
+    "params_b": 32,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen3-Max-Thinking",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "通义千问3系列Max模型，相较2025年9月23日快照，此版本实现思考模式和非思考模式的有效融合，模型整体效果得到全方位的大幅度提升。在思考模式下，同时发布Web搜索、Web信息提取和代码解释器工具能力，使得模型在慢思考的同时，能够通过引入外部工具，以更高的准确性解决更有难度的问题。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 2.5,
+    "max_input_price": 2.5,
+    "min_output_price": 10,
+    "max_output_price": 10,
+    "min_context_length": 262144,
+    "max_context_length": 262144,
+    "tags": [
+      "工具调用 Tools",
+      "推理"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 2.5,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 10,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original_thinking",
+            "official_supplier_tip": "思考模式输出token价格(按百万token计费)",
+            "price": 10,
+            "unit": "million_tokens",
+            "sort_order": 3,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 21.2,
+    "estimated_tps": 14.2,
+    "params_b": 32,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen3-Next-80B-A3B-Instruct",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "基于Qwen3的新一代非思考模式开源模型，相较上一版本（通义千问3-235B-A22B-Instruct-2507）中文文本理解能力更佳、逻辑推理能力有增强、文本生成类任务表现更好。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 1,
+    "max_input_price": 1,
+    "min_output_price": 4,
+    "max_output_price": 4,
+    "min_context_length": 65536,
+    "max_context_length": 262144,
+    "tags": [
+      "工具调用 Tools"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 1,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 4,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 6.2,
+    "estimated_tps": 72.6,
+    "params_b": 7,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen3-Next-80B-A3B-Thinking",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "基于Qwen3的新一代思考模式开源模型，相较上一版本（通义千问3-235B-A22B-Thinking-2507指令遵循能力有提升、模型总结回复更加精简。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 1,
+    "max_input_price": 1,
+    "min_output_price": 4,
+    "max_output_price": 10,
+    "min_context_length": 65536,
+    "max_context_length": 262144,
+    "tags": [
+      "工具调用 Tools",
+      "推理"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 1,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 10,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 10.4,
+    "estimated_tps": 28.8,
+    "params_b": 14,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen3-Reranker-0.6B",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "Reranker"
+    ],
+    "description": "Qwen3-Reranker-0.6B 是一款来自 Qwen3 系列的文本重排模型。 它专为优化初始检索系统的结果而设计，其核心功能是根据给定查询对文档的相关性进行重新排序。 该模型拥有 6 亿参数和 32k 的上下文长度，并继承了其 Qwen3 基础模型强大的多语言（支持超过 100 种语言）、长文本理解及推理能力。评测结果显示，Qwen3-Reranker-0.6B 在 MTEB-R、CMTEB-R 和 MLDR 等多个文本检索基准测试中均取得了优异的性能",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0.07,
+    "max_input_price": 0.8,
+    "min_output_price": 0,
+    "max_output_price": 0,
+    "min_context_length": 32768,
+    "max_context_length": 32768,
+    "tags": [],
+    "discount_rate": 1,
+    "model_price_info": null,
+    "estimated_vram_gb": 5.2,
+    "estimated_tps": 86.5,
+    "params_b": 7,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen3-Reranker-8B",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "Reranker"
+    ],
+    "description": "Qwen3-Reranker-8B 是 Qwen3 系列中拥有 80 亿参数的文本重排模型。 它的设计目标是通过根据查询对文档的相关性进行精确重排，从而优化并提升搜索结果的质量。 该模型构建于强大的 Qwen3 基础模型之上，擅长理解长文本（支持 32k 上下文长度），并支持超过 100 种语言。 Qwen3-Reranker-8B 作为其灵活系列的一员，在多种文本和代码检索场景中展现了顶尖的性能",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0.28,
+    "max_input_price": 0.8,
+    "min_output_price": 0,
+    "max_output_price": 0,
+    "min_context_length": 32768,
+    "max_context_length": 32768,
+    "tags": [],
+    "discount_rate": 1,
+    "model_price_info": null,
+    "estimated_vram_gb": 5.2,
+    "estimated_tps": 86.5,
+    "params_b": 7,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen3-VL-235B-A22B-Instruct",
+    "input_modality": [
+      "文字",
+      "图片",
+      "视频"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "视觉理解"
+    ],
+    "description": "Qwen3系列视觉理解模型，在视觉coding、空间感知等方向全面升级；视觉感知与识别能力大幅提升，支持超长视频理解，OCR能力迎来重大升级。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 2,
+    "max_input_price": 2.85,
+    "min_output_price": 8,
+    "max_output_price": 11.43,
+    "min_context_length": 131072,
+    "max_context_length": 262144,
+    "tags": [
+      "视觉 Vision"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 2,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 8,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 6.2,
+    "estimated_tps": 72.6,
+    "params_b": 7,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen3-VL-235B-A22B-Thinking",
+    "input_modality": [
+      "文字",
+      "图片",
+      "视频"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "视觉理解"
+    ],
+    "description": "Qwen3系列视觉理解模型，多模态思考能力显著增强，模型在STEM与数学推理方面进行了重点优化；视觉感知与识别能力全面提升、OCR能力迎来重大升级。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 2,
+    "max_input_price": 2.85,
+    "min_output_price": 20,
+    "max_output_price": 28.57,
+    "min_context_length": 131072,
+    "max_context_length": 131072,
+    "tags": [
+      "视觉 Vision"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 2,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 20,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 21.2,
+    "estimated_tps": 14.2,
+    "params_b": 32,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen3-VL-30B-A3B-Instruct",
+    "input_modality": [
+      "文字",
+      "图片",
+      "视频"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "视觉理解"
+    ],
+    "description": "Qwen3-VL系列第二大MoE模型的Instruct版本，响应速度快，支持长视频长文档等超长上下文；全面升级图像/视频理解、空间感知与万物识别能力；具备视觉2D/3D定位能力，胜任复杂现实任务。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0.7,
+    "max_input_price": 1.07,
+    "min_output_price": 2.8,
+    "max_output_price": 4.29,
+    "min_context_length": 131072,
+    "max_context_length": 262144,
+    "tags": [
+      "视觉 Vision"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 0.75,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 3,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 6.2,
+    "estimated_tps": 72.6,
+    "params_b": 7,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen3-VL-30B-A3B-Thinking",
+    "input_modality": [
+      "文字",
+      "图片",
+      "视频"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "视觉理解"
+    ],
+    "description": "Qwen3-VL系列第二大MoE模型的Thinking版本，响应速度快，具备更强多模态理解与推理、视觉智能体、长视频长文档等超长上下文支持能力；全面升级图像/视频理解、空间感知与万物识别能力，胜任复杂现实任务。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0.7,
+    "max_input_price": 1.07,
+    "min_output_price": 2.8,
+    "max_output_price": 10.71,
+    "min_context_length": 131072,
+    "max_context_length": 262144,
+    "tags": [
+      "视觉 Vision"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 0.75,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 7.5,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 21.2,
+    "estimated_tps": 14.2,
+    "params_b": 32,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen3.5-122B-A10B",
+    "input_modality": [
+      "文字",
+      "图片",
+      "视频"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "视觉理解"
+    ],
+    "description": "Qwen3.5系列122B-A10B原生视觉语言模型，基于混合架构设计，融合了线性注意力机制与稀疏混合专家模型，实现了更高的推理效率。该模型的综合表现仅次于Qwen3.5-397B-A17B，文本能力显著优于Qwen3-235B-2507，视觉能力优于Qwen3-VL-235B。",
+    "fe_config": {
+      "pin": 15,
+      "label_icons": [
+        {
+          "label": "new",
+          "icon_url": "https://assets.qc-ai.cn/maashub/campaigns/tag-new@2x_2682f35a5cdf902c26dcbfec6023f9b3.png",
+          "side": "rt"
+        }
+      ],
+      "pre_discount_input_price": "",
+      "pre_discount_output_price": ""
+    },
+    "dimension": 0,
+    "min_input_price": 0.8,
+    "max_input_price": 0.8,
+    "min_output_price": 6.4,
+    "max_output_price": 6.4,
+    "min_context_length": 262144,
+    "max_context_length": 262144,
+    "tags": [
+      "工具调用 Tools",
+      "推理",
+      "视觉 Vision"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 0.8,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 6.4,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original_thinking",
+            "official_supplier_tip": "思考模式输出token价格(按百万token计费)",
+            "price": 6.4,
+            "unit": "million_tokens",
+            "sort_order": 3,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 6.2,
+    "estimated_tps": 72.6,
+    "params_b": 7,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen3.5-27B",
+    "input_modality": [
+      "文字",
+      "图片",
+      "视频"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "视觉理解"
+    ],
+    "description": "Qwen3.5系列27B原生视觉语言Dense模型，融合了线性注意力机制；响应速度快，兼具推理速度和性能。该模型的综合能力接近于Qwen3.5-122B-A10B。",
+    "fe_config": {
+      "pin": 15,
+      "label_icons": [
+        {
+          "label": "new",
+          "icon_url": "https://assets.qc-ai.cn/maashub/campaigns/tag-new@2x_2682f35a5cdf902c26dcbfec6023f9b3.png",
+          "side": "rt"
+        }
+      ],
+      "pre_discount_input_price": "",
+      "pre_discount_output_price": ""
+    },
+    "dimension": 0,
+    "min_input_price": 0.6,
+    "max_input_price": 0.6,
+    "min_output_price": 4.8,
+    "max_output_price": 4.8,
+    "min_context_length": 262144,
+    "max_context_length": 262144,
+    "tags": [
+      "工具调用 Tools",
+      "推理",
+      "视觉 Vision"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 0.6,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 4.8,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original_thinking",
+            "official_supplier_tip": "思考模式输出token价格(按百万token计费)",
+            "price": 4.8,
+            "unit": "million_tokens",
+            "sort_order": 3,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 6.2,
+    "estimated_tps": 72.6,
+    "params_b": 7,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen3.5-35B-A3B",
+    "input_modality": [
+      "文字",
+      "图片",
+      "视频"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "视觉理解"
+    ],
+    "description": "Qwen3.5系列35B-A3B原生视觉语言模型，基于混合架构设计，融合了线性注意力机制与稀疏混合专家模型，实现了更高的推理效率。该模型的综合表现接近于Qwen3.5-27B。",
+    "fe_config": {
+      "pin": 15,
+      "label_icons": [
+        {
+          "label": "new",
+          "icon_url": "https://assets.qc-ai.cn/maashub/campaigns/tag-new@2x_2682f35a5cdf902c26dcbfec6023f9b3.png",
+          "side": "rt"
+        }
+      ],
+      "pre_discount_input_price": "",
+      "pre_discount_output_price": ""
+    },
+    "dimension": 0,
+    "min_input_price": 0.4,
+    "max_input_price": 0.4,
+    "min_output_price": 3.2,
+    "max_output_price": 3.2,
+    "min_context_length": 262144,
+    "max_context_length": 262144,
+    "tags": [
+      "工具调用 Tools",
+      "推理",
+      "视觉 Vision"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 0.4,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 3.2,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original_thinking",
+            "official_supplier_tip": "思考模式输出token价格(按百万token计费)",
+            "price": 3.2,
+            "unit": "million_tokens",
+            "sort_order": 3,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 21.2,
+    "estimated_tps": 14.2,
+    "params_b": 32,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen3.5-397B-A17B",
+    "input_modality": [
+      "文字",
+      "图片",
+      "视频"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "视觉理解"
+    ],
+    "description": "Qwen3.5系列397B-A17B原生视觉语言模型，基于混合架构设计，融合了线性注意力机制与稀疏混合专家模型，实现了更高的推理效率。在语言理解、逻辑推理、代码生成、智能体任务、图像理解、视频理解、图形用户界面（GUI）等多种任务中，均展现出与当前顶尖前沿模型相媲美的卓越性能。具备强大的代码生成与智能体能力，对于各类智能体场景具有良好的泛化性。",
+    "fe_config": {
+      "pin": 16,
+      "label_icons": [
+        {
+          "label": "new",
+          "icon_url": "https://assets.qc-ai.cn/maashub/campaigns/tag-new@2x_2682f35a5cdf902c26dcbfec6023f9b3.png",
+          "side": "rt"
+        }
+      ],
+      "pre_discount_input_price": "",
+      "pre_discount_output_price": ""
+    },
+    "dimension": 0,
+    "min_input_price": 0.8,
+    "max_input_price": 1.2,
+    "min_output_price": 4.8,
+    "max_output_price": 7.2,
+    "min_context_length": 131072,
+    "max_context_length": 268288,
+    "tags": [
+      "工具调用 Tools",
+      "推理",
+      "编程 Coder",
+      "视觉 Vision"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 0.8,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 4.8,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original_thinking",
+            "official_supplier_tip": "思考模式输出token价格(按百万token计费)",
+            "price": 4.8,
+            "unit": "million_tokens",
+            "sort_order": 3,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 6.2,
+    "estimated_tps": 72.6,
+    "params_b": 7,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen3.5-4B",
+    "input_modality": [
+      "文字",
+      "图片",
+      "视频"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "视觉理解"
+    ],
+    "description": "Qwen3.5-4B 是通义千问团队推出的原生多模态大语言模型，拥有 4B 参数，是 Qwen3.5 系列中最轻量的 Dense 模型。该模型采用门控 Delta 网络与门控注意力相结合的高效混合架构，原生支持 256K 上下文长度，并可扩展至约 100 万 tokens。模型通过早期融合训练实现了统一的视觉语言基础能力，支持文本、图像和视频理解，在同规模模型中表现优异，多项指标超越 GPT-5-Nano 和 Gemini-2.5-Flash-Lite。模型默认启用思考模式（Thinking Mode），支持工具调用，并覆盖 201 种语言和方言",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0,
+    "max_input_price": 0,
+    "min_output_price": 0,
+    "max_output_price": 0,
+    "min_context_length": 262144,
+    "max_context_length": 262144,
+    "tags": [],
+    "discount_rate": 1,
+    "model_price_info": null,
+    "estimated_vram_gb": 21.2,
+    "estimated_tps": 14.2,
+    "params_b": 32,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen3.5-9B",
+    "input_modality": [
+      "文字",
+      "图片",
+      "视频"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "视觉理解"
+    ],
+    "description": "Qwen3.5-9B 是通义千问团队推出的原生多模态大语言模型，拥有 9B 参数。作为 Qwen3.5 系列的轻量级 Dense 模型，它采用门控 Delta 网络与门控注意力相结合的高效混合架构，原生支持 256K 上下文长度，并可扩展至约 100 万 tokens。模型通过早期融合训练实现了统一的视觉语言基础能力，支持文本、图像和视频理解。模型默认启用思考模式（Thinking Mode），支持工具调用，并覆盖 201 种语言和方言",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 0.5,
+    "max_input_price": 0.5,
+    "min_output_price": 4,
+    "max_output_price": 4,
+    "min_context_length": 262144,
+    "max_context_length": 262144,
+    "tags": [],
+    "discount_rate": 1,
+    "model_price_info": null,
+    "estimated_vram_gb": 6.2,
+    "estimated_tps": 72.6,
+    "params_b": 7,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen3.5-Flash",
+    "input_modality": [
+      "文字",
+      "图片",
+      "视频"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "视觉理解"
+    ],
+    "description": "Qwen3.5原生视觉语言系列Flash模型，基于混合架构设计，融合了线性注意力机制与稀疏混合专家模型，实现了更高的推理效率。模型效果在纯文本与多模态方面相较3系列均实现飞跃式进步；响应速度快，兼具推理速度和性能。",
+    "fe_config": {
+      "pin": 15,
+      "label_icons": [
+        {
+          "label": "new",
+          "icon_url": "https://assets.qc-ai.cn/maashub/campaigns/tag-new@2x_2682f35a5cdf902c26dcbfec6023f9b3.png",
+          "side": "rt"
+        }
+      ],
+      "pre_discount_input_price": "",
+      "pre_discount_output_price": ""
+    },
+    "dimension": 0,
+    "min_input_price": 0.2,
+    "max_input_price": 0.2,
+    "min_output_price": 2,
+    "max_output_price": 2,
+    "min_context_length": 1024000,
+    "max_context_length": 1024000,
+    "tags": [
+      "工具调用 Tools",
+      "推理",
+      "视觉 Vision"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 0.2,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 2,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original_thinking",
+            "official_supplier_tip": "思考模式输出token价格(按百万token计费)",
+            "price": 2,
+            "unit": "million_tokens",
+            "sort_order": 3,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 10.4,
+    "estimated_tps": 28.8,
+    "params_b": 14,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "Qwen3.5-Plus",
+    "input_modality": [
+      "文字",
+      "图片",
+      "视频"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "视觉理解"
+    ],
+    "description": "Qwen3.5原生视觉语言系列Plus模型，基于混合架构设计，融合了线性注意力机制与稀疏混合专家模型，实现了更高的推理效率。在多项任务评测中，3.5系列均展现出与当前顶尖前沿模型相媲美的卓越性能，模型效果在纯文本与多模态方面相较3系列均实现飞跃式进步。",
+    "fe_config": {
+      "pin": 6,
+      "label_icons": [
+        {
+          "label": "new",
+          "icon_url": "https://assets.qc-ai.cn/maashub/campaigns/tag-new@2x_2682f35a5cdf902c26dcbfec6023f9b3.png",
+          "side": "rt"
+        },
+        {
+          "label": "hot",
+          "icon_url": "https://assets.qc-ai.cn/maashub/campaigns/tag-hot@2x_7feaca48607c07f94b4f39e995d3a625.webp",
+          "side": "rb"
+        }
+      ],
+      "pre_discount_input_price": "",
+      "pre_discount_output_price": ""
+    },
+    "dimension": 0,
+    "min_input_price": 0.8,
+    "max_input_price": 0.8,
+    "min_output_price": 4.8,
+    "max_output_price": 4.8,
+    "min_context_length": 1024000,
+    "max_context_length": 1024000,
+    "tags": [
+      "工具调用 Tools",
+      "推理",
+      "视觉 Vision"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 0.8,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 4.8,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original_thinking",
+            "official_supplier_tip": "思考模式输出token价格(按百万token计费)",
+            "price": 4.8,
+            "unit": "million_tokens",
+            "sort_order": 3,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 10.4,
+    "estimated_tps": 28.8,
+    "params_b": 14,
+    "quantization": "INT4"
+  },
+  {
+    "model_card_name": "QwQ-32B",
+    "input_modality": [
+      "文字"
+    ],
+    "output_modality": [
+      "文字"
+    ],
+    "category": [
+      "文本生成"
+    ],
+    "description": "基于Qwen2.5-32B模型训练的QwQ推理模型，通过强化学习大幅度提升了模型推理能力。模型数学代码等核心指标（AIME 24/25、livecodebench）以及部分通用指标（IFEval、LiveBench等）达到DeepSeek-R1 满血版水平，各指标均显著超过同样基于 Qwen2.5-32B 的 DeepSeek-R1-Distill-Qwen-32B。",
+    "fe_config": null,
+    "dimension": 0,
+    "min_input_price": 1,
+    "max_input_price": 2.9,
+    "min_output_price": 2.9,
+    "max_output_price": 6,
+    "min_context_length": 32768,
+    "max_context_length": 131072,
+    "tags": [
+      "工具调用 Tools",
+      "推理"
+    ],
+    "discount_rate": 1,
+    "model_price_info": [
+      {
+        "pricing_type": "token",
+        "pricing_specs": [
+          {
+            "specification": "input_price_original",
+            "official_supplier_tip": "输入token价格(按百万token计费)",
+            "price": 2,
+            "unit": "million_tokens",
+            "sort_order": 1,
+            "discount_rate": 1
+          },
+          {
+            "specification": "output_price_original",
+            "official_supplier_tip": "输出token价格(按百万token计费)",
+            "price": 6,
+            "unit": "million_tokens",
+            "sort_order": 2,
+            "discount_rate": 1
+          }
+        ]
+      }
+    ],
+    "estimated_vram_gb": 21.2,
+    "estimated_tps": 14.2,
+    "params_b": 32,
+    "quantization": "INT4"
+  }
+]

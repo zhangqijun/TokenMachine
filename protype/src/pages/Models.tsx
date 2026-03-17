@@ -79,9 +79,10 @@ const Models = () => {
 
   useEffect(() => {
     // 加载模型数据和logo数据
+    const basePath = import.meta.env.BASE_URL;
     Promise.all([
-      fetch('/data/model_card.json').then(res => res.json()),
-      fetch('/data/model_logos.json').then(res => res.json())
+      fetch(`${basePath}data/model_card.json`).then(res => res.json()),
+      fetch(`${basePath}data/model_logos.json`).then(res => res.json())
     ])
       .then(([modelData, logoData]) => {
         setModels(modelData);
